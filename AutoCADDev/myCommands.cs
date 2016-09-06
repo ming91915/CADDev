@@ -33,10 +33,12 @@ namespace AutoCADDev
         [CommandMethod("MyGroup", "MyCommand", "MyCommandLocal", CommandFlags.Modal)]
         public void MyCommand() // This method can have any name
         {
+            
+          
             // Put your command code here
 
         }
-
+        
         // Modal Command with pickfirst selection
         [CommandMethod("MyGroup", "MyPickFirst", "MyPickFirstLocal", CommandFlags.Modal | CommandFlags.UsePickSet)]
         public void MyPickFirst() // This method can have any name
