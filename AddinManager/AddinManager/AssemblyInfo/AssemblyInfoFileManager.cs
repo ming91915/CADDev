@@ -5,10 +5,10 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using AutoCADDev.AddinManager;
-using AutoCADDev.AssemblyInfo;
+using AutoCADDev.AddinManager;
 using AutoCADDev.ExternalCommand;
 
-namespace AutoCADDev.AssemblyInfo
+namespace AutoCADDev.AddinManager
 {
     internal class AssemblyInfoFileManager
     {
@@ -23,7 +23,7 @@ namespace AutoCADDev.AssemblyInfo
         #region ---   从文件反序列化
 
         /// <summary> 将外部 二进制文件 中的字符进行反序列化 </summary>
-        /// <remarks>不要在 IExtensionApplication.Initialize() 方法中执行此操作，否则即使在Initialize时可以正常序列化，
+        /// <remarks>对于CAD.NET的开发，不要在 IExtensionApplication.Initialize() 方法中执行此操作，否则即使在Initialize时可以正常序列化，
         /// 但是在调用ExternalCommand时还是会出bug，通常的报错为：没有为该对象定义无参数的构造函数。 </remarks>
         public static Dictionary<AddinManagerAssembly, List<MethodInfo>> GetInfosFromFile()
         {

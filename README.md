@@ -1,13 +1,13 @@
 # CADDev
-å¯¹AutoCADè¿›è¡Œå¼€å‘
+¶ÔAutoCAD½øĞĞ¿ª·¢
 
-## AutoCAD AddinManager å¿«é€Ÿè°ƒè¯•æ’ä»¶
-æ“ä½œæ–¹æ³•ï¼š
-1. åœ¨VSä¸­æ–°å»ºä¸€ä¸ª Test.dll é¡¹ç›®ï¼Œå¹¶æ·»åŠ å¯¹ AddinManager.dll çš„å¼•ç”¨
-2. å®šä¹‰ä»»ä½•ä¸€ä¸ªç±»ï¼Œè®©å…¶å®ç° AutoCADDev.ExternalCommand.IExternalCommand æ¥å£
-3. æ‰“å¼€ AutoCADï¼Œå¹¶é€šè¿‡ NETLOAD æ·»åŠ  AddinManager.dll
-4. åœ¨å‘½ä»¤è¡Œä¸­è¾“å…¥ LoadAddinManager ï¼Œä»¥æ‰“å¼€ AddinManager ç•Œé¢ï¼›
-5. é€šè¿‡ AddinManager ç•Œé¢ä¸­çš„ Load åŠ è½½  Test.dll ï¼Œç¨‹åºä¼šè‡ªåŠ¨æå–ç¨‹åºé›†ä¸­å®ç°äº† IExternalCommand æ¥å£çš„ç±»ï¼›
-6. åŒå‡»ä»»æ„ä¸€ä¸ªæ–¹æ³•ï¼Œå³å¯ä»¥å¼€å§‹è¿›è¡Œ  Test.dll  ä¸­çš„ä»£ç æµ‹è¯•ã€‚å½“å‘ç°ä»£ç éœ€è¦ä¼˜åŒ–æ—¶ï¼Œç›´æ¥åœ¨VSä¸­å°†ä»£ç è¿›è¡Œä¿®æ”¹å¹¶é‡æ–°ç¼–è¯‘ï¼Œç„¶ååœ¨ AddinManager ç»§ç»­ç‚¹å‡»å¯¹åº”çš„æ–¹æ³•ï¼Œå³å¯ä»¥çœ‹åˆ°æ›´æ–°åçš„ä»£ç çš„æµ‹è¯•ç»“æœï¼›
-7. å¦‚æœè¦è¿›è¡Œæ–­ç‚¹è°ƒè¯•ï¼Œè¯·å…ˆé€šè¿‡ VS ä¸­çš„ Attatch to Process å°†  Test.dll ä¸ æ­£åœ¨è¿è¡Œçš„ AutoCAD ç¨‹åºè¿›è¡Œå…³è”ï¼Œç„¶åé€šè¿‡åŒå‡» AddinManager ä¸­çš„å¯¹åº”æ–¹æ³•ï¼Œå³å¯ä»¥å®ç°æ–­ç‚¹è°ƒè¯•ã€‚
+## Ò»¡¢AutoCAD AddinManager ¿ìËÙµ÷ÊÔ²å¼ş
+²Ù×÷·½·¨£º
+1. ÔÚVSÖĞĞÂ½¨Ò»¸ö Test.dll ÏîÄ¿£¬²¢Ìí¼Ó¶Ô AddinManager.dll µÄÒıÓÃ
+2. ¶¨ÒåÈÎºÎÒ»¸öÀà£¬ÈÃÆäÊµÏÖ AutoCADDev.ExternalCommand.IExternalCommand ½Ó¿Ú
+3. ´ò¿ª AutoCAD£¬²¢Í¨¹ı NETLOAD Ìí¼Ó AddinManager.dll
+4. ÔÚÃüÁîĞĞÖĞÊäÈë LoadAddinManager £¬ÒÔ´ò¿ª AddinManager ½çÃæ£»
+5. Í¨¹ı AddinManager ½çÃæÖĞµÄ Load ¼ÓÔØ  Test.dll £¬³ÌĞò»á×Ô¶¯ÌáÈ¡³ÌĞò¼¯ÖĞÊµÏÖÁË IExternalCommand ½Ó¿ÚµÄÀà£»
+6. Ë«»÷ÈÎÒâÒ»¸ö·½·¨£¬¼´¿ÉÒÔ¿ªÊ¼½øĞĞ  Test.dll  ÖĞµÄ´úÂë²âÊÔ¡£µ±·¢ÏÖ´úÂëĞèÒªÓÅ»¯Ê±£¬Ö±½ÓÔÚVSÖĞ½«´úÂë½øĞĞĞŞ¸Ä²¢ÖØĞÂ±àÒë£¬È»ºóÔÚ AddinManager ¼ÌĞøµã»÷¶ÔÓ¦µÄ·½·¨£¬¼´¿ÉÒÔ¿´µ½¸üĞÂºóµÄ´úÂëµÄ²âÊÔ½á¹û£»
+7. Èç¹ûÒª½øĞĞ¶Ïµãµ÷ÊÔ£¬ÇëÏÈÍ¨¹ı VS ÖĞµÄ Attatch to Process ½«  Test.dll Óë ÕıÔÚÔËĞĞµÄ AutoCAD ³ÌĞò½øĞĞ¹ØÁª£¬È»ºóÍ¨¹ıË«»÷ AddinManager ÖĞµÄ¶ÔÓ¦·½·¨£¬¼´¿ÉÒÔÊµÏÖ¶Ïµãµ÷ÊÔ¡£
 

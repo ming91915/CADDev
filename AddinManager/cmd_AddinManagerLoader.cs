@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using AutoCADDev.AddinManager;
-using AutoCADDev.AssemblyInfo;
+using AutoCADDev.AddinManager;
 using AutoCADDev.ExternalCommand;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.ApplicationServices;
@@ -54,7 +54,8 @@ namespace AutoCADDev.AddinManager
             else
             {
             }
-            Application.ShowModalDialog(frm);
+            Application.ShowModelessDialog(null,frm);
+            // Application.ShowModalDialog(frm);
         }
 
         // Modal Command with localized name

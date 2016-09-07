@@ -4,7 +4,7 @@
 using System.Diagnostics;
 using System.Windows;
 using AutoCADDev.AddinManager;
-using AutoCADDev.AssemblyInfo;
+using AutoCADDev.AddinManager;
 using Autodesk.AutoCAD.Runtime;
 using Exception = System.Exception;
 

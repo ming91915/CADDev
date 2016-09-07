@@ -113,12 +113,12 @@
   <ItemGroup>
     <Compile Include="AddinManager\AddinManagerAssembly.cs" />
     <Compile Include="cmd_AddinManagerLoader.cs" />
-    <Compile Include="AssemblyInfo\AssemblyInfos.cs" />
-    <Compile Include="AssemblyInfo\AssemblyInfoDllManager.cs" />
-    <Compile Include="AssemblyInfo\AssemblyInfoFileManager.cs" />
-    <Compile Include="AssemblyInfo\BinarySerializer.cs" />
-    <Compile Include="AssemblyInfo\StringSerializer.cs" />
-    <Compile Include="AssemblyInfo\AssemblyInfoSettings.cs" />
+    <Compile Include="AddinManager\AssemblyInfo\AssemblyInfos.cs" />
+    <Compile Include="AddinManager\AssemblyInfo\AssemblyInfoDllManager.cs" />
+    <Compile Include="AddinManager\AssemblyInfo\AssemblyInfoFileManager.cs" />
+    <Compile Include="AddinManager\AssemblyInfo\BinarySerializer.cs" />
+    <Compile Include="AddinManager\AssemblyInfo\StringSerializer.cs" />
+    <Compile Include="AddinManager\AssemblyInfo\AssemblyInfoSettings.cs" />
     <Compile Include="ExternalCommand\ExternalCommandHandler.cs" />
     <Compile Include="AddinManager\form_AddinManager.cs">
       <SubType>Form</SubType>
