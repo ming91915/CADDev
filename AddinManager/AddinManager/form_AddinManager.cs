@@ -24,18 +24,37 @@ namespace AutoCADDev.AddinManager
                 _uniqueForm = new form_AddinManager();
             }
             return _uniqueForm;
-
         }
 
         /// <summary> 构造函数 </summary>
         private form_AddinManager()
         {
             InitializeComponent();
+            //
+            this.KeyPreview = true;
             this.Disposed += OnDisposed;
             //
             _nodesInfo = new Dictionary<AddinManagerAssembly, List<MethodInfo>>(new AssemblyComparer());
             //
             treeView1.NodeMouseDoubleClick += TreeView1OnNodeMouseDoubleClick;
+        }
+
+
+        #endregion
+        #region ---   窗口的关闭
+
+        private void form_AddinManager_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Escape)
+            {
+                this.Close();
+            }
+        }
+
+        private void form_AddinManager_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            e.Cancel = true;
+            this.Hide();
         }
 
         private void OnDisposed(object sender, EventArgs eventArgs)

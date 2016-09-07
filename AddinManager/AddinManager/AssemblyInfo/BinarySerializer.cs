@@ -6,14 +6,14 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 
-namespace AutoCADDev.AssemblyInfo
+namespace AutoCADDev.AddinManager
 {
     /// <summary>
     /// 在.NET中，我们可以将对象序列化从而保存对象的状态到内存或者磁盘文件中，或者分布式应用程序中用于系统通信，，这样就有可能做出一个“对象数据库”了。
     /// 一般来说，二进制序列化的效率要高，所获得的字节数最小。
     /// </summary>
     /// <remarks></remarks>
-    public static class BinarySerializer
+    internal static class BinarySerializer
     {
         /// <summary>
         /// 将任意一个声明为Serializable的类或者其List等集合中的数据，以二进制的格式保存到对应的流文件中。

@@ -43,5 +43,4 @@ namespace AutoCADDev.AddinManager
             return hcode;
         }
     }
-
 }
