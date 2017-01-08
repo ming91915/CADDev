@@ -4,24 +4,22 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using AutoCADDev.AddinManager;
-using AutoCADDev.ExternalCommand;
+using eZcad.AddinManager;
 
-namespace AutoCADDev.AddinManager
+namespace eZcad.AddinManager
 {
+    /// <summary> 通过Dll中的Settings来进行程序集信息的存储与提取 </summary>
     internal class AssemblyInfoDllManager
     {
-
         #region ---   从文件反序列化
 
         /// <summary> 将 Settings 配置文件中的字符进行反序列化 </summary>
         /// <returns></returns>
         /// <remarks>对于CAD.NET的开发，不要在 IExtensionApplication.Initialize() 方法中执行此操作，否则即使在Initialize时可以正常序列化，
         /// 但是在调用ExternalCommand时还是会出bug，通常的报错为：没有为该对象定义无参数的构造函数。 </remarks>
-        public static Dictionary<AddinManagerAssembly, List<MethodInfo>> GetInfosFromFile()
+        public static Dictionary<AddinManagerAssembly, List<ICADExCommand>> GetInfosFromSettings()
         {
-            Dictionary<AddinManagerAssembly, List<MethodInfo>> nodesInfo
-                = new Dictionary<AddinManagerAssembly, List<MethodInfo>>(new AssemblyComparer());
+        var nodesInfo= new Dictionary<AddinManagerAssembly, List<ICADExCommand>>(new AssemblyComparer());
 
             // 提取配置文件中的数据
             AssemblyInfoSettings s = new AssemblyInfoSettings();
@@ -38,11 +36,11 @@ namespace AutoCADDev.AddinManager
         }
 
 
-        private static Dictionary<AddinManagerAssembly, List<MethodInfo>> DeserializeAssemblies(
+        private static Dictionary<AddinManagerAssembly, List<ICADExCommand>> DeserializeAssemblies(
             AssemblyInfos amInfos)
         {
-            Dictionary<AddinManagerAssembly, List<MethodInfo>> nodesInfo;
-            nodesInfo = new Dictionary<AddinManagerAssembly, List<MethodInfo>>(new AssemblyComparer());
+            Dictionary<AddinManagerAssembly, List<ICADExCommand>> nodesInfo;
+            nodesInfo = new Dictionary<AddinManagerAssembly, List<ICADExCommand>>(new AssemblyComparer());
             //
             if (amInfos != null)
             {
@@ -51,10 +49,10 @@ namespace AutoCADDev.AddinManager
                     if (File.Exists(assemblyPath))
                     {
                         // 将每一个程序集中的外部命令提取出来
-                        List<MethodInfo> m = ExternalCommandHandler.LoadExternalCommandsFromAssembly(assemblyPath);
+                        List<ICADExCommand> m = ExCommandFinder.RetriveExternalCommandsFromAssembly(assemblyPath);
                         if (m.Any())
                         {
-                            Assembly ass = m[0].DeclaringType.Assembly;
+                            Assembly ass = m[0].GetType().Assembly;
                             AddinManagerAssembly amAssembly = new AddinManagerAssembly(assemblyPath, ass);
                             if (nodesInfo.ContainsKey(amAssembly))
                             {
@@ -76,8 +74,8 @@ namespace AutoCADDev.AddinManager
 
         #region ---   序列化到文件
 
-        public static void SaveAssemblyInfosToFile(
-            Dictionary<AddinManagerAssembly, List<MethodInfo>> nodesInfo)
+        public static void SaveAssemblyInfosToSettings(
+            Dictionary<AddinManagerAssembly, List<ICADExCommand>> nodesInfo)
         {
             // 转换为可序列化的数据
             List<string> assemblyPaths = nodesInfo.Select(r => r.Key.Path).ToList();
