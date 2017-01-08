@@ -3,16 +3,17 @@
 
 using System.Diagnostics;
 using System.Windows;
-using AutoCADDev.AddinManager;
-using AutoCADDev.AddinManager;
+using eZcad.AddinManager;
+using eZcad.AddinManager;
 using Autodesk.AutoCAD.Runtime;
+using eZcad_AddinManager;
 using Exception = System.Exception;
 
 // This line is not mandatory, but improves loading performances
 
 [assembly: ExtensionApplication(typeof(MyPlugin))]
 
-namespace AutoCADDev.AddinManager
+namespace eZcad_AddinManager
 {
 
     /// <summary>
@@ -47,7 +48,7 @@ namespace AutoCADDev.AddinManager
                 form_AddinManager frm = form_AddinManager.GetUniqueForm();
                 var nodesInfo = frm.NodesInfo;
                 //
-                AssemblyInfoDllManager.SaveAssemblyInfosToFile(nodesInfo);
+                AssemblyInfoDllManager.SaveAssemblyInfosToSettings(nodesInfo);
             }
             catch (Exception ex)
             {

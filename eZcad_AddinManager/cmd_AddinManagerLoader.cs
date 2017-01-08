@@ -5,19 +5,19 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using AutoCADDev.AddinManager;
-using AutoCADDev.AddinManager;
-using AutoCADDev.ExternalCommand;
+using eZcad.AddinManager;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
+using eZcad_AddinManager;
+
 
 // This line is not mandatory, but improves loading performances
 [assembly: CommandClass(typeof(cmd_AddinManagerLoader))]
 
-namespace AutoCADDev.AddinManager
+namespace eZcad_AddinManager
 {
     // This class is instantiated by AutoCAD for each document when
     // a command is called by the user the first time in the context
@@ -38,14 +38,14 @@ namespace AutoCADDev.AddinManager
         private bool _addinManagerFirstLoaded = true;
         // Modal Command with localized name
         [CommandMethod("AddinManager", "LoadAddinManager", CommandFlags.Modal)]
-        public void MyCommand() // This method can have any name
+        public void LoadAddinManager() // This method can have any name
         {
             form_AddinManager frm = form_AddinManager.GetUniqueForm();
             if (_addinManagerFirstLoaded)
             {
                 // 将上次插件卸载时保存的程序集数据加载进来
 
-                var nodesInfo = AssemblyInfoDllManager.GetInfosFromFile();
+                var nodesInfo = AssemblyInfoDllManager.GetInfosFromSettings();
                 frm.RefreshTreeView(nodesInfo);
 
                 //
@@ -62,7 +62,7 @@ namespace AutoCADDev.AddinManager
         [CommandMethod("AddinManager", "LastExternalCommand", CommandFlags.Modal)]
         public void LastExternalCommand() // This method can have any name
         {
-            ExternalCommandHandler.InvokeCurrentExternalCommand();
+            ExCommandExecutor.InvokeCurrentExternalCommand();
         }
     }
 }

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 
-namespace AutoCADDev.AddinManager
+namespace eZcad.AddinManager
 {
     /// <summary>
     /// 在.NET中，我们可以将对象序列化从而保存对象的状态到内存或者磁盘文件中，或者分布式应用程序中用于系统通信，，这样就有可能做出一个“对象数据库”了。

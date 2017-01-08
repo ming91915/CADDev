@@ -8,12 +8,11 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows.Forms;
-using AutoCADDev.ExternalCommand;
-
-namespace AutoCADDev.AddinManager
+namespace eZcad.AddinManager
 {
     internal partial class form_AddinManager : Form
     {
+
         #region ---   构造函数
 
         private static form_AddinManager _uniqueForm;
@@ -23,24 +22,24 @@ namespace AutoCADDev.AddinManager
             {
                 _uniqueForm = new form_AddinManager();
             }
+            //
             return _uniqueForm;
+
         }
 
         /// <summary> 构造函数 </summary>
         private form_AddinManager()
         {
             InitializeComponent();
-            //
             this.KeyPreview = true;
             this.Disposed += OnDisposed;
             //
-            _nodesInfo = new Dictionary<AddinManagerAssembly, List<MethodInfo>>(new AssemblyComparer());
+            _nodesInfo = new Dictionary<AddinManagerAssembly, List<ICADExCommand>>(new AssemblyComparer());
             //
-            treeView1.NodeMouseDoubleClick += TreeView1OnNodeMouseDoubleClick;
         }
 
-
         #endregion
+
         #region ---   窗口的关闭
 
         private void form_AddinManager_KeyDown(object sender, KeyEventArgs e)
@@ -69,10 +68,10 @@ namespace AutoCADDev.AddinManager
         #region ---   TreeView 的刷新 与 _nodesInfo同步
 
         /// <summary> 与 TreeView 同步的节点数据 </summary>
-        private Dictionary<AddinManagerAssembly, List<MethodInfo>> _nodesInfo;
+        private Dictionary<AddinManagerAssembly, List<ICADExCommand>> _nodesInfo;
 
         /// <summary> 与 TreeView 同步的节点数据 </summary>
-        internal Dictionary<AddinManagerAssembly, List<MethodInfo>> NodesInfo
+        internal Dictionary<AddinManagerAssembly, List<ICADExCommand>> NodesInfo
         {
             get
             {
@@ -80,7 +79,7 @@ namespace AutoCADDev.AddinManager
             }
         }
 
-        internal void RefreshTreeView(Dictionary<AddinManagerAssembly, List<MethodInfo>> nodesInfo)
+        internal void RefreshTreeView(Dictionary<AddinManagerAssembly, List<ICADExCommand>> nodesInfo)
         {
 
             if (nodesInfo != null)
@@ -95,15 +94,15 @@ namespace AutoCADDev.AddinManager
                 foreach (var ndInfo in nodesInfo)
                 {
                     AddinManagerAssembly asm = ndInfo.Key;
-                    List<MethodInfo> methods = ndInfo.Value;
+                    List<ICADExCommand> methods = ndInfo.Value;
                     // 添加新的程序集
                     TreeNode tnAss = new TreeNode(asm.Assembly.ManifestModule.ScopeName);
                     tnAss.Tag = asm;
                     treeView1.Nodes.Add(tnAss);
                     // 添加此程序集中所有的外部命令
-                    foreach (MethodInfo m in methods)
+                    foreach (ICADExCommand m in methods)
                     {
-                        TreeNode tnMethod = new TreeNode(m.DeclaringType.FullName);
+                        TreeNode tnMethod = new TreeNode(m.GetType().FullName);
                         tnMethod.Tag = m;
                         tnAss.Nodes.Add(tnMethod);
                     }
@@ -119,14 +118,14 @@ namespace AutoCADDev.AddinManager
 
         /// <summary> 将从一个 Assembly 中加载进来的所有有效的外部命令同步到 _nodesInfo 中 </summary>
         /// <param name="methods"></param>
-        private void AddMethodsInOneAssembly(string assemblyPath, List<MethodInfo> methods)
+        private void AddMethodsInOneAssembly(string assemblyPath, List<ICADExCommand> methods)
         {
             AddinManagerAssembly asm;
             if (methods.Any())
             {
-                asm = new AddinManagerAssembly(assemblyPath, methods.First().DeclaringType.Assembly);
+                asm = new AddinManagerAssembly(assemblyPath, methods.First().GetType().Assembly);
                 //
-                List<MethodInfo> mds = new List<MethodInfo>();
+                List<ICADExCommand> mds = new List<ICADExCommand>();
                 foreach (var m in methods)
                 {
                     mds.Add(m);
@@ -154,16 +153,16 @@ namespace AutoCADDev.AddinManager
             _nodesInfo.Remove(asm);
         }
 
-        private void RemoveMethod(TreeNode ndMethod)
+        private void RemoveMethod(TreeNode ndAss)
         {
-            if (ndMethod.Level != 1)
+            if (ndAss.Level != 1)
             {
                 throw new ArgumentException("this is not a node representing an method.");
             }
             //
-            AddinManagerAssembly asm = ndMethod.Parent.Tag as AddinManagerAssembly;
+            AddinManagerAssembly asm = ndAss.Parent.Tag as AddinManagerAssembly;
 
-            MethodInfo mtd = ndMethod.Tag as MethodInfo;
+            ICADExCommand mtd = ndAss.Tag as ICADExCommand;
             //
             _nodesInfo[asm].Remove(mtd);
         }
@@ -172,7 +171,7 @@ namespace AutoCADDev.AddinManager
 
         #region ---   加载
 
-        private void button1_Click(object sender, EventArgs e)
+        private void buttonLoad_Click(object sender, EventArgs e)
         {
             string[] dllPaths = ChooseOpenDll("Choose an Addin file");
             bool hasNewMethodAdded = false;
@@ -183,7 +182,7 @@ namespace AutoCADDev.AddinManager
                 {
                     if (string.IsNullOrEmpty(dllPath)) { continue; }
                     //
-                    var methods = ExternalCommandHandler.LoadExternalCommandsFromAssembly(dllPath);
+                    var methods = ExCommandFinder.RetriveExternalCommandsFromAssembly(dllPath);
                     if (methods.Any())
                     {
                         // 更新 Dictionary
@@ -200,8 +199,46 @@ namespace AutoCADDev.AddinManager
             }
         }
 
-        /// <summary> 通过选择文件对话框选择要进行数据提取的Excel文件 </summary>
-        /// <returns> 要进行数据提取的Excel文件的绝对路径 </returns>
+        private void button_Reload_Click(object sender, EventArgs e)
+        {
+            TreeNode nd = treeView1.SelectedNode;
+            TreeNode ndAss = null;
+            if (nd == null) return;
+            //
+            if (nd.Level == 0) // 移除程序集
+            {
+                ndAss = nd;
+            }
+            else if (nd.Level == 1)// 移除某个方法所对应的程序集
+            {
+                ndAss = nd.Parent;
+            }
+            AddinManagerAssembly mtd = ndAss.Tag as AddinManagerAssembly;
+            string assFullPath = mtd.Path;
+           
+            // 重新加载此程序集
+            if (!string.IsNullOrEmpty(assFullPath))
+            {
+                bool hasNewMethodAdded = false;
+                //
+                var methods = ExCommandFinder.RetriveExternalCommandsFromAssembly(assFullPath);
+                if (methods.Any())
+                {
+                    // 更新 Dictionary
+                    AddMethodsInOneAssembly(assFullPath, methods);
+                    hasNewMethodAdded = true;
+                }
+
+                if (hasNewMethodAdded)
+                {
+                    // 刷新界面
+                    RefreshTreeView(_nodesInfo);
+                }
+            }
+        }
+
+        /// <summary> 通过选择文件对话框选择要进行数据提取的CAD文件 </summary>
+        /// <returns> 要进行数据提取的CAD文件的绝对路径 </returns>
         public static string[] ChooseOpenDll(string title)
         {
             OpenFileDialog ofd = new OpenFileDialog
@@ -219,6 +256,7 @@ namespace AutoCADDev.AddinManager
             }
             return null;
         }
+
 
         #endregion
 
@@ -254,7 +292,16 @@ namespace AutoCADDev.AddinManager
             }
         }
 
-        private void TreeView1OnNodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
+        private void RunExternalCommand(TreeNode ndCommand)
+        {
+            var exCommand = ndCommand.Tag as ICADExCommand;
+            AddinManagerAssembly asm = ndCommand.Parent.Tag as AddinManagerAssembly;
+            //
+            string assemblyPath = asm.Path;
+            ExCommandExecutor.InvokeExternalCommand(assemblyPath, exCommand);
+        }
+
+        private void treeView1_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
         {
             var nd = e.Node;
             if (nd != null && nd.Level == 1)  // 选择了某一个方法
@@ -263,18 +310,27 @@ namespace AutoCADDev.AddinManager
             }
         }
 
+        #endregion
 
-        private void RunExternalCommand(TreeNode ndMethod)
+        /// <summary> 提取出 TreeView中节点对应的外部命令上的描述字符 </summary>
+        private void ShowExCommandDescription(object sender, TreeNodeMouseClickEventArgs e)
         {
-            MethodInfo mtd = ndMethod.Tag as MethodInfo;
-            AddinManagerAssembly asm = ndMethod.Parent.Tag as AddinManagerAssembly;
-            //
-            string assemblyPath = asm.Path;
-            ExternalCommandHandler.InvokeExternalCommand(assemblyPath, mtd);
+            var nd = e.Node;
+            string description = "描述：";
+            if (nd != null && nd.Level == 1)  // 选择了某一个方法
+            {
+                // 提取此方法所在的类的对应的描述
+                var exCommand = nd.Tag as ICADExCommand;
+                var atts = exCommand.GetType().GetCustomAttributes(typeof(EcDescriptionAttribute), false);
+                if (atts.Length > 0)
+                {
+                    var att = atts.First() as EcDescriptionAttribute;
+                    description += att.Description;
+                }
+            }
+            label_Description.Text = description;
         }
 
-
-        #endregion
 
     }
 }

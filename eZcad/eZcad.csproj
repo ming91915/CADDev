@@ -7,11 +7,11 @@
     </ProductVersion>
     <SchemaVersion>
     </SchemaVersion>
-    <ProjectGuid>{835FA817-EBE4-4C2B-91D4-A6B945878105}</ProjectGuid>
+    <ProjectGuid>{D1B63AC0-DF3E-4A1B-8471-0C6C1A8880DE}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>AutoCADDev</RootNamespace>
-    <AssemblyName>AddinManager</AssemblyName>
+    <AssemblyName>AutoCADDev</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -43,7 +43,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <DocumentationFile>..\bin\AddinManager.xml</DocumentationFile>
+    <DocumentationFile>..\bin\AutoCADDev.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -58,7 +58,7 @@
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>..\bin\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DocumentationFile>..\bin\AddinManager.xml</DocumentationFile>
+    <DocumentationFile>..\bin\AutoCADDev.xml</DocumentationFile>
     <DebugType>full</DebugType>
     <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
@@ -73,28 +73,36 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>
+    </StartupObject>
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AcCoreMgd, Version=19.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="accoremgd">
+      <HintPath>C:\Softwares\Civil Engineering\AutoCAD 2014\accoremgd.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="AcDbMgd, Version=19.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="acdbmgd">
+      <HintPath>C:\Softwares\Civil Engineering\AutoCAD 2014\acdbmgd.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="AcMgd, Version=19.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
+      <HintPath>C:\Softwares\Civil Engineering\AutoCAD 2014\acmgd.dll</HintPath>
     </Reference>
     <!--ACA References Begin-->
     <!--ACA Refences End-->
     <!--AME Referebces Begin-->
     <!--AME Reference End-->
+    <Reference Include="eZcad_AddinManager">
+      <HintPath>..\eZcad_AddinManager\bin\Debug\eZcad_AddinManager.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
-    <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
@@ -109,30 +117,21 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="AddinManager\AddinManagerAssembly.cs" />
-    <Compile Include="cmd_AddinManagerLoader.cs" />
-    <Compile Include="AddinManager\AssemblyInfo\AssemblyInfos.cs" />
-    <Compile Include="AddinManager\AssemblyInfo\AssemblyInfoDllManager.cs" />
-    <Compile Include="AddinManager\AssemblyInfo\AssemblyInfoFileManager.cs" />
-    <Compile Include="AddinManager\AssemblyInfo\BinarySerializer.cs" />
-    <Compile Include="AddinManager\AssemblyInfo\StringSerializer.cs" />
-    <Compile Include="AddinManager\AssemblyInfo\AssemblyInfoSettings.cs" />
-    <Compile Include="ExternalCommand\ExternalCommandHandler.cs" />
-    <Compile Include="AddinManager\form_AddinManager.cs">
-      <SubType>Form</SubType>
+    <Compile Include="Debug\cmd_Debug.cs" />
+    <Compile Include="myCommands.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>myCommands.resx</DependentUpon>
     </Compile>
-    <Compile Include="AddinManager\form_AddinManager.Designer.cs">
-      <DependentUpon>form_AddinManager.cs</DependentUpon>
-    </Compile>
-    <Compile Include="ExternalCommand\IExternalCommand.cs" />
     <Compile Include="myPlugin.cs" />
+    <Compile Include="myCommands.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="AddinManager\form_AddinManager.resx">
-      <DependentUpon>form_AddinManager.cs</DependentUpon>
+    <EmbeddedResource Include="myCommands.resx">
+      <DependentUpon>myCommands.cs</DependentUpon>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>myCommands.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

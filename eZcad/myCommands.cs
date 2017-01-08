@@ -33,9 +33,7 @@ namespace AutoCADDev
         [CommandMethod("MyGroup", "MyCommand", "MyCommandLocal", CommandFlags.Modal)]
         public void MyCommand() // This method can have any name
         {
-            
-          
-            // Put your command code here
+           // Put your command code here
 
         }
         
