@@ -54,8 +54,8 @@ namespace eZcad_AddinManager
             else
             {
             }
-            Application.ShowModelessDialog(null,frm);
-            // Application.ShowModalDialog(frm);
+           Application.ShowModelessDialog(null,frm);
+           // Application.ShowModalDialog(frm);
         }
 
         // Modal Command with localized name
