@@ -123,7 +123,9 @@
     <Compile Include="Debug\Ec_CutRegion.cs" />
     <Compile Include="Debug\Ec_Debug.cs" />
     <Compile Include="Debug\Ec_DrawPolyline.cs" />
+    <Compile Include="Debug\Ec_FilterCircles.cs" />
     <Compile Include="DllActivator_eZcad.cs" />
+    <Compile Include="ElementsCreator.cs" />
     <Compile Include="Graphics\GraphicalElementsCreator.cs" />
     <Compile Include="Graphics\GraphicalElementsFilter.cs" />
     <Compile Include="Graphics\GraphicalElementsModifier.cs" />
