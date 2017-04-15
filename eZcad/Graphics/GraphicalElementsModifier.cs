@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Windows;
 using AutoCADDev;
+using AutoCADDev.Graphics;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
@@ -10,8 +11,7 @@ using Autodesk.AutoCAD.Runtime;
 using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 
 // This line is not mandatory, but improves loading performances
-
-[assembly: CommandClass(typeof(MyCommands))]
+[assembly: CommandClass(typeof(GraphicalElementsModifier))]
 
 namespace AutoCADDev.Graphics
 {
@@ -48,6 +48,7 @@ namespace AutoCADDev.Graphics
                         ObjectId[] Ids = acSSet.GetObjectIds();
                         foreach (ObjectId id in Ids)
                         {
+                            
                             if (string.Compare(id.ObjectClass.DxfName, "Circle", true) == 0)
                             {
                                 listCircle.Add((Circle)(id.GetObject(OpenMode.ForWrite)));
