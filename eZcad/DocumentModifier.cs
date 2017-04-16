@@ -1,27 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Runtime;
 using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
-
-
 
 namespace AutoCADDev
 {
-
-    public class ElementsCreator : IDisposable
+    /// <summary> 对文档进行配置，以启动文档的改写模式 </summary>
+    public class DocumentModifier : IDisposable
     {
-        public Transaction acTransaction;
-        public Document acActiveDocument;
-        public Database acDataBase;
-        private DocumentLock acLock;
+        public readonly Transaction acTransaction;
+        /// <summary> 当前活动的AutoCAD文档 </summary>
+        public readonly Document acActiveDocument;
+        /// <summary> 当前活动的AutoCAD文档中的数据库 </summary>
+        public readonly Database acDataBase;
 
-        public ElementsCreator()
+        private readonly DocumentLock acLock;
+
+        /// <summary> 对文档进行配置，以启动文档的改写模式 </summary>
+        public DocumentModifier()
         {
-
             // 获得当前文档和数据库   Get the current document and database
             acActiveDocument = Application.DocumentManager.MdiActiveDocument;
             acDataBase = acActiveDocument.Database;
@@ -31,6 +28,7 @@ namespace AutoCADDev
         }
 
         #region IDisposable Support
+
         private bool valuesDisposed = false; // To detect redundant calls
 
         protected virtual void Dispose(bool disposing)
@@ -40,10 +38,8 @@ namespace AutoCADDev
                 if (disposing)
                 {
                     // TODO: dispose managed state (managed objects).
-                    if (acLock != null)
-                    {
-                        acLock.Dispose();
-                    }
+                    acTransaction.Dispose();
+                    acLock.Dispose();
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
@@ -54,10 +50,11 @@ namespace AutoCADDev
         }
 
         // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
-        // ~ElementsCreator() {
-        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-        //   Dispose(false);
-        // }
+        ~DocumentModifier()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(false);
+        }
 
         // This code added to correctly implement the disposable pattern.
         public void Dispose()
@@ -67,12 +64,7 @@ namespace AutoCADDev
             // TODO: uncomment the following line if the finalizer is overridden above.
             // GC.SuppressFinalize(this);
         }
+
         #endregion
-
-
-
     }
 }
-
-
-
