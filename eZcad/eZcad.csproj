@@ -122,13 +122,15 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Debug\Ec_ShowClassName.cs" />
+    <Compile Include="Debug\Ec_GetTableDataFromTable.cs" />
     <Compile Include="Examples\Example_AddMenuItem.cs" />
     <Compile Include="Debug\Ec_EllipseToPolyLine.cs" />
     <Compile Include="Debug\Ec_CircleToPolyLine.cs" />
     <Compile Include="Debug\Ec_CutRegion.cs" />
     <Compile Include="Debug\Ec_Debug.cs" />
     <Compile Include="Debug\Ec_DrawPolyline.cs" />
-    <Compile Include="Debug\Ec_GetTableData.cs" />
+    <Compile Include="Debug\Ec_GetTableDataFromVector.cs" />
     <Compile Include="DllActivator_eZcad.cs" />
     <Compile Include="DocumentModifier.cs" />
     <Compile Include="Examples\GraphicalElementsCreator.cs" />
