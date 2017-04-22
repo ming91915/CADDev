@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Windows;
+using AutoCADDev.Utility;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
@@ -10,8 +11,9 @@ using eZstd.Miscellaneous;
 using eZx_API.Entities;
 using Microsoft.Office.Interop.Excel;
 using Application = Microsoft.Office.Interop.Excel.Application;
+using Utils = eZstd.Miscellaneous.Utils;
 
-namespace AutoCADDev
+namespace AutoCADDev.Addins
 {
     /// <summary> 从AutoCAD中的文字或者表格中提取出表格数据 </summary>
     public class TableDataGetter
@@ -27,7 +29,7 @@ namespace AutoCADDev
         /// <returns></returns>
         public void GetVectorFromText()
         {
-            using (DocumentModifier docMdf = new DocumentModifier())
+            using (DocumentModifier docMdf = new DocumentModifier(true))
             {
                 try
                 {
@@ -286,7 +288,7 @@ namespace AutoCADDev
         /// <returns> 对整个二维表格的集合进行排序时，采用文本的坐标Y值大的在前面。这种排序方法的最终结果是：一个单元格中有多个文本时，Y值小的在后面，X是无序的。</returns>
         public string[,] GetTableFromText()
         {
-            using (DocumentModifier docMdf = new DocumentModifier())
+            using (DocumentModifier docMdf = new DocumentModifier(true))
             {
                 try
                 {
@@ -507,7 +509,7 @@ namespace AutoCADDev
 
         public object[,] GetTableFromTable()
         {
-            using (DocumentModifier docMdf = new DocumentModifier())
+            using (DocumentModifier docMdf = new DocumentModifier(true))
             {
                 try
                 {

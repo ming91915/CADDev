@@ -122,8 +122,13 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Addins\PerpendicularLine.cs" />
+    <Compile Include="Debug\Ec_BlockRef.cs" />
+    <Compile Include="Debug\Ec_PLineHandler.cs" />
     <Compile Include="Debug\Ec_ShowClassName.cs" />
     <Compile Include="Debug\Ec_GetTableDataFromTable.cs" />
+    <Compile Include="Debug\PlaneTemplate.cs" />
+    <Compile Include="Examples\CustomEntity.cs" />
     <Compile Include="Examples\Example_AddMenuItem.cs" />
     <Compile Include="Debug\Ec_EllipseToPolyLine.cs" />
     <Compile Include="Debug\Ec_CircleToPolyLine.cs" />
@@ -132,8 +137,9 @@
     <Compile Include="Debug\Ec_DrawPolyline.cs" />
     <Compile Include="Debug\Ec_GetTableDataFromVector.cs" />
     <Compile Include="DllActivator_eZcad.cs" />
-    <Compile Include="DocumentModifier.cs" />
+    <Compile Include="Utility\DocumentModifier.cs" />
     <Compile Include="Examples\GraphicalElementsCreator.cs" />
+    <Compile Include="Examples\GraphicalElementsSelector.cs" />
     <Compile Include="Examples\GraphicalElementsFilter.cs" />
     <Compile Include="Examples\GraphicalElementsModifier.cs" />
     <Compile Include="myCommands.Designer.cs">
@@ -144,7 +150,8 @@
     <Compile Include="myPlugin.cs" />
     <Compile Include="myCommands.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TableDataGetter.cs" />
+    <Compile Include="Addins\TableDataGetter.cs" />
+    <Compile Include="Utility\utils.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="myCommands.resx">

@@ -8,6 +8,8 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows.Forms;
+using eZcad_AddinManager;
+
 namespace eZcad.AddinManager
 {
     internal partial class form_AddinManager : Form
@@ -215,7 +217,7 @@ namespace eZcad.AddinManager
             }
             AddinManagerAssembly mtd = ndAss.Tag as AddinManagerAssembly;
             string assFullPath = mtd.Path;
-           
+
             // 重新加载此程序集
             if (!string.IsNullOrEmpty(assFullPath))
             {
@@ -331,6 +333,9 @@ namespace eZcad.AddinManager
             label_Description.Text = description;
         }
 
-
+        private void form_AddinManager_HelpButtonClicked(object sender, CancelEventArgs e)
+        {
+            cmd_AddinManagerLoader.ShowAddinDebuger();
+        }
     }
 }
