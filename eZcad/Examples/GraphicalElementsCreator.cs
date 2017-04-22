@@ -1,5 +1,6 @@
 ﻿using System;
 using AutoCADDev.Examples;
+using AutoCADDev.Utility;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
@@ -77,7 +78,7 @@ namespace AutoCADDev.Examples
         [CommandMethod("AddPolyline")]
         public static void AddText(double[] srcX, double[] srcY, bool close)
         {
-            using (DocumentModifier docMdf = new DocumentModifier())
+            using (DocumentModifier docMdf = new DocumentModifier(true))
             {
                 try
                 {

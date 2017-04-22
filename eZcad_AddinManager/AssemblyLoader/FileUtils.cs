@@ -15,7 +15,12 @@ namespace eZcad.AddinManager
     /// <summary> Revit AddinManager 中用来进行文件处理的类，用来参考，并不具有通用性 </summary>
     public static class FileUtils
     {
-        private const string TempFolderName = "eZOfficeAddins";
+        private const string TempFolderName = "eZCadAddins";
+
+        /// <summary> 所有Addin临时文件在硬盘中的文本夹 </summary>
+        public static string AddinFolderPath;
+        /// <summary> 所有Addin文本调试器的位置 </summary>
+        public static string AddinDebugerTextFile;
 
         public static DateTime GetModifyTime(string filePath)
         {
@@ -27,8 +32,11 @@ namespace eZcad.AddinManager
             // 临时文件夹，用以复制临时程序集
             DirectoryInfo directoryInfo1 = new DirectoryInfo(Path.Combine(Path.GetTempPath(), TempFolderName));
 
-            if (!directoryInfo1.Exists)
-                directoryInfo1.Create();
+            if (!directoryInfo1.Exists) directoryInfo1.Create();
+            AddinFolderPath = directoryInfo1.FullName;
+            AddinDebugerTextFile = Path.Combine(AddinFolderPath, "AddinDebuger.txt");
+
+            // 删除临时文件夹中前面已经生成的所有文件
             foreach (DirectoryInfo directoryInfo2 in directoryInfo1.GetDirectories())
             {
                 try

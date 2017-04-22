@@ -2,16 +2,19 @@
 //
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
+using System.Windows;
 using eZcad.AddinManager;
 using Autodesk.AutoCAD.Runtime;
-using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
 using eZcad_AddinManager;
+using Application = Autodesk.AutoCAD.ApplicationServices.Application;
 
 
 // This line is not mandatory, but improves loading performances
@@ -23,7 +26,7 @@ namespace eZcad_AddinManager
     // a command is called by the user the first time in the context
     // of a given document. In other words, non static data in this class
     // is implicitly per-document!
-    partial class cmd_AddinManagerLoader
+    public class cmd_AddinManagerLoader
     {
         // The CommandMethod attribute can be applied to any public  member 
         // function of any public class.
@@ -54,8 +57,8 @@ namespace eZcad_AddinManager
             else
             {
             }
-           Application.ShowModelessDialog(null,frm);
-           // Application.ShowModalDialog(frm);
+            Application.ShowModelessDialog(null, frm);
+            // Application.ShowModalDialog(frm);
         }
 
         // Modal Command with localized name
@@ -63,6 +66,24 @@ namespace eZcad_AddinManager
         public void LastExternalCommand() // This method can have any name
         {
             ExCommandExecutor.InvokeCurrentExternalCommand();
+        }
+
+        // Modal Command with localized name
+        /// <summary> 打开保存了调试信息的文本 </summary>
+        [CommandMethod("AddinManager", "AddinDebuger", CommandFlags.Modal)]
+        internal static void ShowAddinDebuger() // This method can have any name
+        {
+            //var p = FileUtils.AddinDebugerTextFile;
+            //if (File.Exists(p))
+            //{
+
+            //    var sr = new StreamReader(p);
+            //    var msg = sr.ReadToEnd();
+            //    Editor ed = Application.DocumentManager.MdiActiveDocument.Editor;
+            //    ed.WriteMessage("\n------------------------- AddinManager 调试信息 ---------------------\n");
+            //    ed.WriteMessage(msg);
+            //    // Process proc = Process.Start(p);
+            //}
         }
     }
 }
