@@ -333,9 +333,5 @@ namespace eZcad.AddinManager
             label_Description.Text = description;
         }
 
-        private void form_AddinManager_HelpButtonClicked(object sender, CancelEventArgs e)
-        {
-            cmd_AddinManagerLoader.ShowAddinDebuger();
-        }
     }
 }

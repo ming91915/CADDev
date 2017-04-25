@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.EditorInput;
 
 namespace eZcad.AddinManager
 {
@@ -19,7 +20,7 @@ namespace eZcad.AddinManager
             // 方法一：zengfy 设计，在测试中通过。其关键在于不能直接将源程序集加载到进程中，
             // 因为如果这样的话，在Visual Studio中修改此程序集的代码后不能重新编译，或者即使可以重新编译，在AddinManager加载的过程中也不会将其刷新。
             byte[] buff = File.ReadAllBytes(assemblyPath);
-                //先将插件拷贝到内存缓冲。一般情况下，当加载的文件大小大于2^32 byte (即4.2 GB），就会出现OutOfMemoryException，在实际测试中的极限值为630MB。
+            //先将插件拷贝到内存缓冲。一般情况下，当加载的文件大小大于2^32 byte (即4.2 GB），就会出现OutOfMemoryException，在实际测试中的极限值为630MB。
             asm = Assembly.Load(buff); //不能直接通过LoadFrom或者LoadFile，而必须先将插件拷贝到内存，然后再从内存中Load
 
 
@@ -48,12 +49,12 @@ namespace eZcad.AddinManager
             {
                 foreach (Type cls in classes)
                 {
-                    if ((cls != null) && cls.GetInterfaces().Any(r => r == typeof (ICADExCommand)))
-                        // 说明这个类实现了 CAD 的命令接口
+                    if ((cls != null) && cls.GetInterfaces().Any(r => r == typeof(ICADExCommand)))
+                    // 说明这个类实现了 CAD 的命令接口
                     {
                         // 寻找此类中所实现的那个 Execute 方法
-                        Type[] paraTypes = new Type[2]
-                        {typeof (string).MakeByRefType(), typeof (IList<ObjectId>).MakeByRefType()};
+                        Type[] paraTypes = new Type[]
+                        {typeof(SelectionSet), typeof (string).MakeByRefType(), typeof (IList<ObjectId>).MakeByRefType()};
                         //
                         MethodInfo m = cls.GetMethod("Execute", paraTypes);
                         //

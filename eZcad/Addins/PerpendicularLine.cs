@@ -1,9 +1,9 @@
 ﻿using System;
-using AutoCADDev.Examples;
 using AutoCADDev.Utility;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.Runtime;
 
 namespace AutoCADDev.Addins
 {
@@ -27,6 +27,7 @@ namespace AutoCADDev.Addins
 
         /// <summary> 为指定的曲线添加垂线 </summary>
         /// <param name="docMdf"></param>
+        [CommandMethod("eZcad", "AddPerpendicularLineOnACurve", CommandFlags.Modal | CommandFlags.UsePickSet)]
         public void AddPerpendicularLineOnACurve(DocumentModifier docMdf)
         {
             var curve = PickOneCurve(docMdf);
@@ -75,6 +76,7 @@ namespace AutoCADDev.Addins
             }
             return curve;
         }
+
         /// <summary> 在曲线附近选一个点，并绘制其垂线 </summary>
         /// <param name="editor"></param>
         /// <param name="baseCurve"></param>
@@ -132,7 +134,7 @@ namespace AutoCADDev.Addins
             }
             return new Line(pointer1: p1, pointer2: p2);
         }
-        
+
         /// <summary> 在界面中选择一个点，用来在其附近创建曲线的垂线 </summary>
         /// <param name="onLeft"> null 表示画在切点的左右两侧 </param>
         /// <param name="length"></param>

@@ -155,7 +155,7 @@ namespace AutoCADDev.Utility
             acEditor.WriteMessage(sb.ToString());
         }
 
-        public void ShowDebugerInfo()
+        private void ShowDebugerInfo()
         {
             if (_openDebugerText)
             {

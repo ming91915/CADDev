@@ -1,23 +1,14 @@
 ﻿// (C) Copyright 2016 by XN 
 //
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Windows;
-using eZcad.AddinManager;
-using Autodesk.AutoCAD.Runtime;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.EditorInput;
-using eZcad_AddinManager;
-using Application = Autodesk.AutoCAD.ApplicationServices.Application;
 
+using Autodesk.AutoCAD.ApplicationServices;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.Runtime;
+using eZcad.AddinManager;
+using eZcad_AddinManager;
 
 // This line is not mandatory, but improves loading performances
+
 [assembly: CommandClass(typeof(cmd_AddinManagerLoader))]
 
 namespace eZcad_AddinManager
@@ -40,7 +31,7 @@ namespace eZcad_AddinManager
 
         private bool _addinManagerFirstLoaded = true;
         // Modal Command with localized name
-        [CommandMethod("AddinManager", "LoadAddinManager", CommandFlags.Modal)]
+        [CommandMethod("AddinManager", "LoadAddinManager", CommandFlags.Modal | CommandFlags.UsePickSet)]
         public void LoadAddinManager() // This method can have any name
         {
             form_AddinManager frm = form_AddinManager.GetUniqueForm();
@@ -57,33 +48,40 @@ namespace eZcad_AddinManager
             else
             {
             }
+            // 先清空以前已经选择的对象集合
+            SetImpliedSelection();
             Application.ShowModelessDialog(null, frm);
             // Application.ShowModalDialog(frm);
         }
 
         // Modal Command with localized name
-        [CommandMethod("AddinManager", "LastExternalCommand", CommandFlags.Modal)]
+        [CommandMethod("AddinManager", "LastExternalCommand", CommandFlags.Modal | CommandFlags.UsePickSet)]
         public void LastExternalCommand() // This method can have any name
         {
+            SetImpliedSelection();
             ExCommandExecutor.InvokeCurrentExternalCommand();
         }
 
-        // Modal Command with localized name
-        /// <summary> 打开保存了调试信息的文本 </summary>
-        [CommandMethod("AddinManager", "AddinDebuger", CommandFlags.Modal)]
-        internal static void ShowAddinDebuger() // This method can have any name
+        /// <summary> 在执行方法之前先获取已经选择到的选择对象集合 </summary>
+        private void SetImpliedSelection()
         {
-            //var p = FileUtils.AddinDebugerTextFile;
-            //if (File.Exists(p))
-            //{
+            // 获得当前文档   Get the current document
+            Editor acDocEd =
+                Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.MdiActiveDocument.Editor;
 
-            //    var sr = new StreamReader(p);
-            //    var msg = sr.ReadToEnd();
-            //    Editor ed = Application.DocumentManager.MdiActiveDocument.Editor;
-            //    ed.WriteMessage("\n------------------------- AddinManager 调试信息 ---------------------\n");
-            //    ed.WriteMessage(msg);
-            //    // Process proc = Process.Start(p);
-            //}
+            // 获得 PickFirst 选择集    Get the PickFirst selection set
+            PromptSelectionResult acSSPrompt = acDocEd.SelectImplied();
+
+            // 如果提示状态是 OK，那么对象在命令启动前已经被选择了   If the prompt status is OK, objects were selected before
+            // the command was started
+            if (acSSPrompt.Status == PromptStatus.OK)
+            {
+                ExCommandExecutor.ImpliedSelection = acSSPrompt.Value;
+            }
+            else
+            {
+                ExCommandExecutor.ImpliedSelection = null;
+            }
         }
     }
 }

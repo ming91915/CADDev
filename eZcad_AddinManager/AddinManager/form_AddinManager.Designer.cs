@@ -135,7 +135,6 @@
             this.Name = "form_AddinManager";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Add-In Manager";
-            this.HelpButtonClicked += new System.ComponentModel.CancelEventHandler(this.form_AddinManager_HelpButtonClicked);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.form_AddinManager_FormClosing);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.form_AddinManager_KeyDown);
             this.ResumeLayout(false);
