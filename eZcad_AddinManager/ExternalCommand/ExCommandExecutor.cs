@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.EditorInput;
 using Application = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace eZcad.AddinManager
@@ -13,6 +14,7 @@ namespace eZcad.AddinManager
     {
         private static ICADExCommand _currentExternalCommand;
         private static string _currentExternalCommandAssemblyPath;
+        public static SelectionSet ImpliedSelection;
 
         /// <summary> 执行当前（即上次执行过的那个）外部命令 </summary>
         public static void InvokeCurrentExternalCommand()
@@ -77,7 +79,7 @@ namespace eZcad.AddinManager
                     }
                     else
                     {
-                        result = Execute(newExCommand,  ref errorMessage, ref errorSet);// 如果在 Execute() 中发现某个程序集不存在，则通过AssemblyResolve 事件手动进行加载
+                        result = Execute(newExCommand, ImpliedSelection, ref errorMessage, ref errorSet);// 如果在 Execute() 中发现某个程序集不存在，则通过AssemblyResolve 事件手动进行加载
                     }
                 }
             }
@@ -93,7 +95,7 @@ namespace eZcad.AddinManager
             return result;
         }
 
-        private static ExternalCommandResult Execute(ICADExCommand exCommand, ref string errorMessage, ref IList<ObjectId> errorSet)
+        private static ExternalCommandResult Execute(ICADExCommand exCommand, SelectionSet impliedSelection, ref string errorMessage, ref IList<ObjectId> errorSet)
         {
             ExternalCommandResult res = ExternalCommandResult.Failed;
             try
@@ -103,7 +105,7 @@ namespace eZcad.AddinManager
                 // 所以，所有引用的 zengfy 自定义程序集，都必须在  Execute() 方法中调用至少一次，以解决在Form.Show()时，出现不能找到或加载前面缺失的程序集B的问题。
 
                 // 如果不想通过 AssemblyResolve 来加载缺失的程序集的话，可以在 AddinManager 中自行设计代码，手动在 Execute() 方法之前将要引用的程序集从临时文件夹中通过 Assembly.LoadFile() 进行加载即可。
-                res = exCommand.Execute(errorMessage: ref errorMessage, elementSet: ref errorSet);
+                res = exCommand.Execute(impliedSelection, errorMessage: ref errorMessage, elementSet: ref errorSet);
             }
             catch (Exception ex)
             {

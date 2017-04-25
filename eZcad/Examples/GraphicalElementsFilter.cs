@@ -53,7 +53,7 @@ namespace AutoCADDev.Examples
                     MessageBox.Show($"选择到的对象数量：{ids.Length}");
                     foreach (ObjectId id in ids)
                     {
-                        Debug.Print(id.ObjectClass.Name);
+                        System.Diagnostics.Debug.Print(id.ObjectClass.Name);
                     }
                 }
             }

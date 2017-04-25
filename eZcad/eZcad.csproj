@@ -122,9 +122,14 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Addins\CommonAddins.cs" />
+    <Compile Include="Addins\RoadMileage.cs" />
     <Compile Include="Addins\PerpendicularLine.cs" />
     <Compile Include="Debug\Ec_BlockRef.cs" />
+    <Compile Include="Debug\Ec_ReverseCurve.cs" />
+    <Compile Include="Debug\Ec_RoadMileage.cs" />
     <Compile Include="Debug\Ec_PLineHandler.cs" />
+    <Compile Include="Debug\Ec_ScaleText.cs" />
     <Compile Include="Debug\Ec_ShowClassName.cs" />
     <Compile Include="Debug\Ec_GetTableDataFromTable.cs" />
     <Compile Include="Debug\PlaneTemplate.cs" />
