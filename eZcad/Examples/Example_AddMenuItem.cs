@@ -1,7 +1,7 @@
 ﻿using AutoCAD;
 using Autodesk.AutoCAD.ApplicationServices;
 
-namespace AutoCADDev
+namespace eZcad
 {
     public class Example_AddMenuItem
     {

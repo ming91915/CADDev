@@ -6,14 +6,40 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 
-namespace AutoCADDev.Utility
+namespace eZcad
 {
     /// <summary> 对文档进行配置，以启动文档的改写模式 </summary>
     public class DocumentModifier : IDisposable
     {
+        #region ---   执行外部命令
+        
+        public delegate void ExternalCommand(DocumentModifier docMdf, SelectionSet impliedSelection);
+
+        /// <summary> 执行外部命令，并且在执行命令之前，自动将 事务打开</summary>
+        /// <param name="cmd">要执行的命令</param>
+        public static void ExecuteCommand(ExternalCommand cmd)
+        {
+            using (DocumentModifier docMdf = new DocumentModifier(openDebugerText: true))
+            {
+                try
+                {
+                    var impliedSelection = docMdf.acEditor.SelectImplied().Value;
+                    cmd(docMdf, impliedSelection);
+                    //
+                    docMdf.acTransaction.Commit();
+                }
+                catch (System.Exception ex)
+                {
+                    docMdf.acTransaction.Abort(); // Abort the transaction and rollback to the previous state
+                    string errorMessage = ex.Message + "\r\n\r\n" + ex.StackTrace;
+                }
+            }
+        }
+        #endregion
+
         #region ---   fields
 
-        public  Transaction acTransaction;
+        public Transaction acTransaction;
         /// <summary> 当前活动的AutoCAD文档 </summary>
         public readonly Document acActiveDocument;
         /// <summary> 当前活动的AutoCAD文档中的数据库 </summary>
@@ -102,7 +128,7 @@ namespace AutoCADDev.Utility
 
         /// <summary> 向文本调试器中写入数据 </summary>
         /// <param name="value"></param>
-        public void WriteLineIntoDebuger(params string[] value)
+        public void WriteLineIntoDebuger(params object[] value)
         {
             if (_openDebugerText)
             {
@@ -118,19 +144,19 @@ namespace AutoCADDev.Utility
 
         /// <summary> 向文本调试器中写入多行数据 </summary>
         /// <param name="lines"></param>
-        public void WriteLinesIntoDebuger(params string[] lines)
+        public void WriteLinesIntoDebuger(params object[] lines)
         {
             if (_openDebugerText)
             {
                 foreach (var s in lines)
                 {
-                    _debugerSb.AppendLine(s);
+                    _debugerSb.AppendLine(s.ToString());
                 }
             }
         }
         /// <summary> 实时显示调试信息 </summary>
         /// <param name="value"></param>
-        public void WriteNow(params string[] value)
+        public void WriteNow(params object[] value)
         {
             var sb = new StringBuilder();
             sb.Append(value[0]);
@@ -139,19 +165,6 @@ namespace AutoCADDev.Utility
                 sb.Append($", {value[i]}");
             }
             sb.AppendLine();
-            acEditor.WriteMessage(sb.ToString());
-        }
-
-        /// <summary> 实时显示调试信息 </summary>
-        /// <param name="value"></param>
-        public void WriteNow(params double[] value)
-        {
-            var sb = new StringBuilder();
-            sb.Append(value[0]);
-            for (int i = 1; i < value.Length; i++)
-            {
-                sb.Append($", {value[i]}");
-            }
             acEditor.WriteMessage(sb.ToString());
         }
 

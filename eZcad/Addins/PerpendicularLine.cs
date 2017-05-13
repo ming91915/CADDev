@@ -1,25 +1,38 @@
 ﻿using System;
-using AutoCADDev.Utility;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
+using eZcad.Addins;
+using eZcad.Utility;
 
-namespace AutoCADDev.Addins
+// This line is not mandatory, but improves loading performances
+// 测试中，如果不使用下面这条，则在AutoCAD中对应的 External Command 不能正常加载。
+
+[assembly: CommandClass(typeof (PerpendicularLine))]
+
+namespace eZcad.Addins
 {
     /// <summary> 为指定的曲线添加垂线 </summary>
     public class PerpendicularLine
     {
+        /// <summary> 垂线的长度 </summary>
+        private double _length;
+
         /// <summary> true 表示垂线总是指向第二、三象限；false 表示垂线总是指向第一、四象限；null表示在曲线上的点两侧均绘制一条曲线 </summary>
         private bool? _onLeft;
 
-        /// <summary> 垂线的长度 </summary>
-        private double _length;
+
+        /// <summary> 无参数的构造函数 </summary>
+        public PerpendicularLine()
+        {
+            _length = 1;
+        }
 
         /// <summary> 构造函数 </summary>
         /// <param name="onLeft">true 表示垂线总是指向第二、三象限；false 表示垂线总是指向第一、四象限；null表示在曲线上的点两侧均绘制一条曲线</param>
         /// <param name="length">垂线的长度</param>
-        public PerpendicularLine(bool? onLeft, double length)
+        public PerpendicularLine(bool? onLeft, double length) : this()
         {
             _onLeft = onLeft;
             _length = length;
@@ -41,7 +54,7 @@ namespace AutoCADDev.Addins
                     BlockTableRecord;
 
             // 在界面中选择一个点，并生成对应位置处曲线的垂线
-            Line line = PickAndAddLine(docMdf.acEditor, curve);
+            var line = PickAndAddLine(docMdf.acEditor, curve);
             while (line != null)
             {
                 // 添加新 对象到块表记录和事务中   Add the new object to the block table record and the transaction
@@ -63,7 +76,7 @@ namespace AutoCADDev.Addins
             // 点选
             var peO = new PromptEntityOptions("\n 选择一条曲线 ");
             peO.SetRejectMessage("\n 请选择一个曲线对象\n");
-            peO.AddAllowedClass(typeof(Curve), exactMatch: false);
+            peO.AddAllowedClass(typeof (Curve), false);
 
             // 请求在图形区域选择对象
             var res = docMdf.acEditor.GetEntity(peO);
@@ -83,7 +96,7 @@ namespace AutoCADDev.Addins
         /// <returns></returns>
         private Line PickAndAddLine(Editor editor, Curve baseCurve)
         {
-            bool continuPickPoint = false;
+            var continuPickPoint = false;
             Point3d? pt;
             do
             {
@@ -94,7 +107,7 @@ namespace AutoCADDev.Addins
             if (pt == null) return null;
             //
 
-            var closestPt = baseCurve.GetClosestPointTo(pt.Value, extend: false);
+            var closestPt = baseCurve.GetClosestPointTo(pt.Value, false);
             //
             var tangVec = baseCurve.GetFirstDerivative(closestPt);
 
@@ -109,8 +122,8 @@ namespace AutoCADDev.Addins
             {
                 case true:
                     perpendVec = tangVec.Y >= 0 // 如果切线矢量指向第一、二象限，则向左转
-                        ? tangVec.RotateBy(Math.PI / 2, planeNorm)
-                        : tangVec.RotateBy(-Math.PI / 2, planeNorm);
+                        ? tangVec.RotateBy(Math.PI/2, planeNorm)
+                        : tangVec.RotateBy(-Math.PI/2, planeNorm);
 
                     perpendVec = perpendVec.SetLength(_length);
                     p1 = closestPt;
@@ -118,21 +131,21 @@ namespace AutoCADDev.Addins
                     break;
                 case false:
                     perpendVec = tangVec.Y >= 0 // 如果切线矢量指向第一、二象限，则向右转
-                        ? tangVec.RotateBy(-Math.PI / 2, planeNorm)
-                        : tangVec.RotateBy(Math.PI / 2, planeNorm);
+                        ? tangVec.RotateBy(-Math.PI/2, planeNorm)
+                        : tangVec.RotateBy(Math.PI/2, planeNorm);
 
                     perpendVec = perpendVec.SetLength(_length);
                     p1 = closestPt;
                     p2 = closestPt.Add(perpendVec);
                     break;
                 case null:
-                    perpendVec = tangVec.RotateBy(Math.PI / 2, planeNorm);
+                    perpendVec = tangVec.RotateBy(Math.PI/2, planeNorm);
                     perpendVec = perpendVec.SetLength(_length);
                     p1 = closestPt.Add(perpendVec);
                     p2 = closestPt.Subtract(perpendVec);
                     break;
             }
-            return new Line(pointer1: p1, pointer2: p2);
+            return new Line(p1, p2);
         }
 
         /// <summary> 在界面中选择一个点，用来在其附近创建曲线的垂线 </summary>
@@ -143,8 +156,7 @@ namespace AutoCADDev.Addins
         private Point3d? GetOnePoint(Editor editor, ref bool? onLeft, ref double length,
             out bool continuPickPoint)
         {
-            var ppo = new PromptPointOptions(messageAndKeywords: "\n选择曲线附近的一个点[长度(L) / 左侧(Lf) / 右侧(Rt) / 两侧(B)]:",
-                globalKeywords: "长度 左侧 右侧 两侧");
+            var ppo = new PromptPointOptions("\n选择曲线附近的一个点[长度(L) / 左侧(Lf) / 右侧(Rt) / 两侧(B)]:", "长度 左侧 右侧 两侧");
             ppo.Keywords.Default = "长度";
             ppo.AllowArbitraryInput = true; // 用户可以输入非关键字的字符，其可以
 

@@ -121,6 +121,8 @@
     <Compile Include="AddinManager\form_AddinManager.Designer.cs">
       <DependentUpon>form_AddinManager.cs</DependentUpon>
     </Compile>
+    <Compile Include="Addins\AutoSwitchIME.cs" />
+    <Compile Include="Addins\EcLoadTemplate1.cs" />
     <Compile Include="AssemblyInfo\AddinManagerAssembly.cs" />
     <Compile Include="AssemblyInfo\AssemblyInfoDllManager.cs" />
     <Compile Include="AssemblyInfo\AssemblyInfoFileManager.cs" />
@@ -134,6 +136,7 @@
     </Compile>
     <Compile Include="AssemblyLoader\FileUtils.cs" />
     <Compile Include="cmd_AddinManagerLoader.cs" />
+    <Compile Include="DocumentModifier.cs" />
     <Compile Include="ExternalCommand\ExCommandExecutor.cs" />
     <Compile Include="ExternalCommand\ExCommandFinder.cs" />
     <Compile Include="ExternalCommand\ICADExCommand.cs" />

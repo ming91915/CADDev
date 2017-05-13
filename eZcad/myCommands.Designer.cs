@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace AutoCADDev {
+namespace eZcad {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace AutoCADDev {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("AutoCADDev.myCommands", typeof(myCommands).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("eZcad.myCommands", typeof(myCommands).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

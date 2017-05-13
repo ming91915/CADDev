@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Windows.Forms;
-using AutoCADDev.Examples;
-using AutoCADDev.Utility;
+using eZcad.Examples;
+using eZcad.Utility;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
@@ -13,12 +13,12 @@ using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 
 [assembly: CommandClass(typeof(GraphicalElementsSelector))]
 
-namespace AutoCADDev.Examples
+namespace eZcad.Examples
 {
     /// <summary> 从用户选择集或者整个文档中过滤出指定信息的对象 </summary>
     internal static class GraphicalElementsSelector
     {
-     
+
         [CommandMethod("FilterBlueCircleOnLayer0")]
         public static void GetSelection()
         {
@@ -126,7 +126,97 @@ namespace AutoCADDev.Examples
                 MessageBox.Show(pdr.Value.ToString()); // 用户在界面中选择的角度值
             }
         }
-        
+
+
+        /// <summary> 在  GetSelection 方法中指定关键字与对应的快捷键 </summary>
+        /// <returns></returns>
+        public static SelectionSet GetSelectionWithKeywordsAndShortcut(DocumentModifier docMdf, ref string filteredDxfName,
+            out bool continueSelect)
+        {
+            var ed = docMdf.acEditor;
+
+            // Create our options object
+            var pso = new PromptSelectionOptions();
+
+
+            pso.Keywords.Add("NoFilter", "无(N)", "无(N)"); //
+
+            // Set our prompts to include our keywords
+            var kws = pso.Keywords.GetDisplayString(true);
+            pso.MessageForAdding = $"\n选择要取交集的对象。\n当前过滤类型：{filteredDxfName} " + kws; // 当用户在命令行中输入A（或Add）时，命令行出现的提示字符。
+            pso.MessageForRemoval = pso.MessageForAdding; // 当用户在命令行中输入Re（或Remove）时，命令行出现的提示字符。
+
+            // 响应事件
+            var keywordsInput = false; // 用户在命令行中输入了关键字或者非关键字
+
+            var defDxfName = filteredDxfName;
+            pso.UnknownInput += delegate (object sender, SelectionTextInputEventArgs e)
+            {
+                keywordsInput = true;
+                switch (e.Input)
+                {
+                    case "N": // 表示输入了关键字 NoFilter
+                        defDxfName = null;
+                        break;
+                    case "n": // 表示输入了关键字 NoFilter
+                        defDxfName = null;
+                        break;
+                    default:
+                        defDxfName = e.Input;
+                        break;
+                }
+                // !!! ((char)10) 对应按下 Enter 键，这一句会立即提交到AutoCAD 命令行中以结束 ed.GetSelection 对线程的阻塞。即是可以模拟当用户输入关键字时立即按下 Escape，此时 API 会直接结束 ed.GetSelection 并往下执行，其返回的 PromptSelectionResult.Status 属性值为 Error。
+                docMdf.acActiveDocument.SendStringToExecute(((char)10).ToString(), true, false, true);
+            };
+
+            // Implement a callback for when keywords are entered
+            // 当用户在命令行中输入关键字时进行对应操作。
+            pso.KeywordInput +=
+                delegate (object sender, SelectionTextInputEventArgs e)
+                {
+                    keywordsInput = true;
+                    switch (e.Input)
+                    {
+                        case "NoFilter":
+                            defDxfName = null;
+                            break;
+                        default:
+                            break;
+                    }
+                    // !!! ((char)10) 对应按下 Enter 键，这一句会立即提交到AutoCAD 命令行中以结束 ed.GetSelection 对线程的阻塞。即是可以模拟当用户输入关键字时立即按下 Escape，此时 API 会直接结束 ed.GetSelection 并往下执行，其返回的 PromptSelectionResult.Status 属性值为 Error。
+                    docMdf.acActiveDocument.SendStringToExecute(((char)10).ToString(), true, false, true);
+                };
+
+            // Finally run the selection and show any results
+
+            PromptSelectionResult res = null;
+            if (string.IsNullOrEmpty(filteredDxfName))
+            {
+                res = ed.GetSelection(pso);
+            }
+            else
+            {
+                var filterType = new TypedValue[1] { new TypedValue((int)DxfCode.Start, filteredDxfName) };
+                res = ed.GetSelection(pso, new SelectionFilter(filterType));
+            }
+
+            docMdf.WriteNow(res.Status);
+
+            if (res.Status == PromptStatus.OK)
+            {
+                continueSelect = false;
+                return res.Value;
+            }
+            if (keywordsInput)
+            {
+                filteredDxfName = defDxfName;
+                continueSelect = true;
+                return null;
+            }
+            continueSelect = false;
+            return null;
+        }
+
         /// <summary> 通过点选的方式选择一条曲线 </summary>
         [CommandMethod("PickOneCurve")]
         public static Curve PickOneCurve(DocumentModifier docMdf)
@@ -146,7 +236,7 @@ namespace AutoCADDev.Examples
             }
             return null;
         }
-    
+
 
     }
 }

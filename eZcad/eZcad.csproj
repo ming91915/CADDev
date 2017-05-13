@@ -10,8 +10,8 @@
     <ProjectGuid>{D1B63AC0-DF3E-4A1B-8471-0C6C1A8880DE}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AutoCADDev</RootNamespace>
-    <AssemblyName>AutoCADDev</AssemblyName>
+    <RootNamespace>eZcad</RootNamespace>
+    <AssemblyName>eZcad</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -43,7 +43,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <DocumentationFile>..\bin\AutoCADDev.xml</DocumentationFile>
+    <DocumentationFile>..\bin\eZcad.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -58,7 +58,7 @@
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>..\bin\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DocumentationFile>..\bin\AutoCADDev.xml</DocumentationFile>
+    <DocumentationFile>..\bin\eZcad.xml</DocumentationFile>
     <DebugType>full</DebugType>
     <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
@@ -123,16 +123,30 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Addins\CommonAddins.cs" />
+    <Compile Include="Addins\EcLoadTemplate1.cs" />
+    <Compile Include="Addins\DimAlignment.cs" />
+    <Compile Include="Addins\DBTextsToMText.cs" />
+    <Compile Include="Addins\DimTextScalor.cs" />
+    <Compile Include="Addins\TextScaler.cs" />
+    <Compile Include="Addins\IntersectSelSet.cs" />
+    <Compile Include="Debug\AddinManagerDebuger.cs" />
+    <Compile Include="Debug\Ec_Addins.cs" />
+    <Compile Include="Debug\Ec_Boundary.cs" />
+    <Compile Include="Debug\Ec_MeshSolid.cs" />
+    <Compile Include="Debug\Ec_DimStyles.cs" />
+    <Compile Include="Debug\Ec_intersectionFinder.cs" />
+    <Compile Include="Addins\HaveATry\IntersectionFinder.cs" />
+    <Compile Include="Addins\HaveATry\Item.cs" />
     <Compile Include="Addins\RoadMileage.cs" />
     <Compile Include="Addins\PerpendicularLine.cs" />
+    <Compile Include="Debug\Ec_AddElevation.cs" />
     <Compile Include="Debug\Ec_BlockRef.cs" />
-    <Compile Include="Debug\Ec_ReverseCurve.cs" />
+    <Compile Include="Debug\Ec_BlockRefField.cs" />
     <Compile Include="Debug\Ec_RoadMileage.cs" />
     <Compile Include="Debug\Ec_PLineHandler.cs" />
-    <Compile Include="Debug\Ec_ScaleText.cs" />
     <Compile Include="Debug\Ec_ShowClassName.cs" />
-    <Compile Include="Debug\Ec_GetTableDataFromTable.cs" />
-    <Compile Include="Debug\PlaneTemplate.cs" />
+    <Compile Include="Examples\TextEditorHandler.cs" />
+    <Compile Include="Addins\RoadMileageRS.cs" />
     <Compile Include="Examples\CustomEntity.cs" />
     <Compile Include="Examples\Example_AddMenuItem.cs" />
     <Compile Include="Debug\Ec_EllipseToPolyLine.cs" />
@@ -140,13 +154,14 @@
     <Compile Include="Debug\Ec_CutRegion.cs" />
     <Compile Include="Debug\Ec_Debug.cs" />
     <Compile Include="Debug\Ec_DrawPolyline.cs" />
-    <Compile Include="Debug\Ec_GetTableDataFromVector.cs" />
     <Compile Include="DllActivator_eZcad.cs" />
-    <Compile Include="Utility\DocumentModifier.cs" />
+    <Compile Include="DocumentModifier.cs" />
     <Compile Include="Examples\GraphicalElementsCreator.cs" />
     <Compile Include="Examples\GraphicalElementsSelector.cs" />
     <Compile Include="Examples\GraphicalElementsFilter.cs" />
     <Compile Include="Examples\GraphicalElementsModifier.cs" />
+    <Compile Include="Examples\LayerHandler.cs" />
+    <Compile Include="Examples\SolidHandler.cs" />
     <Compile Include="myCommands.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -156,7 +171,9 @@
     <Compile Include="myCommands.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Addins\TableDataGetter.cs" />
-    <Compile Include="Utility\utils.cs" />
+    <Compile Include="Utility\ExtensionMethods.cs" />
+    <Compile Include="Utility\TextUtils.cs" />
+    <Compile Include="Utility\Utils.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="myCommands.resx">

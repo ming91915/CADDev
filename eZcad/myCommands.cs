@@ -8,9 +8,10 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
 
 // This line is not mandatory, but improves loading performances
-[assembly: CommandClass(typeof(AutoCADDev.MyCommands))]
+// 测试中，如果不使用下面这条，则在AutoCAD中对应的 External Command 不能正常加载。
+[assembly: CommandClass(typeof(eZcad.MyCommands))]
 
-namespace AutoCADDev
+namespace eZcad
 {
     // This class is instantiated by AutoCAD for each document when
     // a command is called by the user the first time in the context

@@ -24,7 +24,7 @@ namespace eZcad.AddinManager
     /// <summary> 比较两个 Assembly 是否表示同一个对象 </summary>
     /// <remarks>在比较的过程中，会先对GetHashCode的返回值进行比较，如果返回的HashCode是相同的，则再进行 Equals 比较；
     /// 如果返回的HashCode值不同，则直接认为Equals为false。</remarks>
-    internal class AssemblyComparer : IEqualityComparer<AddinManagerAssembly>
+    internal class AssemblyComparer : IEqualityComparer<AddinManagerAssembly>, IComparer<AddinManagerAssembly>
     {
         public bool Equals(AddinManagerAssembly x, AddinManagerAssembly y)
         {
@@ -42,6 +42,14 @@ namespace eZcad.AddinManager
 
             return hcode;
         }
-    }
 
+        /// <summary>
+        ///  比较两个程序集哪个排在前面
+        /// </summary>
+        /// <returns></returns>
+        int IComparer<AddinManagerAssembly>.Compare(AddinManagerAssembly x, AddinManagerAssembly y)
+        {
+            return String.Compare(x.Assembly.ManifestModule.ScopeName, y.Assembly.ManifestModule.ScopeName, StringComparison.Ordinal);
+        }
+    }
 }

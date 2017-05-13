@@ -81,27 +81,32 @@ namespace eZcad.AddinManager
             }
         }
 
+        /// <summary>
+        /// 将所有的外部命令刷新到列表控件中
+        /// </summary>
+        /// <param name="nodesInfo">字典中每一个程序集对应其中的多个外部命令</param>
         internal void RefreshTreeView(Dictionary<AddinManagerAssembly, List<ICADExCommand>> nodesInfo)
         {
-
             if (nodesInfo != null)
             {
                 if (nodesInfo.Comparer.GetType() != typeof(AssemblyComparer))
                 {
                     throw new ArgumentException("The dictionary used to synchronize the treeview must have an \"AssemblyComparer\".");
                 }
-
-                //
                 treeView1.Nodes.Clear();
+                //
                 foreach (var ndInfo in nodesInfo)
                 {
                     AddinManagerAssembly asm = ndInfo.Key;
                     List<ICADExCommand> methods = ndInfo.Value;
+
                     // 添加新的程序集
                     TreeNode tnAss = new TreeNode(asm.Assembly.ManifestModule.ScopeName);
                     tnAss.Tag = asm;
                     treeView1.Nodes.Add(tnAss);
+
                     // 添加此程序集中所有的外部命令
+                    methods.Sort(new ExCmdCompare());
                     foreach (ICADExCommand m in methods)
                     {
                         TreeNode tnMethod = new TreeNode(m.GetType().FullName);
@@ -115,6 +120,15 @@ namespace eZcad.AddinManager
                 //
                 treeView1.ExpandAll();
                 treeView1.Refresh();
+            }
+        }
+
+        /// <summary> 外部命令进行比较的方法 </summary>
+        private class ExCmdCompare : IComparer<ICADExCommand>
+        {
+            int IComparer<ICADExCommand>.Compare(ICADExCommand x, ICADExCommand y)
+            {
+                return String.Compare(x.GetType().FullName, y.GetType().FullName, StringComparison.OrdinalIgnoreCase);
             }
         }
 
@@ -285,6 +299,18 @@ namespace eZcad.AddinManager
 
         #region ---   运行
 
+        private void RunExternalCommand(TreeNode ndCommand)
+        {
+            var exCommand = ndCommand.Tag as ICADExCommand;
+            AddinManagerAssembly asm = ndCommand.Parent.Tag as AddinManagerAssembly;
+            //
+            string assemblyPath = asm.Path;
+            // 将窗口缩小
+            this.WindowState = FormWindowState.Minimized;
+            // 执行外部命令
+            ExCommandExecutor.InvokeExternalCommand(assemblyPath, exCommand);
+        }
+
         private void buttonRun_Click(object sender, EventArgs e)
         {
             TreeNode nd = treeView1.SelectedNode;
@@ -294,14 +320,6 @@ namespace eZcad.AddinManager
             }
         }
 
-        private void RunExternalCommand(TreeNode ndCommand)
-        {
-            var exCommand = ndCommand.Tag as ICADExCommand;
-            AddinManagerAssembly asm = ndCommand.Parent.Tag as AddinManagerAssembly;
-            //
-            string assemblyPath = asm.Path;
-            ExCommandExecutor.InvokeExternalCommand(assemblyPath, exCommand);
-        }
 
         private void treeView1_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
         {

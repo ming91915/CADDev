@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Windows;
-using AutoCADDev.Utility;
+using eZcad.Utility;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
@@ -13,7 +13,7 @@ using Microsoft.Office.Interop.Excel;
 using Application = Microsoft.Office.Interop.Excel.Application;
 using Utils = eZstd.Miscellaneous.Utils;
 
-namespace AutoCADDev.Addins
+namespace eZcad.Addins
 {
     /// <summary> 从AutoCAD中的文字或者表格中提取出表格数据 </summary>
     public class TableDataGetter
@@ -27,44 +27,32 @@ namespace AutoCADDev.Addins
         /// 
         /// </summary>
         /// <returns></returns>
-        public void GetVectorFromText()
+        public void GetVectorFromText(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
-            using (DocumentModifier docMdf = new DocumentModifier(true))
+            // 确定是要按行添加还是按列添加
+            if (_addRow == null)
             {
-                try
-                {
-                    // 确定是要按行添加还是按列添加
-                    if (_addRow == null)
-                    {
-                        _addRow = AsRow(docMdf);
-                    }
-                    //
-                    bool continueSelect = false;
-                    bool exportData = false;
-                    List<List<DBText>> textss = new List<List<DBText>>();
-                    List<DBText> texts = GetVectorTextsFromUI(docMdf, ref continueSelect, ref exportData);
-                    while (continueSelect)
-                    {
-                        textss.Add(texts);
-                        texts = GetVectorTextsFromUI(docMdf, ref continueSelect, ref exportData);
-                    }
-                    // 数据导出
-                    if (exportData)
-                    {
-                        var arr = ConvertVectorsToArray(textss, _addRow.Value);
-
-                        // 将数据保存到表格中
-                        SaveDataToExcel(arr);
-                    }
-                    // 保存新对象到数据库中   Save the new object to the database
-                    docMdf.acTransaction.Commit();
-                }
-                catch (Exception ex)
-                {
-                    docMdf.acTransaction.Abort(); // Abort the transaction and rollback to the previous state
-                    DebugUtils.ShowDebugCatch(ex, "导出表格数据时出错");
-                }
+                _addRow = AsRow(docMdf);
             }
+            //
+            bool continueSelect = false;
+            bool exportData = false;
+            List<List<DBText>> textss = new List<List<DBText>>();
+            List<DBText> texts = GetVectorTextsFromUI(docMdf, ref continueSelect, ref exportData);
+            while (continueSelect)
+            {
+                textss.Add(texts);
+                texts = GetVectorTextsFromUI(docMdf, ref continueSelect, ref exportData);
+            }
+            // 数据导出
+            if (exportData)
+            {
+                var arr = ConvertVectorsToArray(textss, _addRow.Value);
+
+                // 将数据保存到表格中
+                SaveDataToExcel(arr);
+            }
+
         }
 
         /// <summary> 提示用户通过界面选择文字 </summary>
@@ -286,67 +274,53 @@ namespace AutoCADDev.Addins
 
         /// <summary> 从文档中的表格排布的文字中提取出表格信息 </summary>
         /// <returns> 对整个二维表格的集合进行排序时，采用文本的坐标Y值大的在前面。这种排序方法的最终结果是：一个单元格中有多个文本时，Y值小的在后面，X是无序的。</returns>
-        public string[,] GetTableFromText()
+        public void GetTableFromText(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
-            using (DocumentModifier docMdf = new DocumentModifier(true))
+
+            var ed = docMdf.acActiveDocument.Editor;
+            List<Point3d> pRow = new List<Point3d>();
+            List<Point3d> pCol = new List<Point3d>();
+
+            // 选择行
+            bool continueSelect = false;
+            Point3d p = GetPointsFromUI(docMdf, true, out continueSelect);
+            while (continueSelect)
             {
-                try
+                pRow.Add(p);
+                ed.WriteMessage($"已选择 {pRow.Count} 个点。当前点的Y坐标值：{p.Y}");
+                // 继续选择
+                p = GetPointsFromUI(docMdf, true, out continueSelect);
+            }
+
+            // 选择列
+            p = GetPointsFromUI(docMdf, false, out continueSelect);
+            while (continueSelect)
+            {
+                pCol.Add(p);
+                ed.WriteMessage($"已选择 {pCol.Count} 个点。当前点的X坐标值：{p.X}");
+                // 继续选择
+                p = GetPointsFromUI(docMdf, false, out continueSelect);
+            }
+            // 获取整个表格中的文本
+            if (pRow.Count >= 2 && pCol.Count >= 2)
+            {
+                // 选择表格中所有的文本数据
+                var texts = GetTableTextsFromUI(docMdf);
+                if (texts.Count > 0)
                 {
-                    var ed = docMdf.acActiveDocument.Editor;
-                    List<Point3d> pRow = new List<Point3d>();
-                    List<Point3d> pCol = new List<Point3d>();
-
-                    // 选择行
-                    bool continueSelect = false;
-                    Point3d p = GetPointsFromUI(docMdf, true, out continueSelect);
-                    while (continueSelect)
+                    // 构造表格
+                    var arr = ConvertTextsTo2DArray(texts, colRange: pCol, rowRange: pRow);
+                    if (arr != null)
                     {
-                        pRow.Add(p);
-                        ed.WriteMessage($"已选择 {pRow.Count} 个点。当前点的Y坐标值：{p.Y}");
-                        // 继续选择
-                        p = GetPointsFromUI(docMdf, true, out continueSelect);
+                        // 将表格保存到Excel中
+                        SaveDataToExcel(arr);
                     }
-
-                    // 选择列
-                    p = GetPointsFromUI(docMdf, false, out continueSelect);
-                    while (continueSelect)
-                    {
-                        pCol.Add(p);
-                        ed.WriteMessage($"已选择 {pCol.Count} 个点。当前点的X坐标值：{p.X}");
-                        // 继续选择
-                        p = GetPointsFromUI(docMdf, false, out continueSelect);
-                    }
-                    // 获取整个表格中的文本
-                    if (pRow.Count >= 2 && pCol.Count >= 2)
-                    {
-                        // 选择表格中所有的文本数据
-                        var texts = GetTableTextsFromUI(docMdf);
-                        if (texts.Count > 0)
-                        {
-                            // 构造表格
-                            var arr = ConvertTextsTo2DArray(texts, colRange: pCol, rowRange: pRow);
-                            if (arr != null)
-                            {
-                                // 将表格保存到Excel中
-                                SaveDataToExcel(arr);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        MessageBox.Show("行与列都必须选择至少两个点，以框出一个表格矩形。", "提示", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
-
-                    // 保存新对象到数据库中   Save the new object to the database
-                    docMdf.acTransaction.Commit();
-                }
-                catch (Exception ex)
-                {
-                    docMdf.acTransaction.Abort(); // Abort the transaction and rollback to the previous state
-                    DebugUtils.ShowDebugCatch(ex, "导出表格数据时出错");
                 }
             }
-            return null;
+            else
+            {
+                MessageBox.Show("行与列都必须选择至少两个点，以框出一个表格矩形。", "提示", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         /// <summary> 在界面中选择一行点或者一列点，用来进行表格的单元格划分 </summary>
@@ -384,7 +358,7 @@ namespace AutoCADDev.Addins
                 return default(Point3d);
             }
         }
-        
+
         /// <summary>
         /// 将大量的文本根据指定的表格定位信息排列成一个二维表格中
         /// </summary>

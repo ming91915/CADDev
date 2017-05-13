@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Windows;
 using eZcad.Utility;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
@@ -8,12 +9,14 @@ using Autodesk.AutoCAD.Runtime;
 namespace eZcad.Addins
 {
     /// <summary> 获取指定的曲线上某点所对应的里程 </summary>
-    public class RoadMileage
+    public class RoadMileageRS
     {
-        /// <summary> 标志点在曲线中所对应的 parameter 值 </summary>
+        /// <summary> 参考点在曲线中所对应的 parameter 值 </summary>
         private double _basePara;
+        /// <summary> 参考点到曲线起点的实际距离 </summary>
+        private double _baseDist;
 
-        /// <summary> 标志点在曲线中所对应的里程桩号，比如 K5+560.123，即为5560.123 </summary>
+        /// <summary> 参考点在曲线中所对应的里程桩号，比如 K5+560.123，即为5560.123 </summary>
         private double _baseMile;
 
         DocumentModifier _docMdf;
@@ -21,7 +24,7 @@ namespace eZcad.Addins
         /// <summary> 构造函数 </summary>
         /// <param name="basePara">标志点在曲线中所对应的 parameter 值</param>
         /// <param name="baseMile">标志点在曲线中所对应的里程桩号，比如 K5+560.123，即为5560.123</param>
-        public RoadMileage(double basePara, double baseMile)
+        public RoadMileageRS(double basePara, double baseMile)
         {
             _basePara = basePara;
             _baseMile = baseMile;
@@ -57,13 +60,33 @@ namespace eZcad.Addins
             if (baseCurve == null) return;
 
             // 在界面中选择一个点，并生成对应位置处曲线的垂线
-            Point3d? pt = PickPoint(docMdf.acEditor, baseCurve);
+            bool setMileage = false;
+            Point3d? pt = PickPoint(docMdf.acEditor, baseCurve, ref setMileage);
+
+
+            // 以只读方式打开块表   Open the Block table for read
+            var acBlkTbl = docMdf.acTransaction.GetObject(docMdf.acDataBase.BlockTableId, OpenMode.ForRead) as BlockTable;
+
+            // 以写方式打开模型空间块表记录   Open the Block table record Model space for write
+            var acBlkTblRec =
+                docMdf.acTransaction.GetObject(baseCurve.BlockId, OpenMode.ForWrite) as
+                    BlockTableRecord;
+
             while (pt != null)
             {
+               // MessageBox.Show(setMileage.ToString());
+
+                if (setMileage) // 将指定的里程值绘制到曲线上
+                {
+                    DBPoint dbPt = DrawMileage(docMdf, acBlkTblRec, pt.Value);
+
+                }
+                else // 读取指定点的里程
+                {
+                    WriteMileage(docMdf.acEditor, baseCurve, pt.Value);
+                }
                 //
-                WriteMileage(docMdf.acEditor, baseCurve, pt.Value);
-                //
-                pt = PickPoint(docMdf.acEditor, baseCurve);
+                pt = PickPoint(docMdf.acEditor, baseCurve, ref setMileage);
             }
         }
 
@@ -89,14 +112,15 @@ namespace eZcad.Addins
         /// <summary> 在曲线附近选一个点，并绘制其垂线 </summary>
         /// <param name="editor"></param>
         /// <param name="baseCurve"></param>
+        /// <param name="setMileage">false 表示读取指定点的里程，true 表示将指定的里程值绘制到曲线上</param>
         /// <returns></returns>
-        private Point3d? PickPoint(Editor editor, Curve baseCurve)
+        private Point3d? PickPoint(Editor editor, Curve baseCurve, ref bool setMileage)
         {
             bool continuPickPoint = false;
             Point3d? pt;
             do
             {
-                pt = GetOnePoint(editor, baseCurve, out continuPickPoint);
+                pt = GetOnePoint(editor, baseCurve, ref setMileage, out continuPickPoint);
             } while (continuPickPoint);
 
             return pt;
@@ -107,15 +131,15 @@ namespace eZcad.Addins
         /// <param name="length"></param>
         /// <param name="continuPickPoint">没有成功选择一个点，只是输入了关键词，此时需要继续进行选择</param>
         /// <returns>如果没有选择到有效的点，则返回null</returns>
-        private Point3d? GetOnePoint(Editor editor, Curve c, out bool continuPickPoint)
+        private Point3d? GetOnePoint(Editor editor, Curve baseCurve, ref bool setMileage, out bool continuPickPoint)
         {
-            var ppo = new PromptPointOptions(messageAndKeywords: "\n选择曲线附近的一个点[参考里程(R)]:",
-                globalKeywords: "参考里程")
+            var ppo = new PromptPointOptions(messageAndKeywords: "\n选择曲线附近的一个点[参考里程(B) / 设置(S) / 读取(R)]:",
+                globalKeywords: "参考里程 设置 读取")
             {
-                //  ppo.Keywords.Default = "长度";
                 AllowArbitraryInput = false, // 用户可以输入非关键字的字符，其可以
                 AllowNone = true,
             };
+            ppo.Keywords.Default = "读取";
 
             // 在界面中选择一个角度
             var res = editor.GetPoint(ppo);
@@ -128,7 +152,15 @@ namespace eZcad.Addins
                     case "参考里程":
 
                         // 设置一个参考点与对应的里程
-                        PickBaseMileage(c);
+                        PickBaseMileage(baseCurve);
+                        break;
+                    case "设置":
+                        setMileage = true;
+                        return GetPointWithMileage(baseCurve);
+                        break;
+
+                    case "读取":
+                        setMileage = false;
                         break;
                 }
             }
@@ -167,10 +199,12 @@ namespace eZcad.Addins
                 basePt = res.Value;
             }
             // 
+            double basePara = _basePara;
+            double baseMile = _baseMile;
             if (basePt != null) // 成功选择到了里程基准点
             {
                 basePt = c.GetClosestPointTo(basePt.Value, extend: false);
-                _basePara = c.GetParameterAtPoint(basePt.Value);
+                basePara = c.GetParameterAtPoint(basePt.Value);
 
                 // 指定基准点对应的里程
                 var op1 = new PromptDoubleOptions("\n指定基准点所对应的里程值")
@@ -183,9 +217,38 @@ namespace eZcad.Addins
                 var res1 = _docMdf.acEditor.GetDouble(op1);
                 if (res1.Status == PromptStatus.OK)
                 {
-                    _baseMile = res1.Value;
+                    baseMile = res1.Value;
                 }
+                //
+                SetBasePoint(c, basePara, baseMile);
             }
+        }
+
+        private Point3d? GetPointWithMileage(Curve baseCurve)
+        {
+            // 指定基准点对应的里程
+            var op1 = new PromptDoubleOptions("\n指定要绘制的里程值")
+            {
+                AllowNone = false,
+                AllowNegative = false,
+                AllowZero = true,
+            };
+
+            var res1 = _docMdf.acEditor.GetDouble(op1);
+            if (res1.Status == PromptStatus.OK)
+            {
+                var distToStart = res1.Value - _baseMile + _baseDist;
+                var pt = baseCurve.GetPointAtDist(distToStart);
+                return pt;
+            }
+            return null;
+        }
+
+        private void SetBasePoint(Curve c, double para, double mileage)
+        {
+            _basePara = para;
+            _baseDist = c.GetDistanceAtParameter(para);
+            _baseMile = mileage;
         }
 
         private void WriteMileage(Editor editor, Curve c, Point3d pt)
@@ -203,6 +266,19 @@ namespace eZcad.Addins
             string msg =
                 $"坐标{closestPt.ToString()};\t距起点距离：{newDis};\t距参考点距离：{newDis - oldDis};\t参考里程：K{kComp}+{mComp.ToString("0.000")}";
             editor.WriteMessage(msg);
+        }
+
+        // 在画一个点
+        private DBPoint DrawMileage(DocumentModifier docMdf, BlockTableRecord btr, Point3d pt)
+        {
+            // 
+            var point = new DBPoint(pt);
+            // 添加新对象到块表记录和事务中   Add the new object to the block table record and the transaction
+            btr.AppendEntity(point);
+
+            point.Draw();
+            docMdf.acTransaction.AddNewlyCreatedDBObject(point, true);
+            return point;
         }
     }
 }

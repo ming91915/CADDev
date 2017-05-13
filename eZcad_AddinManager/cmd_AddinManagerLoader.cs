@@ -8,7 +8,7 @@ using eZcad.AddinManager;
 using eZcad_AddinManager;
 
 // This line is not mandatory, but improves loading performances
-
+// 测试中，如果不使用下面这条，则在AutoCAD中对应的 External Command 不能正常加载。
 [assembly: CommandClass(typeof(cmd_AddinManagerLoader))]
 
 namespace eZcad_AddinManager
@@ -31,7 +31,7 @@ namespace eZcad_AddinManager
 
         private bool _addinManagerFirstLoaded = true;
         // Modal Command with localized name
-        [CommandMethod("AddinManager", "LoadAddinManager", CommandFlags.Modal | CommandFlags.UsePickSet)]
+        [CommandMethod("AddinManager", "LoadAddinManager", CommandFlags.Modal | CommandFlags.UsePickSet | CommandFlags.Redraw)]
         public void LoadAddinManager() // This method can have any name
         {
             form_AddinManager frm = form_AddinManager.GetUniqueForm();
@@ -55,7 +55,7 @@ namespace eZcad_AddinManager
         }
 
         // Modal Command with localized name
-        [CommandMethod("AddinManager", "LastExternalCommand", CommandFlags.Modal | CommandFlags.UsePickSet)]
+        [CommandMethod("AddinManager", "LastExternalCommand", CommandFlags.Modal | CommandFlags.UsePickSet | CommandFlags.Redraw)]
         public void LastExternalCommand() // This method can have any name
         {
             SetImpliedSelection();
