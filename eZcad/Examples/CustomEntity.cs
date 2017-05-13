@@ -1,5 +1,5 @@
 ﻿using System;
-using AutoCADDev.Examples;
+using eZcad.Examples;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
@@ -7,7 +7,7 @@ using Autodesk.AutoCAD.Runtime;
 using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 using Exception = System.Exception;
 
-namespace AutoCADDev.Examples
+namespace eZcad.Examples
 {
     internal class CustomEntity : Entity
     {

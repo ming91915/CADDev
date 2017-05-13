@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Windows.Forms;
-using AutoCADDev.Examples;
+using eZcad.Examples;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
@@ -12,7 +12,7 @@ using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 
 [assembly: CommandClass(typeof(GraphicalElementsFilter))]
 
-namespace AutoCADDev.Examples
+namespace eZcad.Examples
 {
     /// <summary> 从用户选择集或者整个文档中过滤出指定信息的对象 </summary>
     internal static class GraphicalElementsFilter

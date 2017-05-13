@@ -1,23 +1,24 @@
 ﻿using System;
-using AutoCADDev.Utility;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
+using eZcad.Addins;
 
 
 // This line is not mandatory, but improves loading performances
-[assembly: CommandClass(typeof(AutoCADDev.Addins.CommonAddins))]
+[assembly: CommandClass(typeof(CommonAddins))]
 
-namespace AutoCADDev.Addins
+namespace eZcad.Addins
 {
     /// <summary> 获取指定的多段线上某点所对应的里程 </summary>
     public class CommonAddins
     {
-
         #region ---   在界面中获取对象
 
         #endregion
+
+        #region ---   将指定的曲线的起始点反转
 
         /// <summary> 将指定的曲线的起始点反转 </summary>
         /// <param name="docMdf"></param>
@@ -53,6 +54,8 @@ namespace AutoCADDev.Addins
                 c.DowngradeOpen();
             }
         }
+
+        #endregion
 
         private static Curve PickOneCurve(DocumentModifier docMdf)
         {

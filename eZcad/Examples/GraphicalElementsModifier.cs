@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Windows;
-using AutoCADDev;
-using AutoCADDev.Examples;
+using eZcad;
+using eZcad.Examples;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
@@ -13,7 +13,7 @@ using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 // This line is not mandatory, but improves loading performances
 [assembly: CommandClass(typeof(GraphicalElementsModifier))]
 
-namespace AutoCADDev.Examples
+namespace eZcad.Examples
 {
     /// <summary> 对界面中的各种图形进行修改 </summary>
     internal static class GraphicalElementsModifier
