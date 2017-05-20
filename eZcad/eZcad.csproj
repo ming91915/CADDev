@@ -123,6 +123,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Addins\CommonAddins.cs" />
+    <Compile Include="Addins\PolyfaceToSubdmesh.cs" />
     <Compile Include="Addins\EcLoadTemplate1.cs" />
     <Compile Include="Addins\DimAlignment.cs" />
     <Compile Include="Addins\DBTextsToMText.cs" />
@@ -132,7 +133,8 @@
     <Compile Include="Debug\AddinManagerDebuger.cs" />
     <Compile Include="Debug\Ec_Addins.cs" />
     <Compile Include="Debug\Ec_Boundary.cs" />
-    <Compile Include="Debug\Ec_MeshSolid.cs" />
+    <Compile Include="Debug\Ec_ProxyEntity.cs" />
+    <Compile Include="Debug\Ec_GeoMesh.cs" />
     <Compile Include="Debug\Ec_DimStyles.cs" />
     <Compile Include="Debug\Ec_intersectionFinder.cs" />
     <Compile Include="Addins\HaveATry\IntersectionFinder.cs" />
@@ -145,9 +147,10 @@
     <Compile Include="Debug\Ec_RoadMileage.cs" />
     <Compile Include="Debug\Ec_PLineHandler.cs" />
     <Compile Include="Debug\Ec_ShowClassName.cs" />
+    <Compile Include="Debug\PlaneTemplate.cs" />
     <Compile Include="Examples\TextEditorHandler.cs" />
     <Compile Include="Addins\RoadMileageRS.cs" />
-    <Compile Include="Examples\CustomEntity.cs" />
+    <Compile Include="Examples\Overrule.cs" />
     <Compile Include="Examples\Example_AddMenuItem.cs" />
     <Compile Include="Debug\Ec_EllipseToPolyLine.cs" />
     <Compile Include="Debug\Ec_CircleToPolyLine.cs" />
@@ -172,6 +175,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Addins\TableDataGetter.cs" />
     <Compile Include="Utility\ExtensionMethods.cs" />
+    <Compile Include="Utility\SolidUtils.cs" />
     <Compile Include="Utility\TextUtils.cs" />
     <Compile Include="Utility\Utils.cs" />
   </ItemGroup>
