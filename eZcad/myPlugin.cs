@@ -39,6 +39,7 @@ namespace eZcad
             // as well as some of the existing AutoCAD managed apps.
 
             // Initialize your plug-in application here
+            var ed = Application.DocumentManager.MdiActiveDocument.Editor;
         }
 
         void IExtensionApplication.Terminate()

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using System.Windows;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
@@ -12,7 +13,7 @@ namespace eZcad
     internal class DocumentModifier : IDisposable
     {
         #region ---   执行外部命令
-        
+
         public delegate void ExternalCommand(DocumentModifier docMdf, SelectionSet impliedSelection);
 
         /// <summary> 执行外部命令，并且在执行命令之前，自动将 事务打开</summary>
@@ -32,6 +33,7 @@ namespace eZcad
                 {
                     docMdf.acTransaction.Abort(); // Abort the transaction and rollback to the previous state
                     string errorMessage = ex.Message + "\r\n\r\n" + ex.StackTrace;
+                    MessageBox.Show(errorMessage, "出错", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -179,6 +181,17 @@ namespace eZcad
             }
         }
 
+        #endregion
+
+        #region --- Other Utilities
+
+        /// <summary> 将 各种无关提示进行换行 ，使命令行中显示更清爽 </summary>
+        public static void LineFeedInCommandLine()
+        {
+            // 将加载命令后的各种无关提示进行换行
+            var ed = Application.DocumentManager.MdiActiveDocument.Editor;
+            ed.WriteMessage("\n \n");
+        }
         #endregion
     }
 }

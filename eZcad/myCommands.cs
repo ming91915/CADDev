@@ -6,6 +6,7 @@ using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
+using eZcad.Utility;
 
 // This line is not mandatory, but improves loading performances
 // 测试中，如果不使用下面这条，则在AutoCAD中对应的 External Command 不能正常加载。
@@ -30,7 +31,7 @@ namespace eZcad
         // context menu.
 
         // Modal Command with localized name
-        [CommandMethod("MyGroup", "MyCommand", "MyCommandLocal", CommandFlags.Modal)]
+        [CommandMethod(eZConstants.eZGroupCommnad, "MyCommand", "MyCommandLocal", CommandFlags.Modal)]
         public void MyCommand() // This method can have any name
         {
            // Put your command code here
@@ -38,7 +39,7 @@ namespace eZcad
         }
         
         // Modal Command with pickfirst selection
-        [CommandMethod("MyGroup", "MyPickFirst", "MyPickFirstLocal", CommandFlags.Modal | CommandFlags.UsePickSet)]
+        [CommandMethod(eZConstants.eZGroupCommnad, "MyPickFirst", "MyPickFirstLocal", CommandFlags.Modal | CommandFlags.UsePickSet)]
         public void MyPickFirst() // This method can have any name
         {
             PromptSelectionResult result = Application.DocumentManager.MdiActiveDocument.Editor.GetSelection();
@@ -55,7 +56,7 @@ namespace eZcad
         }
 
         // Application Session Command with localized name
-        [CommandMethod("MyGroup", "MySessionCmd", "MySessionCmdLocal", CommandFlags.Modal | CommandFlags.Session)]
+        [CommandMethod(eZConstants.eZGroupCommnad, "MySessionCmd", "MySessionCmdLocal", CommandFlags.Modal | CommandFlags.Session)]
         public void MySessionCmd() // This method can have any name
         {
             // Put your command code here

@@ -70,11 +70,12 @@ namespace eZcad.AddinManager
                 {
                     // !!  注意这里的 addinItem 实例是刷新前的程序集中对应的类，这里只能用来提取其 FullName 字符串，而不能直接用来执行，因为虽然它确实可以执行，但是执行的是重新编译前的那个方法。
                     // !!  这里一定要从最新加载进来的程序集中重新创建对应的外部命令插件
-                    ICADExCommand newExCommand = assembly.CreateInstance(addinItem.GetType().FullName) as ICADExCommand;
+                    // AutoCAD 2016 中注释掉： ICADExCommand newExCommand = assembly.CreateInstance(addinItem.GetType().FullName) as ICADExCommand;
+                    var newExCommand = assembly.CreateInstance(addinItem.GetType().FullName);
 
                     if (newExCommand == null)
                     {
-                        MessageBox.Show(@"在新加载的程序集中未能找到匹配的方法", @"出错", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(@"在新加载的程序集中未能找到匹配的方法!!", @"出错", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         result = ExternalCommandResult.Failed;
                     }
                     else
@@ -95,17 +96,30 @@ namespace eZcad.AddinManager
             return result;
         }
 
-        private static ExternalCommandResult Execute(ICADExCommand exCommand, SelectionSet impliedSelection, ref string errorMessage, ref IList<ObjectId> errorSet)
+        private static ExternalCommandResult Execute(object exCommandIns, SelectionSet impliedSelection, ref string errorMessage, ref IList<ObjectId> errorSet)
         {
+            DocumentModifier.LineFeedInCommandLine();
+
             ExternalCommandResult res = ExternalCommandResult.Failed;
             try
             {
+                var mtd = ExCommandFinder.FindExCommandMethod(exCommandIns.GetType());
+                if (mtd != null)
+                {
+                    object[] paras = new object[] { impliedSelection, errorMessage, errorSet };
+                    res = (ExternalCommandResult)mtd.Invoke(exCommandIns, paras);
+                    // 将 ref 参数的值提取出来
+                    errorMessage = paras[1] as string;
+                    errorSet = paras[2] as IList<ObjectId>;
+                }
+
                 // 执行操作
                 // 如果在执行 Execute()方法时发现某个程序集不存在，则通过AssemblyResolve 事件手动进行加载
                 // 所以，所有引用的 zengfy 自定义程序集，都必须在  Execute() 方法中调用至少一次，以解决在Form.Show()时，出现不能找到或加载前面缺失的程序集B的问题。
 
                 // 如果不想通过 AssemblyResolve 来加载缺失的程序集的话，可以在 AddinManager 中自行设计代码，手动在 Execute() 方法之前将要引用的程序集从临时文件夹中通过 Assembly.LoadFile() 进行加载即可。
-                res = exCommand.Execute(impliedSelection, errorMessage: ref errorMessage, elementSet: ref errorSet);
+                // var exCommand = exCommandIns as ICADExCommand;
+                // res = exCommand.Execute(impliedSelection, errorMessage: ref errorMessage, elementSet: ref errorSet);
             }
             catch (Exception ex)
             {

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.Runtime;
 using Microsoft.Win32;
 
 namespace eZcad.Utility
@@ -58,7 +57,7 @@ namespace eZcad.Utility
                 foreach (ObjectId idTemp in block)
                 {
                     // 判断该实体是否是块定义 ，也可以以块定义方式打开，但是会产生事物嵌套  
-                    if (idTemp.ObjectClass.Equals(RXObject.GetClass(typeof(AttributeDefinition))))
+                    if (idTemp.ObjectClass.Equals(Autodesk.AutoCAD.Runtime.RXObject.GetClass(typeof(AttributeDefinition))))
                     {
                         AttributeDefinition adDef = tr.GetObject(idTemp, OpenMode.ForRead) as AttributeDefinition;
                         if (adDef != null)

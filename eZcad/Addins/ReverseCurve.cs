@@ -1,31 +1,33 @@
-﻿using System;
+﻿using System.Windows;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
 using eZcad.Addins;
-
+using eZcad.Utility;
 
 // This line is not mandatory, but improves loading performances
-[assembly: CommandClass(typeof(CommonAddins))]
+
+[assembly: CommandClass(typeof (ReverseCurve))]
 
 namespace eZcad.Addins
 {
-    /// <summary> 获取指定的多段线上某点所对应的里程 </summary>
-    public class CommonAddins
+    /// <summary> 将指定的曲线的起始点反转 </summary>
+    public class ReverseCurve
     {
-        #region ---   在界面中获取对象
-
-        #endregion
-
-        #region ---   将指定的曲线的起始点反转
+        /// <summary> 将指定的曲线的起始点反转 </summary>
+        [CommandMethod(eZConstants.eZGroupCommnad, "ReverseCurve", CommandFlags.Modal | CommandFlags.UsePickSet)]
+        public void EcReverseCurve()
+        {
+            DocumentModifier.ExecuteCommand(Execute);
+        }
 
         /// <summary> 将指定的曲线的起始点反转 </summary>
         /// <param name="docMdf"></param>
         /// <param name="impliedSelection"> 用户在执行方法之前已经选择好的对象。</param>
-        [CommandMethod("eZcad", "ReverseCurve", CommandFlags.Modal | CommandFlags.UsePickSet)]
-        public static void ReverseCurve(DocumentModifier docMdf, SelectionSet impliedSelection)
+        public static void Execute(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
+            docMdf.acEditor.Command();
+
             Curve c = null;
             if (impliedSelection != null)
             {
@@ -54,15 +56,13 @@ namespace eZcad.Addins
                 c.DowngradeOpen();
             }
         }
-
-        #endregion
-
+        
         private static Curve PickOneCurve(DocumentModifier docMdf)
         {
             // 点选
             var peO = new PromptEntityOptions("\n 选择一条曲线 ");
             peO.SetRejectMessage("\n 请选择一个曲线对象\n");
-            peO.AddAllowedClass(typeof(Curve), exactMatch: false);
+            peO.AddAllowedClass(typeof (Curve), exactMatch: false);
 
             // 请求在图形区域选择对象
             var res = docMdf.acEditor.GetEntity(peO);

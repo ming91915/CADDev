@@ -2,6 +2,7 @@
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
 using eZcad.Addins;
+using eZcad.Utility;
 
 // This line is not mandatory, but improves loading performances
 // 测试中，如果不使用下面这条，则在AutoCAD中对应的 External Command 不能正常加载。
@@ -36,7 +37,7 @@ namespace eZcad.Addins
 
         #region --- 外部命令 - 实例 - 1
 
-        [CommandMethod("eZcad", "EcInstanceMethod1", CommandFlags.Modal)]
+        [CommandMethod(eZConstants.eZGroupCommnad, "EcInstanceMethod1", CommandFlags.Modal)]
         public void EcInstanceMethod1() // This method can have any name
         {
             // 当用户第一次在 AutoCAD 界面中通过命令行调用此方法时，AutoCAD会通过此类的无参数构造函数创建出一个对应的实例A
@@ -54,8 +55,8 @@ namespace eZcad.Addins
         #endregion
 
         #region --- 外部命令 - 实例 - 2
-
-        [CommandMethod("eZcad", "EcInstanceMethod2", CommandFlags.Modal)]
+        
+        [CommandMethod(eZConstants.eZGroupCommnad, "EcInstanceMethod2", CommandFlags.Modal)]
         public void EcInstanceMethod2() // This method can have any name
         {
             // 当用户已经在 AutoCAD 界面中通过命令行调用过此类中的某实例 EcInstanceMethod1 后，再调用此 EcInstanceMethod2 时，
@@ -74,7 +75,7 @@ namespace eZcad.Addins
 
         #region --- 外部命令 - 静态 - 1
 
-        [CommandMethod("eZcad", "EcStaticeMethod1", CommandFlags.Modal)]
+        [CommandMethod(eZConstants.eZGroupCommnad, "EcStaticeMethod1", CommandFlags.Modal)]
         public static void EcStaticeMethod1() // This method can have any name
         {
             // 当用户在 AutoCAD 界面中通过命令行调用过此类中的某静态 EcStaticeMethod 时，不会创建出此类的任何实例（也不需要），而是直接调用静态方法 EcLoad.EcStaticeMethod()。

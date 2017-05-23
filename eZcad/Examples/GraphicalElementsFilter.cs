@@ -17,7 +17,6 @@ namespace eZcad.Examples
     /// <summary> 从用户选择集或者整个文档中过滤出指定信息的对象 </summary>
     internal static class GraphicalElementsFilter
     {
-        [CommandMethod("FindCirclesNoUI")]
         public static void FindCirclesNoUI()
         {
             // 获得当前文档和数据库   Get the current document and database

@@ -23,7 +23,7 @@ namespace eZcad.Addins
     public class DBTextsToMText
     {
         /// <summary> 将单行文字转换为多行文字 </summary>
-        [CommandMethod("eZcad", "DBTextsToMText", CommandFlags.Modal | CommandFlags.UsePickSet)]
+        [CommandMethod(eZConstants.eZGroupCommnad, "DBTextsToMText", CommandFlags.Modal | CommandFlags.UsePickSet)]
         public void EcConvertDBTextsToMText()
         {
             DocumentModifier.ExecuteCommand(ConvertDBTextsToMText);
@@ -32,7 +32,7 @@ namespace eZcad.Addins
         /// <summary> 将单行文字转换为多行文字 </summary>
         public static void ConvertDBTextsToMText(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
-            if (ManualMode(docMdf))
+           if (ManualMode(docMdf))
             {
                 ConvertInManualMode(docMdf);
             }

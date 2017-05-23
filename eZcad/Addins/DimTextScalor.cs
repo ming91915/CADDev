@@ -21,7 +21,7 @@ namespace eZcad.Addins
     public class DimTextScalor
     {
         /// <summary> 将用户手动修改过的标注进行单位缩放 </summary>
-        [CommandMethod("eZcad", "ScaleDimText", CommandFlags.Modal | CommandFlags.UsePickSet)]
+        [CommandMethod(eZConstants.eZGroupCommnad, "ScaleDimText", CommandFlags.Modal | CommandFlags.UsePickSet)]
         public void EcScaleDimText()
         {
             DocumentModifier.ExecuteCommand(ScaleDimText);
