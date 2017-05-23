@@ -19,7 +19,6 @@ namespace eZcad.Examples
     internal static class GraphicalElementsSelector
     {
 
-        [CommandMethod("FilterBlueCircleOnLayer0")]
         public static void GetSelection()
         {
             // 创建一个 TypedValue 数组，用于定义过滤条件
@@ -51,7 +50,6 @@ namespace eZcad.Examples
             }
         }
 
-        [CommandMethod("GetSelectionWithKeywords")]
         public static void GetSelectionWithKeywords()
         {
             Document doc = Application.DocumentManager.MdiActiveDocument;
@@ -87,7 +85,6 @@ namespace eZcad.Examples
             }
         }
 
-        [CommandMethod("GetAngleWithKeywords")]
         public static void GetAngleWithKeywords()
         {
             var doc = Application.DocumentManager.MdiActiveDocument;
@@ -218,7 +215,6 @@ namespace eZcad.Examples
         }
 
         /// <summary> 通过点选的方式选择一条曲线 </summary>
-        [CommandMethod("PickOneCurve")]
         public static Curve PickOneCurve(DocumentModifier docMdf)
         {
             // 点选

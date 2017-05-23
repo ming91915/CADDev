@@ -33,7 +33,6 @@ namespace eZcad.Addins
             "MLEADERCONTENTEDIT", // 编辑 多重引线
             "TEXTEDIT", // 编辑 标注文字
         };
-
         #endregion
 
         public AutoSwitchIME()

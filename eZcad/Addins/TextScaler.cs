@@ -21,7 +21,7 @@ namespace eZcad.Addins
     {
 
         /// <summary> 在新选择集中过滤出与当前选择集不相交的对象 </summary>
-        [CommandMethod("eZcad", "ScaleText", CommandFlags.Modal | CommandFlags.UsePickSet)]
+        [CommandMethod(eZConstants.eZGroupCommnad, "ScaleText", CommandFlags.Modal | CommandFlags.UsePickSet)]
         public void EcScaleText()
         {
             DocumentModifier.ExecuteCommand(ScaleText);

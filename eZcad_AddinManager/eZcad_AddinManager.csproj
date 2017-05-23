@@ -12,7 +12,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>eZcad</RootNamespace>
     <AssemblyName>eZcad_AddinManager</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <FileUpgradeFlags>
@@ -33,6 +33,8 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -44,6 +46,7 @@
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <DocumentationFile>..\bin\eZcad_AddinManager.xml</DocumentationFile>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -53,16 +56,18 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DocumentationFile>bin\Debug\eZcad_AddinManager.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\eZcad_AddinManager.XML</DocumentationFile>
     <DebugType>full</DebugType>
     <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>bin\x64\Release\</OutputPath>
@@ -72,6 +77,7 @@
     <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <!--ACA References Begin-->
@@ -79,16 +85,13 @@
     <!--AME Referebces Begin-->
     <!--AME Reference End-->
     <Reference Include="accoremgd">
-      <HintPath>C:\Softwares\Civil Engineering\AutoCAD 2014\accoremgd.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>C:\Softwares\Civil Engineering\AutoCAD 2016\accoremgd.dll</HintPath>
     </Reference>
     <Reference Include="acdbmgd">
-      <HintPath>C:\Softwares\Civil Engineering\AutoCAD 2014\acdbmgd.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>C:\Softwares\Civil Engineering\AutoCAD 2016\acdbmgd.dll</HintPath>
     </Reference>
     <Reference Include="acmgd">
-      <HintPath>C:\Softwares\Civil Engineering\AutoCAD 2014\acmgd.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>C:\Softwares\Civil Engineering\AutoCAD 2016\acmgd.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -122,7 +125,9 @@
       <DependentUpon>form_AddinManager.cs</DependentUpon>
     </Compile>
     <Compile Include="Addins\AutoSwitchIME.cs" />
+    <Compile Include="Addins\Class1.cs" />
     <Compile Include="Addins\EcLoadTemplate1.cs" />
+    <Compile Include="Addins\CmdDuplicatesFinder.cs" />
     <Compile Include="AssemblyInfo\AddinManagerAssembly.cs" />
     <Compile Include="AssemblyInfo\AssemblyInfoDllManager.cs" />
     <Compile Include="AssemblyInfo\AssemblyInfoFileManager.cs" />
@@ -134,6 +139,7 @@
     <Compile Include="AssemblyLoader\AssemblySelectorForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="AssemblyLoader\eZAssemblyLoader.cs" />
     <Compile Include="AssemblyLoader\FileUtils.cs" />
     <Compile Include="cmd_AddinManagerLoader.cs" />
     <Compile Include="DocumentModifier.cs" />

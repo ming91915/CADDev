@@ -6,6 +6,7 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
 using eZcad.Addins;
+using eZcad.Utility;
 
 // This line is not mandatory, but improves loading performances
 // 测试中，如果不使用下面这条，则在AutoCAD中对应的 External Command 不能正常加载。
@@ -18,7 +19,7 @@ namespace eZcad.Addins
     public class DimAlignment
     {
         /// <summary> 在新选择集中过滤出与当前选择集不相交的对象 </summary>
-        [CommandMethod("eZcad", "AlignDim", CommandFlags.Modal | CommandFlags.UsePickSet)]
+        [CommandMethod(eZConstants.eZGroupCommnad, "AlignDim", CommandFlags.Modal | CommandFlags.UsePickSet)]
         public void EcAlignDim()
         {
             DocumentModifier.ExecuteCommand(AlignDim);
@@ -88,9 +89,9 @@ namespace eZcad.Addins
         #region ---   界面交互
 
         /// <summary> 通过点选的方式选择一条曲线 </summary>
-        [CommandMethod("PickOneCurve")]
         public static Curve PickOneCurve(DocumentModifier docMdf)
         {
+
             // 点选
             var peO = new PromptEntityOptions("\n 选择一条曲线 ");
             peO.SetRejectMessage("\n 请选择一个曲线对象\n");

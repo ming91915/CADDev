@@ -142,7 +142,7 @@ namespace eZcad.AddinManager
         /// <summary> 将程序集加载到程序中 </summary>
         /// <param name="filePath">程序集的文件路径</param>
         /// <returns></returns>
-        private Assembly LoadAddin(string filePath)
+        private  Assembly LoadAddin(string filePath)
         {
             Assembly result = null;
             try

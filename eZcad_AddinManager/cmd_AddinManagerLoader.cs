@@ -51,7 +51,7 @@ namespace eZcad_AddinManager
             // 先清空以前已经选择的对象集合
             SetImpliedSelection();
             Application.ShowModelessDialog(null, frm);
-            // Application.ShowModalDialog(frm);
+            //Application.ShowModalDialog(frm);
         }
 
         // Modal Command with localized name
@@ -83,5 +83,6 @@ namespace eZcad_AddinManager
                 ExCommandExecutor.ImpliedSelection = null;
             }
         }
+
     }
 }

@@ -16,7 +16,7 @@ namespace eZcad.Addins
     public class Polyface_SubDMesh_Convertor
     {
         /// <summary> 将多面网络转换为细分网格 </summary>
-        [CommandMethod("eZcad", "PolyfaceSubDMeshConvert", CommandFlags.Modal | CommandFlags.UsePickSet)]
+        [CommandMethod(eZConstants.eZGroupCommnad, "PolyfaceSubDMeshConvert", CommandFlags.Modal | CommandFlags.UsePickSet)]
         public void EcConvert()
         {
             DocumentModifier.ExecuteCommand(Convert);

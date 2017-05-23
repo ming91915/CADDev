@@ -21,7 +21,6 @@ namespace eZcad.Examples
         /// <param name="srcX">用来创建二维多段线的 X 集合</param>
         /// <param name="srcY">用来创建二维多段线的 Y 集合，其元素个数必须与 X 集合的元素个数相同 </param>
         /// <param name="close">是否要将整个多段线进行闭合</param>
-        [CommandMethod("AddPolyline")]
         public static void AddPolyline2D(double[] srcX, double[] srcY, bool close)
         {
             // 获得当前文档和数据库   Get the current document and database
@@ -81,7 +80,6 @@ namespace eZcad.Examples
         /// <param name="srcX">用来创建二维多段线的 X 集合</param>
         /// <param name="srcY">用来创建二维多段线的 Y 集合，其元素个数必须与 X 集合的元素个数相同 </param>
         /// <param name="close">是否要将整个多段线进行闭合</param>
-        [CommandMethod("AddPolyline")]
         public static void AddText(double[] srcX, double[] srcY, bool close)
         {
             using (DocumentModifier docMdf = new DocumentModifier(true))

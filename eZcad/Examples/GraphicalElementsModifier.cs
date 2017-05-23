@@ -20,7 +20,6 @@ namespace eZcad.Examples
     {
         /// <summary> 提示用户在界面中选择多个椭圆形，并将其转换为多段线 </summary>
         /// <remarks></remarks>
-        [CommandMethod("EllipseToPolyLine", CommandFlags.UsePickSet)]
         public static void EllipseToPolyLine()
         {
 
@@ -132,7 +131,6 @@ namespace eZcad.Examples
 
         /// <summary> 提示用户在界面中选择多个圆形，并将其转换为多段线 </summary>
         /// <remarks></remarks>
-        [CommandMethod("CircleToPolyLine", CommandFlags.UsePickSet)]
         public static void CircleToPolyLine()
         {
             // 获得当前文档和数据库   Get the current document and database

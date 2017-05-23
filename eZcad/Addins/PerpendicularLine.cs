@@ -40,7 +40,7 @@ namespace eZcad.Addins
 
         /// <summary> 为指定的曲线添加垂线 </summary>
         /// <param name="docMdf"></param>
-        [CommandMethod("eZcad", "AddPerpendicularLineOnACurve", CommandFlags.Modal | CommandFlags.UsePickSet)]
+        [CommandMethod(eZConstants.eZGroupCommnad, "AddPerpendicularLineOnACurve", CommandFlags.Modal | CommandFlags.UsePickSet)]
         public void AddPerpendicularLineOnACurve(DocumentModifier docMdf)
         {
             var curve = PickOneCurve(docMdf);

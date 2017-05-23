@@ -20,7 +20,7 @@ namespace eZcad.Addins
     {
 
         /// <summary> 在新选择集中过滤出与当前选择集不相交的对象 </summary>
-        [CommandMethod("eZcad", "IntersectSelSet", CommandFlags.Modal | CommandFlags.UsePickSet)]
+        [CommandMethod(eZConstants.eZGroupCommnad, "IntersectSelSet", CommandFlags.Modal | CommandFlags.UsePickSet)]
         public void EcIntersectSelSet()
         {
             DocumentModifier.ExecuteCommand(IntersectSelSet);

@@ -34,7 +34,7 @@ namespace eZcad.Addins
         /// <summary> 为指定的曲线添加垂线 </summary>
         /// <param name="docMdf"></param>
         /// <param name="impliedSelection"> 用户在执行方法之前已经选择好的对象。</param>
-        [CommandMethod("eZcad", "GetRoadMileage", CommandFlags.Modal | CommandFlags.UsePickSet)]
+        [CommandMethod(eZConstants.eZGroupCommnad, "GetRoadMileage2", CommandFlags.Modal | CommandFlags.UsePickSet)]
         public void GetRoadMileage(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
             _docMdf = docMdf;
