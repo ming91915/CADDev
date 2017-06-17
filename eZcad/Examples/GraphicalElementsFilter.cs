@@ -56,6 +56,42 @@ namespace eZcad.Examples
                     }
                 }
             }
+            }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="docMdf"></param>
+        /// <returns></returns>
+        private static ObjectId[] SelectDims(DocumentModifier docMdf)
+        {
+            var ed = docMdf.acEditor;
+
+            var filterType = new[]
+            {
+                new TypedValue((int) DxfCode.Start, "DIMENSION"),
+                // 将标注类型限制为转角标注与对齐标注
+                new TypedValue((int) DxfCode.Operator, "<OR"),
+                new TypedValue(100, "AcDbAlignedDimension)"),
+                new TypedValue(100, "AcDbRotatedDimension))"),
+                new TypedValue((int) DxfCode.Operator, "OR>"),
+            };
+            var filter = new SelectionFilter(filterType);
+
+            // Create our options object
+            var pso = new PromptSelectionOptions();
+            var kws = pso.Keywords.GetDisplayString(true);
+            pso.MessageForAdding = $"\n选择标注对象"; // 当用户在命令行中输入A（或Add）时，命令行出现的提示字符。
+            pso.MessageForRemoval = pso.MessageForAdding; // 当用户在命令行中输入Re（或Remove）时，命令行出现的提示字符。
+
+
+            var res = ed.GetSelection(pso, filter);
+
+            if (res.Status == PromptStatus.OK)
+            {
+                return res.Value.GetObjectIds();
+            }
+            return null;
         }
+
     }
 }

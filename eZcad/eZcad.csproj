@@ -99,10 +99,6 @@
       <HintPath>C:\Softwares\Civil Engineering\AutoCAD 2016\acmgd.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="eZcad_AddinManager">
-      <HintPath>..\eZcad_AddinManager\bin\Debug\eZcad_AddinManager.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Office.Interop.Excel, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
       <EmbedInteropTypes>True</EmbedInteropTypes>
@@ -126,13 +122,52 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Addins\CombineDbTexts.cs" />
+    <Compile Include="Addins\DbTextsFormator.cs" />
     <Compile Include="Addins\ReverseCurve.cs" />
     <Compile Include="Addins\PolyfaceToSubdmesh.cs" />
     <Compile Include="Addins\EcLoadTemplate1.cs" />
     <Compile Include="Addins\DimAlignment.cs" />
     <Compile Include="Addins\DBTextsToMText.cs" />
     <Compile Include="Addins\DimTextScalor.cs" />
+    <Compile Include="Addins\SlopeProtection\Cmds\Ec_SlopeProtection.cs" />
+    <Compile Include="Addins\SlopeProtection\Cmds\OptionsSetter.cs" />
+    <Compile Include="Addins\SlopeProtection\Cmds\SlopeWalker.cs" />
+    <Compile Include="Addins\SlopeProtection\Cmds\SectionsFinder.cs" />
+    <Compile Include="Addins\SlopeProtection\Cmds\SpInfosGetter.cs" />
+    <Compile Include="Addins\SlopeProtection\Cmds\SpInfosSetter.cs" />
+    <Compile Include="Addins\SlopeProtection\Entities\SlopeSegment.cs" />
+    <Compile Include="Addins\SlopeProtection\SlopeDataEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Addins\SlopeProtection\SlopeDataEditor.designer.cs">
+      <DependentUpon>SlopeDataEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Addins\SlopeProtection\Entities\CenterAxis.cs" />
+    <Compile Include="Addins\SlopeProtection\Entities\ProtectionOptions.cs" />
+    <Compile Include="Addins\SlopeProtection\Entities\ProtectionStyle.cs" />
+    <Compile Include="Addins\SlopeProtection\Entities\ProtectionUtils.cs" />
+    <Compile Include="Addins\SlopeProtection\Entities\SlopeLine.cs" />
+    <Compile Include="Addins\SlopeProtection\MatchOptionsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Addins\SlopeProtection\MatchOptionsForm.Designer.cs">
+      <DependentUpon>MatchOptionsForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Addins\SlopeProtection\Options.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Addins\SlopeProtection\Options.Designer.cs">
+      <DependentUpon>Options.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Addins\SlopeProtection\ProtectionStyleLister.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Addins\SlopeProtection\ProtectionStyleLister.Designer.cs">
+      <DependentUpon>ProtectionStyleLister.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Addins\SlopeProtection\SlopeProtectionInfos\MileageInfo.cs" />
+    <Compile Include="Addins\SlopeProtection\Entities\SlopeData.cs" />
+    <Compile Include="Addins\SlopeProtection\SlopeProtectionInfos\WorkSheetData.cs" />
     <Compile Include="Addins\TextScaler.cs" />
     <Compile Include="Addins\IntersectSelSet.cs" />
     <Compile Include="Debug\AddinManagerDebuger.cs" />
@@ -181,18 +216,45 @@
     <Compile Include="myCommands.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Addins\TableDataGetter.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Utility\EntityArray2D.cs" />
     <Compile Include="Utility\ExtensionMethods.cs" />
     <Compile Include="Utility\eZConstants.cs" />
+    <Compile Include="Utility\FormOk.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Utility\SolidUtils.cs" />
     <Compile Include="Utility\TextUtils.cs" />
     <Compile Include="Utility\Utils.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Addins\SlopeProtection\SlopeDataEditor.resx">
+      <DependentUpon>SlopeDataEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Addins\SlopeProtection\MatchOptionsForm.resx">
+      <DependentUpon>MatchOptionsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Addins\SlopeProtection\Options.resx">
+      <DependentUpon>Options.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Addins\SlopeProtection\ProtectionStyleLister.resx">
+      <DependentUpon>ProtectionStyleLister.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="myCommands.resx">
       <DependentUpon>myCommands.cs</DependentUpon>
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>myCommands.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Utility\FormOk.resx">
+      <DependentUpon>FormOk.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -246,7 +308,12 @@
       <Project>{fb9b6528-5424-4b7a-aeba-6733450dc44b}</Project>
       <Name>eZstd</Name>
     </ProjectReference>
+    <ProjectReference Include="..\eZcad_AddinManager\eZcad_AddinManager.csproj">
+      <Project>{835fa817-ebe4-4c2b-91d4-a6b945878105}</Project>
+      <Name>eZcad_AddinManager</Name>
+    </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

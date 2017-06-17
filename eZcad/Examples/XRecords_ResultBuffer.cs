@@ -11,7 +11,6 @@ namespace eZcad.Examples
     public class XRecords_ResultBuffer
     {
         /// <summary> 向 Entity 中添加数据 </summary>
-        [CommandMethod("AddDataToExtensionDictionary")]
         public static void AddDataToExtensionDictionary()
         {
             Editor ed = Application.DocumentManager.MdiActiveDocument.Editor;
@@ -110,7 +109,6 @@ namespace eZcad.Examples
         }
 
         /// <summary> 向数据库中添加数据 </summary>
-        [CommandMethod("AddDataToNOD")]
         public static void AddDataToNOD()
         {
             // get the editor object 
@@ -185,6 +183,61 @@ namespace eZcad.Examples
                 // whatever happens we must dispose the transaction 
                 trans.Dispose();
             }
+        }
+        
+        public static void WriteXData(DocumentModifier docMdf, SelectionSet impliedSelection)
+        {
+            var apptable = docMdf.acDataBase.RegAppTableId.GetObject(OpenMode.ForWrite) as RegAppTable;
+
+            // RegAppTableRecord 的创建
+            var strApp1 = "app1";
+            if (!apptable.Has(strApp1))
+            {
+                var app1 = new RegAppTableRecord() { Name = strApp1, };
+                apptable.Add(app1);
+                docMdf.acTransaction.AddNewlyCreatedDBObject(app1, true);
+            }
+            var strApp2 = "app2";
+            if (!apptable.Has(strApp2))
+            {
+                var app1 = new RegAppTableRecord() { Name = strApp2, };
+                apptable.Add(app1);
+                docMdf.acTransaction.AddNewlyCreatedDBObject(app1, true);
+            }
+
+            // 在界面中选择实体，用来写入XData
+            var ed = Application.DocumentManager.MdiActiveDocument.Editor;
+            var id = ed.GetEntity("\n选择一个要写入XData的实体：").ObjectId;
+            var obj = id.GetObject(OpenMode.ForRead);
+            if (obj != null)
+            {
+                obj.UpgradeOpen();
+                ResultBuffer data2 = new ResultBuffer(
+                        new TypedValue((int)DxfCode.ExtendedDataRegAppName, strApp1),
+                        new TypedValue((int)DxfCode.ExtendedDataAsciiString, "任意字符"),
+                        new TypedValue((int)DxfCode.ExtendedDataDist, 1.3),
+                        new TypedValue((int)DxfCode.ExtendedDataReal, 2),
+
+                        new TypedValue((int)DxfCode.ExtendedDataRegAppName, strApp2),
+                        new TypedValue((int)DxfCode.ExtendedDataInteger16, 88),
+                        new TypedValue((int)DxfCode.ExtendedDataReal, 4.5),
+                        new TypedValue((int)DxfCode.ExtendedDataScale, 6)
+                        );
+                obj.XData = data2;
+
+                // 提取不同 RegAppName 的数据
+                var res1 = obj.GetXDataForApplication(strApp1); // 返回的集合中包含 strApp1 在内的4个元素。
+                var res2 = obj.GetXDataForApplication(strApp2); // 返回的集合中包含 strApp2 在内的4个元素。
+                var res3 = obj.GetXDataForApplication("app3"); // 返回 null
+            }
+        }
+        
+        public static ResultBuffer ClearXData()
+        {
+            ResultBuffer buff = new ResultBuffer(new TypedValue((int)DxfCode.ExtendedDataRegAppName, "某AppName"));
+            // 此时，Entity中的XData集合里，对应AppName下的所有数据，连同AppName这一项本身，都在实体中删除了。
+            // 但是此AppName在 RegAppTable 中对应的 RegAppTableRecord 定义还是存在的。
+            return buff;
         }
     }
 }

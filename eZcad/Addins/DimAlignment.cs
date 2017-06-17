@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
@@ -11,7 +9,7 @@ using eZcad.Utility;
 // This line is not mandatory, but improves loading performances
 // 测试中，如果不使用下面这条，则在AutoCAD中对应的 External Command 不能正常加载。
 
-[assembly: CommandClass(typeof(DimAlignment))]
+[assembly: CommandClass(typeof (DimAlignment))]
 
 namespace eZcad.Addins
 {
@@ -70,6 +68,7 @@ namespace eZcad.Addins
             }
             //
         }
+
         private static void AlignDimsToLine(DocumentModifier docMdf, AlignedDimension dim, Curve c)
         {
             // 找到标注的两个顶点
@@ -91,11 +90,10 @@ namespace eZcad.Addins
         /// <summary> 通过点选的方式选择一条曲线 </summary>
         public static Curve PickOneCurve(DocumentModifier docMdf)
         {
-
             // 点选
             var peO = new PromptEntityOptions("\n 选择一条曲线 ");
             peO.SetRejectMessage("\n 请选择一个曲线对象\n");
-            peO.AddAllowedClass(typeof(Curve), false);
+            peO.AddAllowedClass(typeof (Curve), false);
 
             // 请求在图形区域选择对象
             var res = docMdf.acEditor.GetEntity(peO);
@@ -155,7 +153,7 @@ namespace eZcad.Addins
             // var l = new Line(basePt, dimPt); // 创建一条线用来计算交点，但是并不将其添加到数据库
             var line3d = new Line3d(basePt, dimPt);
             var c3d = c.GetGeCurve();
-            var pts = c3d.GetClosestPointTo(line3d).Select(r=>r.GetPoint()).ToArray();
+            var pts = c3d.GetClosestPointTo(line3d).Select(r => r.GetPoint()).ToArray();
             // var pts = new Point3dCollection();
             // c.IntersectWith(l, Intersect.ExtendArgument, c.GetPlane(), pts, IntPtr.Zero, IntPtr.Zero);
             // l.Erase(true); 会出现报错：eNoDatabase，因为它根本就没有添加到数据库，所以自然也删不掉。

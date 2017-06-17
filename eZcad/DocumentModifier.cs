@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using System.Windows;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
@@ -32,6 +33,7 @@ namespace eZcad
                 {
                     docMdf.acTransaction.Abort(); // Abort the transaction and rollback to the previous state
                     string errorMessage = ex.Message + "\r\n\r\n" + ex.StackTrace;
+                    MessageBox.Show(errorMessage, "出错", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }

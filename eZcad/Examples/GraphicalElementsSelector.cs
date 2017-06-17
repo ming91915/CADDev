@@ -19,6 +19,8 @@ namespace eZcad.Examples
     internal static class GraphicalElementsSelector
     {
 
+        #region --- GetSelection
+
         public static void GetSelection()
         {
             // 创建一个 TypedValue 数组，用于定义过滤条件
@@ -84,46 +86,6 @@ namespace eZcad.Examples
                 ed.WriteMessage($"\n{psr.Value.Count} object{(psr.Value.Count == 1 ? "" : "s")} selected.");
             }
         }
-
-        public static void GetAngleWithKeywords()
-        {
-            var doc = Application.DocumentManager.MdiActiveDocument;
-            var ed = doc.Editor;
-
-            var pao = new PromptAngleOptions(
-                messageAndKeywords: "\n指定对角点或[栏选(F) / 圈围(WP) / 圈交(CP)]:",
-                globalKeywords: "栏选1 圈围2 圈交3");
-
-            // 在界面中选择一个角度
-            var pdr = ed.GetAngle(pao);
-
-            MessageBox.Show(pdr.Status.ToString());
-            if (pdr.Status == PromptStatus.Keyword)
-            {
-                MessageBox.Show($"用户输入的关键字为“{pdr.StringResult}”"); // 用户在命令行中输入的关键字
-
-                //　根据用户在命令行中输入的不同的关键字，进行对应的处理
-                switch (pdr.StringResult)
-                {
-                    case "栏选1":
-                        break;
-                    case "圈围2":
-
-                        break;
-                    case "圈交3":
-
-                        break;
-                    default: // 如果用户不输入任何关键字，则StringResult属性的值为null
-
-                        break;
-                }
-            }
-            else if (pdr.Status == PromptStatus.OK) // 用户选择结束
-            {
-                MessageBox.Show(pdr.Value.ToString()); // 用户在界面中选择的角度值
-            }
-        }
-
 
         /// <summary> 在  GetSelection 方法中指定关键字与对应的快捷键 </summary>
         /// <returns></returns>
@@ -213,7 +175,48 @@ namespace eZcad.Examples
             continueSelect = false;
             return null;
         }
+        
+        #endregion
 
+        public static void GetAngleWithKeywords()
+        {
+            var doc = Application.DocumentManager.MdiActiveDocument;
+            var ed = doc.Editor;
+
+            var pao = new PromptAngleOptions(
+                messageAndKeywords: "\n指定对角点或[栏选(F) / 圈围(WP) / 圈交(CP)]:",
+                globalKeywords: "栏选1 圈围2 圈交3");
+
+            // 在界面中选择一个角度
+            var pdr = ed.GetAngle(pao);
+
+            MessageBox.Show(pdr.Status.ToString());
+            if (pdr.Status == PromptStatus.Keyword)
+            {
+                MessageBox.Show($"用户输入的关键字为“{pdr.StringResult}”"); // 用户在命令行中输入的关键字
+
+                //　根据用户在命令行中输入的不同的关键字，进行对应的处理
+                switch (pdr.StringResult)
+                {
+                    case "栏选1":
+                        break;
+                    case "圈围2":
+
+                        break;
+                    case "圈交3":
+
+                        break;
+                    default: // 如果用户不输入任何关键字，则StringResult属性的值为null
+
+                        break;
+                }
+            }
+            else if (pdr.Status == PromptStatus.OK) // 用户选择结束
+            {
+                MessageBox.Show(pdr.Value.ToString()); // 用户在界面中选择的角度值
+            }
+        }
+        
         /// <summary> 通过点选的方式选择一条曲线 </summary>
         public static Curve PickOneCurve(DocumentModifier docMdf)
         {

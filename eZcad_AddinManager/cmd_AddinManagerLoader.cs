@@ -1,11 +1,9 @@
-﻿// (C) Copyright 2016 by XN 
-//
-
-using Autodesk.AutoCAD.ApplicationServices;
+﻿using System.Windows.Forms;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
 using eZcad.AddinManager;
 using eZcad_AddinManager;
+using Application = Autodesk.AutoCAD.ApplicationServices.Application;
 
 // This line is not mandatory, but improves loading performances
 // 测试中，如果不使用下面这条，则在AutoCAD中对应的 External Command 不能正常加载。
@@ -29,6 +27,7 @@ namespace eZcad_AddinManager
         // NOTE: CommandMethod has overloads where you can provide helpid and
         // context menu.
 
+
         private bool _addinManagerFirstLoaded = true;
         // Modal Command with localized name
         [CommandMethod("AddinManager", "LoadAddinManager", CommandFlags.Modal | CommandFlags.UsePickSet | CommandFlags.Redraw)]
@@ -50,6 +49,8 @@ namespace eZcad_AddinManager
             }
             // 先清空以前已经选择的对象集合
             SetImpliedSelection();
+            
+            frm.WindowState = FormWindowState.Normal; // 取消其最小化
             Application.ShowModelessDialog(null, frm);
             //Application.ShowModalDialog(frm);
         }

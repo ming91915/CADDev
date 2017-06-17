@@ -40,12 +40,12 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\bin\</OutputPath>
+    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <DocumentationFile>..\bin\eZcad_AddinManager.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\eZcad_AddinManager.XML</DocumentationFile>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -86,12 +86,19 @@
     <!--AME Reference End-->
     <Reference Include="accoremgd">
       <HintPath>C:\Softwares\Civil Engineering\AutoCAD 2016\accoremgd.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="acdbmgd">
       <HintPath>C:\Softwares\Civil Engineering\AutoCAD 2016\acdbmgd.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="acmgd">
       <HintPath>C:\Softwares\Civil Engineering\AutoCAD 2016\acmgd.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Interop.AutoCAD">
+      <HintPath>..\eZcad\obj\Debug\Interop.AutoCAD.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -128,6 +135,9 @@
     <Compile Include="Addins\Class1.cs" />
     <Compile Include="Addins\EcLoadTemplate1.cs" />
     <Compile Include="Addins\CmdDuplicatesFinder.cs" />
+    <Compile Include="Addins\MenuItemsLoader.cs" />
+    <Compile Include="Addins\Utilities\eZConstants.cs" />
+    <Compile Include="Addins\Utilities\Utils.cs" />
     <Compile Include="AssemblyInfo\AddinManagerAssembly.cs" />
     <Compile Include="AssemblyInfo\AssemblyInfoDllManager.cs" />
     <Compile Include="AssemblyInfo\AssemblyInfoFileManager.cs" />
