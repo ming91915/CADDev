@@ -1,8 +1,8 @@
 ﻿using Autodesk.AutoCAD.Runtime;
 
-namespace eZcad.Utility
+namespace eZcad.Addins.Utilities
 {
-    public static class eZConstants
+    internal static class eZConstants
     {
         /// <summary>
         /// 在<see cref="CommandMethodAttribute"/>中设置的外部命令的 GroupName。

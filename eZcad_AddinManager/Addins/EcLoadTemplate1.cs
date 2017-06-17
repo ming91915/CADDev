@@ -1,7 +1,8 @@
-﻿using Autodesk.AutoCAD.ApplicationServices.Core;
+﻿using System.Windows;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
 using eZcad.Addins;
+using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 
 // This line is not mandatory, but improves loading performances
 // 测试中，如果不使用下面这条，则在AutoCAD中对应的 External Command 不能正常加载。
@@ -74,7 +75,7 @@ namespace eZcad.Addins
 
         #region --- 外部命令 - 静态 - 1
 
-        [CommandMethod("eZcad", "EcStaticeMethod10", CommandFlags.Modal)]
+        [CommandMethod("eZcad", "EcStaticeMethod3", CommandFlags.Modal)]
         public static void EcStaticeMethod1() // This method can have any name
         {
             // 当用户在 AutoCAD 界面中通过命令行调用过此类中的某静态 EcStaticeMethod 时，不会创建出此类的任何实例（也不需要），而是直接调用静态方法 EcLoad.EcStaticeMethod()。
@@ -83,6 +84,7 @@ namespace eZcad.Addins
 
         public static void StaticeMethod1(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
+            MessageBox.Show("进入静态的外部命令");
             if (impliedSelection != null && impliedSelection.Count > 0)
             {
             }

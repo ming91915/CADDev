@@ -38,7 +38,7 @@ namespace eZcad
             // Display the menu on the menu bar
 
             // If index is a string, the name of the popup menu must contain any underscore that appears in the menu. 
-            topPpMenu.InsertInMenuBar(Index: "工具(&T)");
+            topPpMenu.InsertInMenuBar(Index: "工具(&T)");  // Index: app.MenuBar.Count + 1
             return;
             // 以下为功能测试项 --------------------------------------------------------
 

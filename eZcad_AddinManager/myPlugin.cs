@@ -1,28 +1,14 @@
-﻿// (C) Copyright 2016 by XN 
-//
-
-using System;
-using System.Diagnostics;
-using System.Globalization;
-using System.Linq;
-using System.Windows;
-using System.Windows.Forms;
-using Autodesk.AutoCAD.ApplicationServices;
-using eZcad.AddinManager;
-using eZcad.AddinManager;
+﻿using System.Diagnostics;
 using Autodesk.AutoCAD.Runtime;
+using eZcad.AddinManager;
 using eZcad.Addins;
 using eZcad_AddinManager;
-using Application = Autodesk.AutoCAD.ApplicationServices.Application;
 using Exception = System.Exception;
-
 // This line is not mandatory, but improves loading performances
-
-[assembly: ExtensionApplication(typeof(MyPlugin))]
+[assembly: ExtensionApplication(typeof (MyPlugin))]
 
 namespace eZcad_AddinManager
 {
-
     /// <summary>
     /// AddinManager 插件程序集 加载与卸载时的操作
     /// </summary>
@@ -65,7 +51,7 @@ namespace eZcad_AddinManager
                 Debug.Print("AddinManager 插件关闭时出错： \n\r" + ex.Message + "\n\r" + ex.StackTrace);
             }
         }
-        #endregion
 
+        #endregion
     }
 }
