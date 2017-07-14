@@ -56,7 +56,7 @@ namespace eZcad.Utility
                 // 从压缩到的一整行中提取每一个元素的列号
                 colIndex = rowEnts[ent];
                 // 从压缩到的一整列中提取每一个元素的行号，同时，考虑到AutoCAD几何坐标系中，Y坐标较小者位于集合前面，而在计算机的二维数组表示方法中，下标(0,0)一般表示位于左上角的元素，所以，这里在将几何元素填充到二维数组中时，将Y值的排序进行反转。
-                rowIndex = rowsCount - 1 - colEnts[ent]; 
+                rowIndex = rowsCount - 1 - colEnts[ent];
                 // 为二维方格中添加实体
                 res[rowIndex, colIndex].Add(ent.Entity);
             }

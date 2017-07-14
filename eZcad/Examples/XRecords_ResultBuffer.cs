@@ -4,7 +4,7 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
 using eZcad.Examples;
 
-[assembly: CommandClass(typeof (XRecords_ResultBuffer))]
+[assembly: CommandClass(typeof(XRecords_ResultBuffer))]
 
 namespace eZcad.Examples
 {
@@ -27,7 +27,7 @@ namespace eZcad.Examples
                     // Here we will add XData to a selected entity. 
 
                     // 1. Declare an Entity variable named ent. Instantiate it using GetOBject of the Transaction created above. 
-                    Entity ent = (Entity) trans.GetObject(getEntityResult.ObjectId, OpenMode.ForRead);
+                    Entity ent = (Entity)trans.GetObject(getEntityResult.ObjectId, OpenMode.ForRead);
 
                     // 2. Use an "if" statement and test the IsNull property of the  ExtensionDictionary of the ent.
                     if (ent.ExtensionDictionary.IsNull)
@@ -41,7 +41,7 @@ namespace eZcad.Examples
 
                     // 5. Declare a variable as DBDictionary. Instantiate it by using the GetObject method of the Transaction created above. 
                     DBDictionary extensionDict =
-                        (DBDictionary) trans.GetObject(ent.ExtensionDictionary, OpenMode.ForRead);
+                        (DBDictionary)trans.GetObject(ent.ExtensionDictionary, OpenMode.ForRead);
 
                     // 6. Check to see if the entry we are going to add to the dictionary is already there. Use the Contains property of the dictionary in an "if else statement.
                     if (extensionDict.Contains("MyData"))
@@ -56,7 +56,7 @@ namespace eZcad.Examples
                         Xrecord myXrecord = default(Xrecord);
 
                         // 10. Instantiate the Xrecord variable using the  GetObject method of the Transaction created above. 
-                        myXrecord = (Xrecord) trans.GetObject(entryId, OpenMode.ForRead);
+                        myXrecord = (Xrecord)trans.GetObject(entryId, OpenMode.ForRead);
 
                         // 11. Here print out the values in the Xrecord to the command line. 
                         ResultBuffer resBuff = myXrecord.Data;
@@ -76,21 +76,21 @@ namespace eZcad.Examples
                         Xrecord myXrecord = new Xrecord();
 
                         // 15. Create the resbuf list. Declare a ResultBuffer variable. Instantiate it by creating a New ResultBuffer.
-                        ResultBuffer data = new ResultBuffer(new TypedValue((int) DxfCode.Int16, 1),
-                            new TypedValue((int) DxfCode.Text, "MyStockData"),
-                            new TypedValue((int) DxfCode.Real, 51.9),
-                            new TypedValue((int) DxfCode.Real, 100.0),
-                            new TypedValue((int) DxfCode.Real, 320.6));
+                        ResultBuffer data = new ResultBuffer(
+                            new TypedValue((int)DxfCode.Int16, 1),
+                            new TypedValue((int)DxfCode.Text, "MyStockData"),
+                            new TypedValue((int)DxfCode.Real, 51.9),
+                            new TypedValue((int)DxfCode.Real, 100.0),
+                            new TypedValue((int)DxfCode.Real, 320.6));
 
-                        // 16. Add the ResultBuffer to the Xrecord using the Data 
-                        // property of the Xrecord. (make it equal the ResultBuffer 
-                        // from step 15) 
+                        // 16. Add the ResultBuffer to the Xrecord using the Data property of the Xrecord. (make it equal the ResultBuffer from step 15) 
                         myXrecord.Data = data;
 
                         // 17. Create the entry in the ExtensionDictionary. Use the SetAt  method of the ExtensionDictionary from step 5. 
                         extensionDict.SetAt(searchKey: "MyData", newValue: myXrecord);
 
                         // 18. Tell the transaction about the newly created Xrecord using the AddNewlyCreatedDBObject of the Transaction (trans) 
+                        // 如果不将 myXrecord 添加到数据库中，在程序运行的过程中不会报错，但是，在保存文件时，会出现报错：此图形中的一个或多个对象无法保存为指定格式。操作未完成，因此未创建任何文件。
                         trans.AddNewlyCreatedDBObject(myXrecord, true);
                     }
                     // all ok, commit it 
@@ -108,6 +108,49 @@ namespace eZcad.Examples
             }
         }
 
+        /// <summary> 向 Dictionary 中添加 Dictionary </summary>
+        public static void AddDictionayToExtensionDictionary(Entity ent)
+        {
+            Editor ed = Application.DocumentManager.MdiActiveDocument.Editor;
+
+            // now start a transaction 
+            using (Transaction trans = ed.Document.Database.TransactionManager.StartTransaction())
+            {
+                try
+                {
+                    if (ent.ExtensionDictionary.IsNull)
+                    {
+                        ent.UpgradeOpen();
+                        ent.CreateExtensionDictionary();
+                    }
+
+                    // 5. Declare a variable as DBDictionary. Instantiate it by using the GetObject method of the Transaction created above. 
+                    DBDictionary extensionDict =
+                        (DBDictionary)trans.GetObject(ent.ExtensionDictionary, OpenMode.ForRead);
+
+                    // DBDictionary 中插入 DBDictionary
+                    var newDb = new DBDictionary();
+                    extensionDict.SetAt("MyData", newDb);
+                    // 如果在将字典对象添加到其容器字典 extensionDict 之前，就用 AddNewlyCreatedDBObject ，则会出现报错：eNotInDatabase
+                    trans.AddNewlyCreatedDBObject(newDb, true);
+
+                    // DBDictionary 中插入 Xrecord
+                    var rec = new Xrecord() { Data = new ResultBuffer(new TypedValue { }) };
+                    // 在 newDb.SetAt() 之前，如果不将其添加到数据库中，则会直接导致 AutoCAD 崩溃。
+                    newDb.SetAt("SomeKey", rec);
+                    trans.AddNewlyCreatedDBObject(rec, true);
+                    // 如果不将 rec 添加到数据库中，在程序运行的过程中不会报错，但是，在保存文件时，会出现报错：此图形中的一个或多个对象无法保存为指定格式。操作未完成，因此未创建任何文件。
+
+                    // all ok, commit it 
+                    trans.Commit();
+                }
+                catch (Exception ex)
+                {
+                    ed.WriteMessage("a problem occured because " + ex.Message);
+                }
+            }
+        }
+
         /// <summary> 向数据库中添加数据 </summary>
         public static void AddDataToNOD()
         {
@@ -119,7 +162,7 @@ namespace eZcad.Examples
             {
                 // 26. Here we will add our data to the Named Objects Dictionary.(NOD). Declare a variable as a DBDictionary. (name it nod).
                 DBDictionary nod =
-                    (DBDictionary) trans.GetObject(ed.Document.Database.NamedObjectsDictionaryId, OpenMode.ForRead);
+                    (DBDictionary)trans.GetObject(ed.Document.Database.NamedObjectsDictionaryId, OpenMode.ForRead);
 
                 // 27. Check to see if the entry we are going to add to the NOD is  already there. 
                 if (nod.Contains("MyData"))
@@ -134,7 +177,7 @@ namespace eZcad.Examples
                     Xrecord myXrecord = null;
 
                     // 31. USe the Transaction (trans) and use the GetObject method to get the the Xrecord from the NOD.
-                    myXrecord = (Xrecord) trans.GetObject(entryId, OpenMode.ForRead);
+                    myXrecord = (Xrecord)trans.GetObject(entryId, OpenMode.ForRead);
 
                     // 32. Print out the values of the Xrecord to the command line.
                     foreach (TypedValue value in myXrecord.Data)
@@ -153,11 +196,11 @@ namespace eZcad.Examples
                     Xrecord myXrecord = new Xrecord();
 
                     // 36. Create the resbuf list. Declare a ResultBuffer variable. Instantiate it  by creating a New ResultBuffer.
-                    ResultBuffer data = new ResultBuffer(new TypedValue((int) DxfCode.Int16, 1),
-                        new TypedValue((int) DxfCode.Text, "MyCompanyDefaultSettings"),
-                        new TypedValue((int) DxfCode.Real, 51.9),
-                        new TypedValue((int) DxfCode.Real, 100.0),
-                        new TypedValue((int) DxfCode.Real, 320.6));
+                    ResultBuffer data = new ResultBuffer(new TypedValue((int)DxfCode.Int16, 1),
+                        new TypedValue((int)DxfCode.Text, "MyCompanyDefaultSettings"),
+                        new TypedValue((int)DxfCode.Real, 51.9),
+                        new TypedValue((int)DxfCode.Real, 100.0),
+                        new TypedValue((int)DxfCode.Real, 320.6));
 
                     // 37. Add the ResultBuffer to the Xrecord using the Data property of the Xrecord.
                     myXrecord.Data = data;
@@ -166,6 +209,7 @@ namespace eZcad.Examples
                     nod.SetAt(searchKey: "MyData", newValue: myXrecord);
 
                     // 39. Tell the transaction about the newly created Xrecord. 
+                    // 如果不将 myXrecord 添加到数据库中，在程序运行的过程中不会报错，但是，在保存文件时，会出现报错：此图形中的一个或多个对象无法保存为指定格式。操作未完成，因此未创建任何文件。
                     trans.AddNewlyCreatedDBObject(myXrecord, true);
                 }
 
@@ -184,7 +228,7 @@ namespace eZcad.Examples
                 trans.Dispose();
             }
         }
-        
+
         public static void WriteXData(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
             var apptable = docMdf.acDataBase.RegAppTableId.GetObject(OpenMode.ForWrite) as RegAppTable;
@@ -231,7 +275,7 @@ namespace eZcad.Examples
                 var res3 = obj.GetXDataForApplication("app3"); // 返回 null
             }
         }
-        
+
         public static ResultBuffer ClearXData()
         {
             ResultBuffer buff = new ResultBuffer(new TypedValue((int)DxfCode.ExtendedDataRegAppName, "某AppName"));
