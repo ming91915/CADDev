@@ -150,5 +150,166 @@ Windows Registry Editor Version 5.00
             return map.OrderBy(orderSelector).ToList();
         }
         #endregion
+
+        /// <summary> 将表示句柄值的字符转换为句柄 </summary>
+        /// <param name="handle">表示句柄的字符，即16进制的数值，比如“409E”。最小的句柄值为1。</param>
+        public static Handle ConvertToHandle(string handle)
+        {
+            return new Handle(Convert.ToInt64(handle, 16));
+        }
+
+        /// <summary>
+        /// 从数据库中按名称搜索或者创建出<seealso cref="RegAppTableRecord"/>对象
+        /// </summary>
+        /// <returns></returns>
+        public static ObjectId GetOrCreateAppName(Database db, Transaction startedTrans, string appName)
+        {
+            var apptable = db.RegAppTableId.GetObject(OpenMode.ForWrite) as RegAppTable;
+
+            // RegAppTableRecord 的创建
+            if (!apptable.Has(appName))
+            {
+                var app1 = new RegAppTableRecord() { Name = appName, };
+                apptable.Add(app1);
+                startedTrans.AddNewlyCreatedDBObject(app1, true);
+                return app1.ObjectId;
+            }
+            else
+            {
+                return apptable[appName];
+            }
+        }
+
+        #region ---   字典操作
+
+        /// <summary> 提取字典中的键所对应的值 </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="src"></param>
+        /// <param name="Key"></param>
+        /// <returns></returns>
+        public static T GetDictionaryValue<T>(DBDictionary src, string Key) where T : DBObject
+        {
+            if (src.Contains(Key))
+            {
+                var id = src.GetAt(Key);
+                return id.GetObject(OpenMode.ForRead) as T;
+            }
+            return null;
+        }
+        #endregion
+
+        #region ---   多段线变稀
+
+        /// <summary> 将给定的线性多段线的段数变稀 </summary>
+        /// <param name="cs">用来变稀的那条比较密的多段线几何，集合中的曲线必须首尾相连</param>
+        /// <param name="segPoints">每隔多少个点取用一个，比如2表示只取源多段线中的第1、3、5、7 ... 个点</param>
+        /// <param name="includeAllNonlinear"> true 表示保留所有的曲线段，只将直线段的顶点变疏；false 表示不管是曲线段还是直线段，最终都按顶点坐标转换为直线段 </param>
+        /// <returns></returns>
+        public static CompositeCurve3d GetThinedPolyline(Curve3d[] cs, int segPoints, bool includeAllNonlinear)
+        {
+            Point3d startPt = cs[0].StartPoint;
+            Point3d endPt;
+            var curves = new List<Curve3d>();
+            Curve3d c = null;
+            var n = cs.Length;
+            var id = 1;
+            if (includeAllNonlinear)
+            {
+                // 保留所有的曲线段，只将直线段的顶点变疏
+                for (var i = 0; i < n; i++)
+                {
+                    c = cs[i];
+                    if (c is LineSegment3d)
+                    {
+                        if (id % segPoints == 0)
+                        {
+                            // 说明到了关键点
+                            endPt = c.EndPoint;
+                            curves.Add(new LineSegment3d(startPt, endPt));
+                            startPt = endPt;
+                        }
+                        id += 1;
+                    }
+                    else
+                    {
+
+                        if (id > 1)
+                        {
+                            // 说明中间有直线段
+                            endPt = c.StartPoint;
+                            curves.Add(new LineSegment3d(startPt, endPt));
+                        }
+                        else
+                        {
+                            // 说明前一段也是曲线
+                        }
+                        // 强制性添加上这一段曲线
+                        curves.Add(c);
+                        startPt = c.EndPoint;
+                        id = 1;
+                    }
+                }
+            }
+            else
+            {
+                // 不管是曲线段还是直线段，最终都按顶点坐标转换为直线段
+                for (var i = 0; i < n; i++)
+                {
+                    c = cs[i];
+                    if (id % segPoints == 0)
+                    {
+                        // 说明到了关键点
+                        endPt = c.EndPoint;
+                        curves.Add(new LineSegment3d(startPt, endPt));
+                        startPt = endPt;
+                    }
+                    id += 1;
+                }
+            }
+
+            // 强制补上最后一个可能漏掉的直线段
+            if (c != null && startPt != c.EndPoint)
+            {
+                curves.Add(new LineSegment3d(startPt, c.EndPoint));
+            }
+
+            return new CompositeCurve3d(curves.ToArray());
+        }
+
+        /// <summary>
+        /// 通过限定分段长度来对多段线变稀或者变密（保留首尾两个点）
+        /// </summary>
+        /// <param name="cs"></param>
+        /// <param name="segLength">每一分段的长度</param>
+        /// <returns></returns>
+        public static CompositeCurve3d GetThinedPolyline(CompositeCurve3d cs, double segLength)
+        {
+            var startPara = cs.GetParameterOf(cs.StartPoint);
+            var endPara = cs.GetParameterOf(cs.EndPoint);
+            var startPt = cs.StartPoint;
+            var endPt = startPt;
+            var para = startPara;
+            //
+            var segCount = (int)Math.Ceiling((endPara - startPara) / segLength);
+            var lines = new Curve3d[segCount];
+
+            // 最后一段的间距不由 segLength 控制
+            for (int i = 0; i < segCount - 1; i++)
+            {
+                para += segLength;
+                endPt = cs.EvaluatePoint(para);
+                //
+                lines[i] = new LineSegment3d(startPt, endPt);
+                //
+                startPt = endPt;
+            }
+            // 处理最后一段曲线
+            lines[segCount - 1] = new LineSegment3d(startPt, cs.EndPoint);
+            //
+            return new CompositeCurve3d(lines);
+        }
+
+        #endregion
+
     }
 }

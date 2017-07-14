@@ -24,12 +24,24 @@ namespace eZcad.Examples
         public static void GetSelection()
         {
             // 创建一个 TypedValue 数组，用于定义过滤条件
-            TypedValue[] acTypValAr = new TypedValue[]
+            var acTypValAr = new TypedValue[]
             {
                 new TypedValue((int) DxfCode.Color, 5),
                 new TypedValue((int) DxfCode.Start, "CIRCLE"),
                 new TypedValue((int) DxfCode.LayerName, "0")
             };
+
+            /*
+            var filterType = new[]
+            {
+                new TypedValue((int) DxfCode.Start, "DIMENSION"),
+                // 将标注类型限制为转角标注与对齐标注
+                new TypedValue((int) DxfCode.Operator, "<OR"),
+                new TypedValue(100, "AcDbAlignedDimension)"),
+                new TypedValue(100, "AcDbRotatedDimension))"),
+                new TypedValue((int) DxfCode.Operator, "OR>")
+            };
+            */
 
             // 将过滤条件赋值给SelectionFilter对象
             var acSelFtr = new SelectionFilter(acTypValAr);
@@ -175,7 +187,7 @@ namespace eZcad.Examples
             continueSelect = false;
             return null;
         }
-        
+
         #endregion
 
         public static void GetAngleWithKeywords()
@@ -216,9 +228,9 @@ namespace eZcad.Examples
                 MessageBox.Show(pdr.Value.ToString()); // 用户在界面中选择的角度值
             }
         }
-        
+
         /// <summary> 通过点选的方式选择一条曲线 </summary>
-        public static Curve PickOneCurve(DocumentModifier docMdf)
+        public static Curve GetEntity(DocumentModifier docMdf)
         {
             // 点选
             var peO = new PromptEntityOptions("\n 选择一条曲线 ");
@@ -237,5 +249,68 @@ namespace eZcad.Examples
         }
 
 
+        /// <summary> 从两个选项中选择一个 </summary>
+        /// <param name="docMdf"></param>
+        /// <returns>true 表示按顶点缩放（默认值），false 表示按长度缩放</returns>
+        private static bool GetKeywordsFromTwoOptions(DocumentModifier docMdf)
+        {
+            var op = new PromptKeywordOptions(
+                messageAndKeywords: "\n[按顶点缩放(V) / 按长度缩放(L)]:",
+                globalKeywords: "顶点 长度"); // 默认值写在前面
+            op.AllowArbitraryInput = false;
+            op.AllowNone = true;
+            var res = docMdf.acEditor.GetKeywords(op);
+            if (res.Status == PromptStatus.OK)
+            {
+                // 非默认值
+                if (res.StringResult == "长度")
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+        
+        /// <summary> 分段的长度 </summary>
+        private static double GetDistance(DocumentModifier docMdf)
+        {
+            var op = new PromptDistanceOptions(message: "\n每个分段的长度")
+            {
+                AllowNegative = false,
+                AllowNone = false,
+                AllowZero = false,
+                AllowArbitraryInput = false
+            };
+            //
+            var res = docMdf.acEditor.GetDistance(op);
+            if (res.Status == PromptStatus.OK)
+            {
+                return res.Value;
+            }
+            return 0;
+        }
+
+        /// <summary> 在命令行中获取一个整数值 </summary>
+        private static int GetInterger(DocumentModifier docMdf)
+        {
+            var op = new PromptIntegerOptions(message: "\n每隔多少个顶点进行分段")
+            {
+                LowerLimit = 1,
+                UpperLimit = (int)1e6,
+                //
+                AllowNegative = false,
+                AllowNone = false,
+                AllowZero = false,
+                AllowArbitraryInput = false
+            };
+
+            //
+            var res = docMdf.acEditor.GetInteger(op);
+            if (res.Status == PromptStatus.OK)
+            {
+                return res.Value;
+            }
+            return 0;
+        }
     }
 }

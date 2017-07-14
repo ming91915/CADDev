@@ -123,56 +123,81 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Addins\DbTextsFormator.cs" />
+    <Compile Include="Addins\PolylineRemesh.cs" />
     <Compile Include="Addins\ReverseCurve.cs" />
     <Compile Include="Addins\PolyfaceToSubdmesh.cs" />
     <Compile Include="Addins\EcLoadTemplate1.cs" />
     <Compile Include="Addins\DimAlignment.cs" />
     <Compile Include="Addins\DBTextsToMText.cs" />
     <Compile Include="Addins\DimTextScalor.cs" />
-    <Compile Include="Addins\SlopeProtection\Cmds\Ec_SlopeProtection.cs" />
-    <Compile Include="Addins\SlopeProtection\Cmds\OptionsSetter.cs" />
-    <Compile Include="Addins\SlopeProtection\Cmds\SlopeWalker.cs" />
-    <Compile Include="Addins\SlopeProtection\Cmds\SectionsFinder.cs" />
-    <Compile Include="Addins\SlopeProtection\Cmds\SpInfosGetter.cs" />
-    <Compile Include="Addins\SlopeProtection\Cmds\SpInfosSetter.cs" />
-    <Compile Include="Addins\SlopeProtection\Entities\SlopeSegment.cs" />
-    <Compile Include="Addins\SlopeProtection\SlopeDataEditor.cs">
+    <Compile Include="Debug\Ec_GetThinedPolyline.cs" />
+    <Compile Include="Examples\SplineHandler.cs" />
+    <Compile Include="SubgradeQuantity\Cmds\Ec_SubgradeQuantity.cs" />
+    <Compile Include="SubgradeQuantity\Cmds\InfosGetter_ThinFill.cs" />
+    <Compile Include="SubgradeQuantity\Cmds\OptionsSetter.cs" />
+    <Compile Include="SubgradeQuantity\Cmds\SectionsConstructor.cs" />
+    <Compile Include="SubgradeQuantity\Cmds\SlopeWalker.cs" />
+    <Compile Include="SubgradeQuantity\Cmds\MileagesFinder.cs" />
+    <Compile Include="SubgradeQuantity\Cmds\SlpInfosGetterBackup.cs" />
+    <Compile Include="SubgradeQuantity\Cmds\InfosGetter_Slope.cs" />
+    <Compile Include="SubgradeQuantity\Cmds\SlopeConstructor.cs" />
+    <Compile Include="SubgradeQuantity\Cmds\SlpInfosSetter.cs" />
+    <Compile Include="SubgradeQuantity\DataExport\Exporter_ThinFillShallowCut.cs" />
+    <Compile Include="SubgradeQuantity\DataExport\Exporter_SlopeProtection.cs" />
+    <Compile Include="SubgradeQuantity\DataExport\DataExporter.cs" />
+    <Compile Include="SubgradeQuantity\Utility\ProtectionConstants.cs" />
+    <Compile Include="SubgradeQuantity\Entities\SectionInfo.cs" />
+    <Compile Include="SubgradeQuantity\Entities\ISlopeSeg.cs" />
+    <Compile Include="SubgradeQuantity\Entities\SlopeData.cs" />
+    <Compile Include="SubgradeQuantity\Entities\SlopeLineBackup.cs" />
+    <Compile Include="SubgradeQuantity\Entities\SlopeSegment.cs" />
+    <Compile Include="SubgradeQuantity\SlopeSegsController.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="SubgradeQuantity\SlopesegLister.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Addins\SlopeProtection\SlopeDataEditor.designer.cs">
+    <Compile Include="SubgradeQuantity\SlopesegLister.Designer.cs">
+      <DependentUpon>SlopesegLister.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SubgradeQuantity\SlopeDataEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SubgradeQuantity\SlopeDataEditor.designer.cs">
       <DependentUpon>SlopeDataEditor.cs</DependentUpon>
     </Compile>
-    <Compile Include="Addins\SlopeProtection\Entities\CenterAxis.cs" />
-    <Compile Include="Addins\SlopeProtection\Entities\ProtectionOptions.cs" />
-    <Compile Include="Addins\SlopeProtection\Entities\ProtectionStyle.cs" />
-    <Compile Include="Addins\SlopeProtection\Entities\ProtectionUtils.cs" />
-    <Compile Include="Addins\SlopeProtection\Entities\SlopeLine.cs" />
-    <Compile Include="Addins\SlopeProtection\MatchOptionsForm.cs">
+    <Compile Include="SubgradeQuantity\Entities\SubgradeSection.cs" />
+    <Compile Include="SubgradeQuantity\Utility\ProtectionOptions.cs" />
+    <Compile Include="SubgradeQuantity\Entities\ProtectionStyle.cs" />
+    <Compile Include="SubgradeQuantity\Utility\ProtectionUtils.cs" />
+    <Compile Include="SubgradeQuantity\Entities\SlopeLine.cs" />
+    <Compile Include="SubgradeQuantity\MatchOptionsForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Addins\SlopeProtection\MatchOptionsForm.Designer.cs">
+    <Compile Include="SubgradeQuantity\MatchOptionsForm.Designer.cs">
       <DependentUpon>MatchOptionsForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Addins\SlopeProtection\Options.cs">
+    <Compile Include="SubgradeQuantity\Options.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Addins\SlopeProtection\Options.Designer.cs">
+    <Compile Include="SubgradeQuantity\Options.Designer.cs">
       <DependentUpon>Options.cs</DependentUpon>
     </Compile>
-    <Compile Include="Addins\SlopeProtection\ProtectionStyleLister.cs">
+    <Compile Include="SubgradeQuantity\ProtectionStyleLister.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Addins\SlopeProtection\ProtectionStyleLister.Designer.cs">
+    <Compile Include="SubgradeQuantity\ProtectionStyleLister.Designer.cs">
       <DependentUpon>ProtectionStyleLister.cs</DependentUpon>
     </Compile>
-    <Compile Include="Addins\SlopeProtection\SlopeProtectionInfos\MileageInfo.cs" />
-    <Compile Include="Addins\SlopeProtection\Entities\SlopeData.cs" />
-    <Compile Include="Addins\SlopeProtection\SlopeProtectionInfos\WorkSheetData.cs" />
+    <Compile Include="SubgradeQuantity\DataExport\MileageInfo.cs" />
+    <Compile Include="SubgradeQuantity\Entities\SlopeDataBackup.cs" />
+    <Compile Include="SubgradeQuantity\DataExport\WorkSheetData.cs" />
     <Compile Include="Addins\TextScaler.cs" />
     <Compile Include="Addins\IntersectSelSet.cs" />
     <Compile Include="Debug\AddinManagerDebuger.cs" />
     <Compile Include="Debug\Ec_Addins.cs" />
     <Compile Include="Debug\Ec_Boundary.cs" />
+    <Compile Include="Debug\Ec_SlopeStandards.cs" />
     <Compile Include="Debug\Ec_FormatDbTexts.cs" />
     <Compile Include="Debug\Ec_ProxyEntity.cs" />
     <Compile Include="Debug\Ec_GeoMesh.cs" />
@@ -232,16 +257,19 @@
     <Compile Include="Utility\Utils.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Addins\SlopeProtection\SlopeDataEditor.resx">
+    <EmbeddedResource Include="SubgradeQuantity\SlopesegLister.resx">
+      <DependentUpon>SlopesegLister.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SubgradeQuantity\SlopeDataEditor.resx">
       <DependentUpon>SlopeDataEditor.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Addins\SlopeProtection\MatchOptionsForm.resx">
+    <EmbeddedResource Include="SubgradeQuantity\MatchOptionsForm.resx">
       <DependentUpon>MatchOptionsForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Addins\SlopeProtection\Options.resx">
+    <EmbeddedResource Include="SubgradeQuantity\Options.resx">
       <DependentUpon>Options.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Addins\SlopeProtection\ProtectionStyleLister.resx">
+    <EmbeddedResource Include="SubgradeQuantity\ProtectionStyleLister.resx">
       <DependentUpon>ProtectionStyleLister.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="myCommands.resx">
@@ -311,9 +339,9 @@
     <ProjectReference Include="..\eZcad_AddinManager\eZcad_AddinManager.csproj">
       <Project>{835fa817-ebe4-4c2b-91d4-a6b945878105}</Project>
       <Name>eZcad_AddinManager</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
