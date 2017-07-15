@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using AutoCAD;
 using Autodesk.AutoCAD.ApplicationServices;
@@ -20,7 +21,8 @@ namespace eZcad.Addins
     public class PolylineRemesh
     {
         /// <summary> 对多段线的疏密进行重新设置 </summary>
-        [CommandMethod(eZConstants.eZGroupCommnad, "RemeshPolyline", CommandFlags.Modal | CommandFlags.UsePickSet)]
+        [CommandMethod(eZConstants.eZGroupCommnad, "RemeshPolyline", CommandFlags.Modal | CommandFlags.UsePickSet)
+        , DisplayName(@"多段线疏密"), Description("对多段线的疏密进行重新设置")]
         public void EcRemeshPolyline()
         {
             DocumentModifier.ExecuteCommand(RemeshPolyline);
