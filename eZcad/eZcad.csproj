@@ -254,6 +254,7 @@
     </Compile>
     <Compile Include="Utility\SolidUtils.cs" />
     <Compile Include="Utility\TextUtils.cs" />
+    <Compile Include="Utility\CurrentEditState.cs" />
     <Compile Include="Utility\Utils.cs" />
   </ItemGroup>
   <ItemGroup>
