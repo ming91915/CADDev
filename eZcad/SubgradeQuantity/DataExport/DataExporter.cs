@@ -33,6 +33,7 @@ namespace eZcad.SubgradeQuantity.DataExport
             /// <summary> 在两个断面之间进行插值，以生成一个新的用来计算的断面 </summary>
             IInterpolatableSection InterpolateWith(IInterpolatableSection section2);
         }
+
         #endregion
 
         #region ---   Fields

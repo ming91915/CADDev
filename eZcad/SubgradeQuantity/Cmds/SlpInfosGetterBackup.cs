@@ -36,7 +36,7 @@ namespace eZcad.SubgradeQuantity.Cmds
 
         /// <summary> 将所有的边坡信息提取出来并制成相应表格 </summary>
         [CommandMethod(eZConstants.eZGroupCommnad, "ExportSlopeInfos", CommandFlags.Modal | CommandFlags.UsePickSet)
-        , DisplayName(@"边坡表格"), Description("将所有的边坡信息提取出来并制成相应表格")]
+        , DisplayName(@"边坡表格备份"), Description("将所有的边坡信息提取出来并制成相应表格")]
         public void EcExportSlopeInfos()
         {
             DocumentModifier.ExecuteCommand(ExportSlopeInfos);

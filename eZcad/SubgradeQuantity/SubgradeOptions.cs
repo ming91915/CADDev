@@ -1,17 +1,18 @@
 ﻿using System;
+using eZcad.SubgradeQuantity.DataExport;
 using eZcad.SubgradeQuantity.Utility;
 using eZcad.Utility;
 
 namespace eZcad.SubgradeQuantity
 {
     /// <summary> 路基工程量计算的总选项设置 </summary>
-    public partial class Options : FormOk
+    public partial class SubgradeOptions : FormOk
     {
         private readonly DocumentModifier _docMdf;
 
         #region --- 构造函数
 
-        public Options(DocumentModifier docMdf)
+        public SubgradeOptions(DocumentModifier docMdf)
         {
             _docMdf = docMdf;
             InitializeComponent();
@@ -20,7 +21,7 @@ namespace eZcad.SubgradeQuantity
             textBox_Waterlevel.Text = ProtectionOptions.WaterLevel.ToString();
             checkBox_FillAboveWater.Checked = ProtectionOptions.ConsiderWaterLevel;
             textBox_FillAboveWater.Text =
-                (ProtectionOptions.FillUpperEdge - ProtectionOptions.WaterLevel).ToString();
+                (ProtectionOptions.FillUpperEdge - ProtectionOptions.WaterLevel).ToString("0.###");
         }
 
         #endregion
@@ -47,5 +48,17 @@ namespace eZcad.SubgradeQuantity
         {
             panel_FillWater.Enabled = checkBox_FillAboveWater.Checked;
         }
+
+        #region ---   各类工程量的判断与计量标准
+
+        private void btn_criterion_ThinFillShallowCut_Click(object sender, EventArgs e)
+        {
+            var u = Criterion_ThinFillShallowCut.UniqueInstance;
+            var fsc = new CriterionEditor(u);
+            fsc.ShowDialog();
+        }
+
+        #endregion
+
     }
 }

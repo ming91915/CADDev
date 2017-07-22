@@ -5,19 +5,30 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.Geometry;
 using eZcad.SubgradeQuantity.Cmds;
 using eZcad.SubgradeQuantity.Entities;
 using eZcad.Utility;
 using Microsoft.Office.Interop.Excel;
 using Application = Microsoft.Office.Interop.Excel.Application;
 using Line = Autodesk.AutoCAD.DatabaseServices.Line;
+using Windows = eZstd.API.Windows;
 
 namespace eZcad.SubgradeQuantity.Utility
 {
     /// <summary> 与边坡防护相关的一些通用性的操作 </summary>
-    public static partial class ProtectionUtils
+    public static class ProtectionUtils
     {
+        /// <summary> 可用的防护形式 </summary>
+        public static readonly Dictionary<ProtectionStyle, string> AvailableProtections = new Dictionary
+            <ProtectionStyle, string>
+        {
+            {ProtectionStyle.挂网喷锚6, "挂网喷锚（6m锚杆）"},
+            {ProtectionStyle.锚杆网格梁, "锚杆网格梁"},
+            {ProtectionStyle.浆砌片石, "浆砌片石"},
+            {ProtectionStyle.边坡防护1, "边坡防护1"},
+            {ProtectionStyle.边坡防护2, "边坡防护2"},
+            {ProtectionStyle.边坡防护3, "边坡防护3"}
+        };
 
 
         /// <summary> 路基工程量计算系统 环境配置 </summary>
@@ -28,6 +39,45 @@ namespace eZcad.SubgradeQuantity.Utility
             Utils.GetOrCreateAppName(docMdf.acDataBase, docMdf.acTransaction, SectionInfo.AppNameLeft);
             Utils.GetOrCreateAppName(docMdf.acDataBase, docMdf.acTransaction, SectionInfo.AppNameRight);
             // var app = Utils.GetOrCreateAppName(docMdf.acDataBase, docMdf.acTransaction, SlopeDataBackup.AppName);
+        }
+
+        /// <summary> 从整个项目中获取全部的横断面所对应的桩号（不要求界面全部显示） </summary>
+        public static SubgradeSection[] GetAllSections(DocumentModifier docMdf)
+        {
+            var mileages = new List<SubgradeSection>();
+
+            var filterCenterAxis = new[]
+            {
+                new TypedValue((int) DxfCode.Start, "LINE"),
+                new TypedValue((int) DxfCode.LayerName, ProtectionOptions.LayerName_CenterAxis)
+            };
+            var res = docMdf.acEditor.SelectAll(new SelectionFilter(filterCenterAxis));
+            if (res.Status == PromptStatus.OK)
+            {
+                var ids = res.Value.GetObjectIds();
+                foreach (var id in ids)
+                {
+                    SubgradeSection centerLine = null;
+                    var l = id.GetObject(OpenMode.ForRead) as Line;
+                    if (l != null)
+                    {
+                        var si = SectionInfo.FromCenterLine(l);
+                        if (si != null && si.FullyCalculated)
+                        {
+                            centerLine = new SubgradeSection(docMdf, l, si);
+                            mileages.Add(centerLine);
+                        }
+                    }
+                    if (centerLine == null)
+                    {
+                        MessageBox.Show($"某些道路中心线对象所对应的横断面未进行构造，" +
+                                        $"\r\n请先调用“{SectionsConstructor.CommandName}”命令，以构造整个项目的横断面系统。",
+                            "提示", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return null;
+                    }
+                }
+            }
+            return mileages.ToArray();
         }
 
         #region --- Excel 程序
@@ -41,8 +91,8 @@ namespace eZcad.SubgradeQuantity.Utility
         {
             if (_workingApp != null)
             {
-                int processId = 0;
-                var threadId = eZstd.API.Windows.GetWindowThreadProcessId(_workingApp.Hwnd, ref processId);
+                var processId = 0;
+                var threadId = Windows.GetWindowThreadProcessId(_workingApp.Hwnd, ref processId);
                 var pr = Process.GetProcessById(processId);
                 if (pr == null || pr.HasExited)
                 {
@@ -56,7 +106,7 @@ namespace eZcad.SubgradeQuantity.Utility
             }
             if (_workingApp == null)
             {
-                _workingApp = new Application() { Visible = visible };
+                _workingApp = new Application {Visible = visible};
             }
             if (_workingApp == null)
             {
@@ -73,8 +123,8 @@ namespace eZcad.SubgradeQuantity.Utility
                 try
                 {
                     // excelApp.Quit();
-                    int processId = 0;
-                    var threadId = eZstd.API.Windows.GetWindowThreadProcessId(appToKill.Hwnd, ref processId);
+                    var processId = 0;
+                    var threadId = Windows.GetWindowThreadProcessId(appToKill.Hwnd, ref processId);
                     var pr = Process.GetProcessById(processId);
                     pr.Kill();
                     //
@@ -87,7 +137,6 @@ namespace eZcad.SubgradeQuantity.Utility
                 {
                     return false;
                 }
-
             }
             return true;
         }
@@ -117,7 +166,6 @@ namespace eZcad.SubgradeQuantity.Utility
             return matchedSheet;
         }
 
-
         #endregion
 
         #region --- 桩号处理
@@ -136,65 +184,12 @@ namespace eZcad.SubgradeQuantity.Utility
                 double m;
                 if (int.TryParse(mt.Groups[1].Value, out k) && double.TryParse(mt.Groups[2].Value, out m))
                 {
-                    return k * 1000 + m;
+                    return k*1000 + m;
                 }
             }
             return null;
         }
 
         #endregion
-
-        /// <summary> 可用的防护形式 </summary>
-        public static readonly Dictionary<ProtectionStyle, string> AvailableProtections = new Dictionary
-            <ProtectionStyle, string>
-        {
-            {ProtectionStyle.挂网喷锚6, "挂网喷锚（6m锚杆）"},
-            {ProtectionStyle.锚杆网格梁, "锚杆网格梁"},
-            {ProtectionStyle.浆砌片石, "浆砌片石"},
-            {ProtectionStyle.边坡防护1, "边坡防护1"},
-            {ProtectionStyle.边坡防护2, "边坡防护2"},
-            {ProtectionStyle.边坡防护3, "边坡防护3"},
-        };
-
-        /// <summary> 从整个项目中获取全部的横断面所对应的桩号（不要求界面全部显示） </summary>
-        public static SubgradeSection[] GetAllSections(DocumentModifier docMdf)
-        {
-            var mileages = new List<SubgradeSection>();
-
-            var filterCenterAxis = new[]
-                   {
-                new TypedValue((int) DxfCode.Start, "LINE"),
-                new TypedValue((int) DxfCode.LayerName, ProtectionOptions.LayerName_CenterAxis),
-            };
-            var res = docMdf.acEditor.SelectAll(filter: new SelectionFilter(filterCenterAxis));
-            if (res.Status == PromptStatus.OK)
-            {
-                var ids = res.Value.GetObjectIds();
-                foreach (var id in ids)
-                {
-                    SubgradeSection centerLine = null;
-                    var l = id.GetObject(OpenMode.ForRead) as Line;
-                    if (l != null)
-                    {
-                        var si = SectionInfo.FromCenterLine(l);
-                        if (si != null && si.FullyCalculated)
-                        {
-                            centerLine = new SubgradeSection(docMdf, l, si);
-                            mileages.Add(centerLine);
-                        }
-                    }
-                    if (centerLine == null)
-                    {
-                        MessageBox.Show($"某些道路中心线对象所对应的横断面未进行构造，" +
-                                        $"\r\n请先调用“{SectionsConstructor.CommandName}”命令，以构造整个项目的横断面系统。",
-                                        "提示", MessageBoxButton.OK, MessageBoxImage.Error);
-                        return null;
-
-                    }
-                }
-            }
-            return mileages.ToArray();
-        }
-
     }
 }

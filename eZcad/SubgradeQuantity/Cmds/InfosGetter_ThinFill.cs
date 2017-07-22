@@ -68,7 +68,7 @@ namespace eZcad.SubgradeQuantity.Cmds
 
             // 将边坡防护数据导出
             var exporter = new Exporter_ThinFillShallowCut(docMdf, handledSections, allSections);
-            exporter.ExportThinFill();
+            exporter.ExportThinFillShallowCut();
         }
 
 

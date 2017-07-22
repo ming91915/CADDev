@@ -170,7 +170,7 @@ namespace eZcad.SubgradeQuantity
             var cs = listBox_slopes.SelectedItem as SlopeLine;
             var sd = cs.XData;
 
-            var formAddDefinition = new SlopeDataEditor(sd);
+            var formAddDefinition = new PropertyEditor("边坡参数", sd);
             //
             var res = formAddDefinition.ShowDialog();
             var newSlpDa = formAddDefinition.Instance;
