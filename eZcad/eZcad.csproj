@@ -142,6 +142,12 @@
     <Compile Include="SubgradeQuantity\Cmds\InfosGetter_Slope.cs" />
     <Compile Include="SubgradeQuantity\Cmds\SlopeConstructor.cs" />
     <Compile Include="SubgradeQuantity\Cmds\SlpInfosSetter.cs" />
+    <Compile Include="SubgradeQuantity\DataExport\CriterionEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SubgradeQuantity\DataExport\CriterionEditor.Designer.cs">
+      <DependentUpon>CriterionEditor.cs</DependentUpon>
+    </Compile>
     <Compile Include="SubgradeQuantity\DataExport\Exporter_ThinFillShallowCut.cs" />
     <Compile Include="SubgradeQuantity\DataExport\Exporter_SlopeProtection.cs" />
     <Compile Include="SubgradeQuantity\DataExport\DataExporter.cs" />
@@ -160,11 +166,11 @@
     <Compile Include="SubgradeQuantity\SlopesegLister.Designer.cs">
       <DependentUpon>SlopesegLister.cs</DependentUpon>
     </Compile>
-    <Compile Include="SubgradeQuantity\SlopeDataEditor.cs">
+    <Compile Include="SubgradeQuantity\PropertyEditor.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SubgradeQuantity\SlopeDataEditor.designer.cs">
-      <DependentUpon>SlopeDataEditor.cs</DependentUpon>
+    <Compile Include="SubgradeQuantity\PropertyEditor.designer.cs">
+      <DependentUpon>PropertyEditor.cs</DependentUpon>
     </Compile>
     <Compile Include="SubgradeQuantity\Entities\SubgradeSection.cs" />
     <Compile Include="SubgradeQuantity\Utility\ProtectionOptions.cs" />
@@ -177,11 +183,11 @@
     <Compile Include="SubgradeQuantity\MatchOptionsForm.Designer.cs">
       <DependentUpon>MatchOptionsForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="SubgradeQuantity\Options.cs">
+    <Compile Include="SubgradeQuantity\SubgradeOptions.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SubgradeQuantity\Options.Designer.cs">
-      <DependentUpon>Options.cs</DependentUpon>
+    <Compile Include="SubgradeQuantity\SubgradeOptions.Designer.cs">
+      <DependentUpon>SubgradeOptions.cs</DependentUpon>
     </Compile>
     <Compile Include="SubgradeQuantity\ProtectionStyleLister.cs">
       <SubType>Form</SubType>
@@ -246,6 +252,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="SubgradeQuantity\Utility\StaticCriterion.cs" />
     <Compile Include="Utility\EntityArray2D.cs" />
     <Compile Include="Utility\ExtensionMethods.cs" />
     <Compile Include="Utility\eZConstants.cs" />
@@ -258,17 +265,20 @@
     <Compile Include="Utility\Utils.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="SubgradeQuantity\DataExport\CriterionEditor.resx">
+      <DependentUpon>CriterionEditor.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="SubgradeQuantity\SlopesegLister.resx">
       <DependentUpon>SlopesegLister.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="SubgradeQuantity\SlopeDataEditor.resx">
-      <DependentUpon>SlopeDataEditor.cs</DependentUpon>
+    <EmbeddedResource Include="SubgradeQuantity\PropertyEditor.resx">
+      <DependentUpon>PropertyEditor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SubgradeQuantity\MatchOptionsForm.resx">
       <DependentUpon>MatchOptionsForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="SubgradeQuantity\Options.resx">
-      <DependentUpon>Options.cs</DependentUpon>
+    <EmbeddedResource Include="SubgradeQuantity\SubgradeOptions.resx">
+      <DependentUpon>SubgradeOptions.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SubgradeQuantity\ProtectionStyleLister.resx">
       <DependentUpon>ProtectionStyleLister.cs</DependentUpon>

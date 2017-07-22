@@ -7,22 +7,31 @@ namespace eZcad.SubgradeQuantity
 {
     /// <summary> 参数信息的添加或者对已有参数文件的编辑 </summary>
     /// <typeparam name="T"></typeparam>
-    public partial class SlopeDataEditor : FormOk
+    public partial class PropertyEditor : FormOk
     {
         #region ---   Property
 
-        public SlopeDataBackup Instance
+        public object Instance
         {
-            get { return propertyGrid1.SelectedObject as SlopeDataBackup; }
+            get { return propertyGrid1.SelectedObject; }
         }
 
         #endregion
 
-        /// <summary> 编辑定义 </summary>
-        /// <param name="instance">要进行绑定和参数设置的那个对象的实例</param>
-        public SlopeDataEditor(SlopeData instance)
+        #region ---   构造函数
+
+
+        public PropertyEditor()
         {
             InitializeComponent();
+        }
+
+        /// <summary> 构造函数 </summary>
+        /// <param name="instance">要进行绑定和参数设置的那个对象的实例</param>
+        public PropertyEditor(string formTitle, object instance) : this()
+        {
+            //
+            Text = formTitle;
             //
             if (instance == null)
             {
@@ -31,19 +40,18 @@ namespace eZcad.SubgradeQuantity
             //
             propertyGrid1.SelectedObject = instance;
         }
-        
+        #endregion
+
         #region ---   属性值发生变化
 
-        /// <summary>
-        /// 当绑定的对象的属性值发生变化时
-        /// </summary>
+        /// <summary> 当绑定的对象的属性值发生变化时 </summary>
         /// <param name="s"></param>
         /// <param name="e"></param>
         private void propertyGrid1_PropertyValueChanged(object s, PropertyValueChangedEventArgs e)
         {
-            if (e.ChangedItem.Label == "Type")
-            {
-            }
+            //if (e.ChangedItem.Label == "Type")
+            //{
+            //}
         }
 
         #endregion

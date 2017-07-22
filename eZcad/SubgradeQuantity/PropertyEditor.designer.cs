@@ -1,6 +1,6 @@
 ﻿namespace eZcad.SubgradeQuantity
 {
-    partial class SlopeDataEditor
+    partial class PropertyEditor
     {
         /// <summary>
         /// Required designer variable.
@@ -33,15 +33,11 @@
             // 
             // btnCancel
             // 
-            this.btnCancel.Location = new System.Drawing.Point(269, 472);
-            this.btnCancel.Margin = new System.Windows.Forms.Padding(4);
-            this.btnCancel.Size = new System.Drawing.Size(100, 29);
+            this.btnCancel.Location = new System.Drawing.Point(202, 378);
             // 
             // btnOk
             // 
-            this.btnOk.Location = new System.Drawing.Point(377, 472);
-            this.btnOk.Margin = new System.Windows.Forms.Padding(4);
-            this.btnOk.Size = new System.Drawing.Size(100, 29);
+            this.btnOk.Location = new System.Drawing.Point(283, 378);
             this.btnOk.Click += new System.EventHandler(this.btnOk_Click);
             // 
             // propertyGrid1
@@ -50,22 +46,20 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.propertyGrid1.CategoryForeColor = System.Drawing.SystemColors.InactiveCaptionText;
-            this.propertyGrid1.Location = new System.Drawing.Point(13, 15);
-            this.propertyGrid1.Margin = new System.Windows.Forms.Padding(4);
+            this.propertyGrid1.Location = new System.Drawing.Point(10, 12);
             this.propertyGrid1.Name = "propertyGrid1";
-            this.propertyGrid1.Size = new System.Drawing.Size(464, 448);
+            this.propertyGrid1.Size = new System.Drawing.Size(348, 358);
             this.propertyGrid1.TabIndex = 0;
             this.propertyGrid1.PropertyValueChanged += new System.Windows.Forms.PropertyValueChangedEventHandler(this.propertyGrid1_PropertyValueChanged);
             // 
-            // SlopeDataEditor
+            // PropertyEditor
             // 
             this.AcceptButton = null;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(493, 514);
+            this.ClientSize = new System.Drawing.Size(370, 411);
             this.Controls.Add(this.propertyGrid1);
-            this.Margin = new System.Windows.Forms.Padding(4);
-            this.Name = "SlopeDataEditor";
+            this.Name = "PropertyEditor";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "边坡参数";
             this.Controls.SetChildIndex(this.propertyGrid1, 0);
@@ -77,6 +71,6 @@
 
         #endregion
 
-        private System.Windows.Forms.PropertyGrid propertyGrid1;
+        protected System.Windows.Forms.PropertyGrid propertyGrid1;
     }
 }

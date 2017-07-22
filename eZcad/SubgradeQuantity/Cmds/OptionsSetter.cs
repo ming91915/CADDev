@@ -1,11 +1,12 @@
 ﻿using System.ComponentModel;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
-using eZcad.SubgradeQuantity;
 using eZcad.SubgradeQuantity.Cmds;
+using eZcad.SubgradeQuantity.DataExport;
+using eZcad.SubgradeQuantity.Utility;
 using eZcad.Utility;
 
-[assembly: CommandClass(typeof (OptionsSetter))]
+[assembly: CommandClass(typeof(OptionsSetter))]
 
 namespace eZcad.SubgradeQuantity.Cmds
 {
@@ -25,7 +26,7 @@ namespace eZcad.SubgradeQuantity.Cmds
         /// <summary> 边坡防护的选项设置 </summary>
         public static void SetSlopeOptions(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
-            var f = new Options(docMdf);
+            var f = new SubgradeOptions(docMdf);
             f.ShowDialog(null);
         }
 

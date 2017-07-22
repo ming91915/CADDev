@@ -42,7 +42,7 @@ namespace eZcad.SubgradeQuantity.Cmds
 
                     var slpData = SlopeData.FromEntity(pl);
 
-                    var formAddDefinition = new SlopeDataEditor(slpData);
+                    var formAddDefinition = new PropertyEditor("边坡参数", slpData);
                     //
                     var res = formAddDefinition.ShowDialog();
                     if (res == DialogResult.OK)
