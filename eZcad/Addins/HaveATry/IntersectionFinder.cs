@@ -31,8 +31,8 @@ namespace eZcad.Addins.HaveATry
             {
                 var categories = items.Select(r => r.Category).Distinct().ToArray();
                 var paperIdss = items.Select(r => r.PaperId).Distinct().ToArray();
-                var minMileage = items.Select(r => r.Start).Min();
-                var maxMileage = items.Select(r => r.End).Max();
+                var minStation = items.Select(r => r.Start).Min();
+                var maxStation = items.Select(r => r.End).Max();
 
                 var paperIds = new Dictionary<string, ObjectIdCollection>();
                 foreach (var paperId in paperIdss)
@@ -49,7 +49,7 @@ namespace eZcad.Addins.HaveATry
                         BlockTableRecord;
 
                 // 绘制基本坐标系与分界线等
-                ConstructWorld(docMdf, acBlkTblRec, categories, minMileage, maxMileage);
+                ConstructWorld(docMdf, acBlkTblRec, categories, minStation, maxStation);
 
                 //
                 FindIntersections(docMdf, acBlkTblRec, items, categories, paperIds);

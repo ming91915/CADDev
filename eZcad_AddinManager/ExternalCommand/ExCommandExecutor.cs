@@ -31,8 +31,12 @@ namespace eZcad.AddinManager
         /// <remarks>出于调试的即时更新的考虑，这里在每一次调试外部命令时，都对最新的dll进行重新加载。</remarks>
         public static void InvokeExternalCommand(string assemblyPath, ICADExCommand externalCommand)
         {
-
-            ExCommandExecutor.RunActiveCommand(externalCommand, assemblyPath);
+            string errMsg;
+            var res = ExCommandExecutor.RunActiveCommand(externalCommand, assemblyPath, out errMsg);
+            if (res == ExternalCommandResult.Failed)
+            {
+                MessageBox.Show($"外部命令加载或运行时出错！\r\n{errMsg}", @"出错", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
             //
             _currentExternalCommandAssemblyPath = assemblyPath;
             _currentExternalCommand = externalCommand;
@@ -45,11 +49,11 @@ namespace eZcad.AddinManager
         /// <param name="addinItem">注意这里的 addinItem 实例是刷新前的程序集中对应的类，
         /// 这里只能用来提取其 FullName 字符串，而不能直接用来执行， 因为虽然它确实可以执行，但是执行的是重新编译前的那个方法。</param>
         /// <param name="assemblyPath"></param>
-        private static ExternalCommandResult RunActiveCommand(ICADExCommand addinItem, string assemblyPath)
+        /// <param name="errorMsg"></param>
+        private static ExternalCommandResult RunActiveCommand(ICADExCommand addinItem, string assemblyPath, out string errorMsg)
         {
-            string errorMessage = "";
             IList<ObjectId> errorSet = new List<ObjectId>();
-
+            errorMsg = "";
             AssemLoader assemLoader = new AssemLoader();
             ExternalCommandResult result;
             try
@@ -63,7 +67,8 @@ namespace eZcad.AddinManager
                 Assembly assembly = assemLoader.LoadAddinsToTempFolder(assemblyPath, false);
                 if (null == assembly)
                 {
-                    MessageBox.Show(@"未能加载程序集", @"出错", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    //MessageBox.Show(@"未能加载程序集", @"出错", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    errorMsg = $"未能加载程序集：{assemblyPath}\r\n";
                     result = ExternalCommandResult.Failed;
                 }
                 else
@@ -71,21 +76,23 @@ namespace eZcad.AddinManager
                     // !!  注意这里的 addinItem 实例是刷新前的程序集中对应的类，这里只能用来提取其 FullName 字符串，而不能直接用来执行，因为虽然它确实可以执行，但是执行的是重新编译前的那个方法。
                     // !!  这里一定要从最新加载进来的程序集中重新创建对应的外部命令插件
                     // AutoCAD 2016 中注释掉： ICADExCommand newExCommand = assembly.CreateInstance(addinItem.GetType().FullName) as ICADExCommand;
-                    var newExCommand = assembly.CreateInstance(addinItem.GetType().FullName);
-
+                    var instanceName = addinItem.GetType().FullName;
+                    var newExCommand = assembly.CreateInstance(instanceName);
+                  
                     if (newExCommand == null)
                     {
-                        MessageBox.Show(@"在新加载的程序集中未能找到匹配的方法!!", @"出错", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        errorMsg = $"在新加载的程序集中未能找到匹配名称“{instanceName}”的外部命令对象!!";
                         result = ExternalCommandResult.Failed;
                     }
                     else
                     {
-                        result = Execute(newExCommand, ImpliedSelection, ref errorMessage, ref errorSet);// 如果在 Execute() 中发现某个程序集不存在，则通过AssemblyResolve 事件手动进行加载
+                        result = Execute(newExCommand, ImpliedSelection, ref errorMsg, ref errorSet);// 如果在 Execute() 中发现某个程序集不存在，则通过AssemblyResolve 事件手动进行加载
                     }
                 }
             }
             catch (Exception ex)
             {
+                errorMsg = ex.Message;
                 result = ExternalCommandResult.Failed;
             }
             finally
@@ -150,7 +157,7 @@ namespace eZcad.AddinManager
                             }
                             errorMessage += "\r\n出错对象：\r\n " + errorIds.ToString();
                         }
-                        MessageBox.Show(errorMessage, @"外部命令执行出错", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        // MessageBox.Show(errorMessage, @"外部命令执行出错", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         break;
                     }
                 case ExternalCommandResult.Cancelled:

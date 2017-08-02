@@ -1,0 +1,347 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>
+    </ProductVersion>
+    <SchemaVersion>
+    </SchemaVersion>
+    <ProjectGuid>{9F3B3C1D-DCD2-4E9C-9FE1-8CE3EA7BB160}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>eZcad.SubgradeQuantity</RootNamespace>
+    <AssemblyName>SubgradeQuantity</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation />
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <DocumentationFile>..\bin\SubgradeQuantity.xml</DocumentationFile>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>..\bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DocumentationFile>..\bin\SubgradeQuantity.xml</DocumentationFile>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>
+    </StartupObject>
+  </PropertyGroup>
+  <ItemGroup>
+    <!--ACA References Begin-->
+    <!--ACA Refences End-->
+    <!--AME Referebces Begin-->
+    <!--AME Reference End-->
+    <Reference Include="accoremgd">
+      <HintPath>C:\Softwares\Civil Engineering\AutoCAD 2016\accoremgd.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="acdbmgd">
+      <HintPath>C:\Softwares\Civil Engineering\AutoCAD 2016\acdbmgd.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="acmgd">
+      <HintPath>C:\Softwares\Civil Engineering\AutoCAD 2016\acmgd.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="AdWindows">
+      <HintPath>C:\Softwares\Civil Engineering\AutoCAD 2016\AdWindows.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.Office.Interop.Excel, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ApplicationSetup\AddinManagerDebuger.cs" />
+    <Compile Include="ApplicationSetup\RibbonButtonAttribute.cs" />
+    <Compile Include="Cmds\Ec_SubgradeQuantity.cs" />
+    <Compile Include="Cmds\StationNavigator.cs" />
+    <Compile Include="ApplicationSetup\AddinSetup.cs" />
+    <Compile Include="Cmds\工程量导出\InfosGetter_ThinFill.cs" />
+    <Compile Include="Cmds\边坡防护\ProtectionFlusher.cs" />
+    <Compile Include="Cmds\OptionsSetter.cs" />
+    <Compile Include="Cmds\SectionsConstructor.cs" />
+    <Compile Include="Cmds\LongitudinalSection.cs" />
+    <Compile Include="Cmds\边坡防护\ProtectionPlacer.cs" />
+    <Compile Include="Cmds\边坡防护\SlopeConstructor.cs" />
+    <Compile Include="Cmds\边坡防护\SlopeWalker.cs" />
+    <Compile Include="Cmds\StationsFinder.cs" />
+    <Compile Include="DataExport\SlopeProtectionExporter\ProtMtdInfo.cs" />
+    <Compile Include="DataExport\SlopeProtectionExporter\SlopeExpands.cs" />
+    <Compile Include="DataExport\SlopeProtectionExporter\SlopeSegsGeom.cs" />
+    <Compile Include="Entities\AllStations.cs" />
+    <Compile Include="Entities\RetainingWall.cs" />
+    <Compile Include="Redundant\SlpInfosGetterBackup.cs" />
+    <Compile Include="Cmds\工程量导出\InfosGetter_Slope.cs" />
+    <Compile Include="Redundant\SlpInfosSetter.cs" />
+    <Compile Include="DataExport\CriterionEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DataExport\CriterionEditor.Designer.cs">
+      <DependentUpon>CriterionEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DataExport\Exporter_ThinFillShallowCut.cs" />
+    <Compile Include="DataExport\SlopeProtectionExporter\Exporter_SlopeProtection.cs" />
+    <Compile Include="DataExport\DataExporter.cs" />
+    <Compile Include="SlopeProtection\AutoProtectionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SlopeProtection\AutoProtectionForm.Designer.cs">
+      <DependentUpon>AutoProtectionForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SlopeProtection\PlatformCriterionController.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SlopeProtection\SlopeCriterionController.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SlopeProtection\AutoProtectionCriterions.cs" />
+    <Compile Include="Utility\ProtectionConstants.cs" />
+    <Compile Include="Entities\SectionInfo.cs" />
+    <Compile Include="SlopeProtection\ISlopeSeg.cs" />
+    <Compile Include="Entities\SlopeData.cs" />
+    <Compile Include="Redundant\SlopeLineBackup.cs" />
+    <Compile Include="Redundant\SlopeSegment.cs" />
+    <Compile Include="SlopeProtection\SlopeSegLister.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SlopeProtection\SlopeSegLister.Designer.cs">
+      <DependentUpon>SlopeSegLister.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PropertyEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PropertyEditor.designer.cs">
+      <DependentUpon>PropertyEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Entities\SubgradeSection.cs" />
+    <Compile Include="Utility\ProtectionOptions.cs" />
+    <Compile Include="Redundant\ProtectionStyle.cs" />
+    <Compile Include="Utility\ProtectionUtils.cs" />
+    <Compile Include="Entities\SlopeLine.cs" />
+    <Compile Include="MatchOptionsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MatchOptionsForm.Designer.cs">
+      <DependentUpon>MatchOptionsForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SubgradeOptions.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SubgradeOptions.Designer.cs">
+      <DependentUpon>SubgradeOptions.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Redundant\ProtectionStyleLister.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Redundant\ProtectionStyleLister.Designer.cs">
+      <DependentUpon>ProtectionStyleLister.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DataExport\MileageInfo.cs" />
+    <Compile Include="Redundant\SlopeDataBackup.cs" />
+    <Compile Include="DataExport\WorkSheetData.cs" />
+    <Compile Include="ApplicationSetup\DllActivator_eZcad.cs" />
+    <Compile Include="ApplicationSetup\DocumentModifier.cs" />
+    <Compile Include="ApplicationSetup\myCommands.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>myCommands.resx</DependentUpon>
+    </Compile>
+    <Compile Include="ApplicationSetup\myCommands.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Utility\StaticCriterion.cs" />
+    <Compile Include="eZcadUtility\EntityArray2D.cs" />
+    <Compile Include="eZcadUtility\ExtensionMethods.cs" />
+    <Compile Include="eZcadUtility\eZConstants.cs" />
+    <Compile Include="eZcadUtility\FormOk.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="eZcadUtility\SolidUtils.cs" />
+    <Compile Include="eZcadUtility\TextUtils.cs" />
+    <Compile Include="eZcadUtility\CurrentEditState.cs" />
+    <Compile Include="eZcadUtility\Utils.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="DataExport\CriterionEditor.resx">
+      <DependentUpon>CriterionEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SlopeProtection\AutoProtectionForm.resx">
+      <DependentUpon>AutoProtectionForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SlopeProtection\SlopeSegLister.resx">
+      <DependentUpon>SlopeSegLister.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PropertyEditor.resx">
+      <DependentUpon>PropertyEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MatchOptionsForm.resx">
+      <DependentUpon>MatchOptionsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SubgradeOptions.resx">
+      <DependentUpon>SubgradeOptions.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Redundant\ProtectionStyleLister.resx">
+      <DependentUpon>ProtectionStyleLister.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ApplicationSetup\myCommands.resx">
+      <DependentUpon>myCommands.cs</DependentUpon>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>myCommands.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="eZcadUtility\FormOk.resx">
+      <DependentUpon>FormOk.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.0">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="AutoCAD">
+      <Guid>{4E3F492A-FB57-4439-9BF0-1567ED84A3A9}</Guid>
+      <VersionMajor>1</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+    <COMReference Include="stdole">
+      <Guid>{00020430-0000-0000-C000-000000000046}</Guid>
+      <VersionMajor>2</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\eZOffice\eZx_API\eZx_API.csproj">
+      <Project>{60bf7d52-330a-4ed2-9632-4efb8fb6f231}</Project>
+      <Name>eZx_API</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\eZstd\Projects\eZstd\eZstd.csproj">
+      <Project>{fb9b6528-5424-4b7a-aeba-6733450dc44b}</Project>
+      <Name>eZstd</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\eZcad_AddinManager\eZcad_AddinManager.csproj">
+      <Project>{835fa817-ebe4-4c2b-91d4-a6b945878105}</Project>
+      <Name>eZcad_AddinManager</Name>
+      <Private>False</Private>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Section.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
