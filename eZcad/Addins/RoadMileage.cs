@@ -8,7 +8,7 @@ using Autodesk.AutoCAD.Runtime;
 namespace eZcad.Addins
 {
     /// <summary> 获取指定的曲线上某点所对应的里程 </summary>
-    public class RoadMileage
+    public class RoadStation
     {
         /// <summary> 标志点在曲线中所对应的 parameter 值 </summary>
         private double _basePara;
@@ -21,7 +21,7 @@ namespace eZcad.Addins
         /// <summary> 构造函数 </summary>
         /// <param name="basePara">标志点在曲线中所对应的 parameter 值</param>
         /// <param name="baseMile">标志点在曲线中所对应的里程桩号，比如 K5+560.123，即为5560.123</param>
-        public RoadMileage(double basePara, double baseMile)
+        public RoadStation(double basePara, double baseMile)
         {
             _basePara = basePara;
             _baseMile = baseMile;
@@ -34,8 +34,8 @@ namespace eZcad.Addins
         /// <summary> 为指定的曲线添加垂线 </summary>
         /// <param name="docMdf"></param>
         /// <param name="impliedSelection"> 用户在执行方法之前已经选择好的对象。</param>
-        [CommandMethod(eZConstants.eZGroupCommnad, "GetRoadMileage2", CommandFlags.Modal | CommandFlags.UsePickSet)]
-        public void GetRoadMileage(DocumentModifier docMdf, SelectionSet impliedSelection)
+        [CommandMethod(eZConstants.eZGroupCommnad, "GetRoadStation2", CommandFlags.Modal | CommandFlags.UsePickSet)]
+        public void GetRoadStation(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
             _docMdf = docMdf;
             Curve baseCurve = null;
@@ -61,7 +61,7 @@ namespace eZcad.Addins
             while (pt != null)
             {
                 //
-                WriteMileage(docMdf.acEditor, baseCurve, pt.Value);
+                WriteStation(docMdf.acEditor, baseCurve, pt.Value);
                 //
                 pt = PickPoint(docMdf.acEditor, baseCurve);
             }
@@ -128,7 +128,7 @@ namespace eZcad.Addins
                     case "参考里程":
 
                         // 设置一个参考点与对应的里程
-                        PickBaseMileage(c);
+                        PickBaseStation(c);
                         break;
                 }
             }
@@ -147,7 +147,7 @@ namespace eZcad.Addins
         }
 
         // 设置一个基准里程点
-        private void PickBaseMileage(Curve c)
+        private void PickBaseStation(Curve c)
         {
             Point3d? basePt = null;
             // 选择一个点作为基准里程点
@@ -188,7 +188,7 @@ namespace eZcad.Addins
             }
         }
 
-        private void WriteMileage(Editor editor, Curve c, Point3d pt)
+        private void WriteStation(Editor editor, Curve c, Point3d pt)
         {
             var closestPt = c.GetClosestPointTo(pt, extend: false);
             var newPara = c.GetParameterAtPoint(closestPt);
@@ -196,9 +196,9 @@ namespace eZcad.Addins
             var newDis = c.GetDistanceAtParameter(newPara);
 
             // 计算新增加的里程
-            var newMileage = _baseMile + newDis - oldDis;
-            var kComp = (int)Math.Floor(newMileage / 1000); // 千米的分量
-            var mComp = newMileage - kComp * 1000; // 米的分量
+            var newStation = _baseMile + newDis - oldDis;
+            var kComp = (int)Math.Floor(newStation / 1000); // 千米的分量
+            var mComp = newStation - kComp * 1000; // 米的分量
 
             string msg =
                 $"坐标{closestPt.ToString()};\t距起点距离：{newDis};\t距参考点距离：{newDis - oldDis};\t参考里程：K{kComp}+{mComp.ToString("0.000")}";

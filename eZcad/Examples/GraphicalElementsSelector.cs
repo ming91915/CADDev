@@ -30,6 +30,10 @@ namespace eZcad.Examples
                 new TypedValue((int) DxfCode.Start, "CIRCLE"),
                 new TypedValue((int) DxfCode.LayerName, "0")
             };
+            /*
+                var pso = new PromptSelectionOptions();
+                pso.Keywords.Add("NoFilter", "无(N)", "无(N)"); //
+            */
 
             /*
             var filterType = new[]
@@ -108,7 +112,6 @@ namespace eZcad.Examples
 
             // Create our options object
             var pso = new PromptSelectionOptions();
-
 
             pso.Keywords.Add("NoFilter", "无(N)", "无(N)"); //
 
@@ -270,7 +273,7 @@ namespace eZcad.Examples
             }
             return true;
         }
-        
+
         /// <summary> 分段的长度 </summary>
         private static double GetDistance(DocumentModifier docMdf)
         {

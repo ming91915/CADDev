@@ -1,24 +1,22 @@
 ﻿// (C) Copyright 2016 by XN 
 //
-using System;
-using Autodesk.AutoCAD.Runtime;
-using Autodesk.AutoCAD.ApplicationServices;
+
+using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.Runtime;
+using eZcad;
 
 // This line is not mandatory, but improves loading performances
-[assembly: ExtensionApplication(typeof(eZcad.MyPlugin))]
+
+[assembly: ExtensionApplication(typeof (MyPlugin))]
 
 namespace eZcad
 {
-
     // This class is instantiated by AutoCAD once and kept alive for the 
     // duration of the session. If you don't do any one time initialization 
     // then you should remove this class.
     public class MyPlugin : IExtensionApplication
     {
-
         void IExtensionApplication.Initialize()
         {
             // Add one time initialization here
@@ -46,9 +44,7 @@ namespace eZcad
         {
             DBObject dbo;
 
-                // Do plug-in application clean up here
+            // Do plug-in application clean up here
         }
-
     }
-
 }
