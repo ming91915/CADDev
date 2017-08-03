@@ -128,27 +128,34 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApplicationSetup\AddinManagerDebuger.cs" />
+    <Compile Include="ApplicationSetup\ApplicationSetup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ApplicationSetup\ApplicationSetup.Designer.cs">
+      <DependentUpon>ApplicationSetup.cs</DependentUpon>
+    </Compile>
     <Compile Include="ApplicationSetup\RibbonButtonAttribute.cs" />
     <Compile Include="Cmds\Ec_SubgradeQuantity.cs" />
-    <Compile Include="Cmds\StationNavigator.cs" />
+    <Compile Include="Cmds\工程量导出\InfosGetter_FillCutInters.cs" />
+    <Compile Include="Cmds\路基系统\StationNavigator.cs" />
     <Compile Include="ApplicationSetup\AddinSetup.cs" />
     <Compile Include="Cmds\工程量导出\InfosGetter_ThinFill.cs" />
+    <Compile Include="Cmds\边坡防护\SeperateByElev.cs" />
+    <Compile Include="Cmds\边坡防护\SlopeEraser.cs" />
     <Compile Include="Cmds\边坡防护\ProtectionFlusher.cs" />
     <Compile Include="Cmds\OptionsSetter.cs" />
-    <Compile Include="Cmds\SectionsConstructor.cs" />
-    <Compile Include="Cmds\LongitudinalSection.cs" />
+    <Compile Include="Cmds\路基系统\SectionsConstructor.cs" />
+    <Compile Include="Cmds\路基系统\LongitudinalSection.cs" />
     <Compile Include="Cmds\边坡防护\ProtectionPlacer.cs" />
     <Compile Include="Cmds\边坡防护\SlopeConstructor.cs" />
     <Compile Include="Cmds\边坡防护\SlopeWalker.cs" />
-    <Compile Include="Cmds\StationsFinder.cs" />
+    <Compile Include="Cmds\路基系统\SectionInfosHandler.cs" />
     <Compile Include="DataExport\SlopeProtectionExporter\ProtMtdInfo.cs" />
     <Compile Include="DataExport\SlopeProtectionExporter\SlopeExpands.cs" />
     <Compile Include="DataExport\SlopeProtectionExporter\SlopeSegsGeom.cs" />
     <Compile Include="Entities\AllStations.cs" />
     <Compile Include="Entities\RetainingWall.cs" />
-    <Compile Include="Redundant\SlpInfosGetterBackup.cs" />
     <Compile Include="Cmds\工程量导出\InfosGetter_Slope.cs" />
-    <Compile Include="Redundant\SlpInfosSetter.cs" />
     <Compile Include="DataExport\CriterionEditor.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -175,8 +182,6 @@
     <Compile Include="Entities\SectionInfo.cs" />
     <Compile Include="SlopeProtection\ISlopeSeg.cs" />
     <Compile Include="Entities\SlopeData.cs" />
-    <Compile Include="Redundant\SlopeLineBackup.cs" />
-    <Compile Include="Redundant\SlopeSegment.cs" />
     <Compile Include="SlopeProtection\SlopeSegLister.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -191,7 +196,6 @@
     </Compile>
     <Compile Include="Entities\SubgradeSection.cs" />
     <Compile Include="Utility\ProtectionOptions.cs" />
-    <Compile Include="Redundant\ProtectionStyle.cs" />
     <Compile Include="Utility\ProtectionUtils.cs" />
     <Compile Include="Entities\SlopeLine.cs" />
     <Compile Include="MatchOptionsForm.cs">
@@ -206,23 +210,10 @@
     <Compile Include="SubgradeOptions.Designer.cs">
       <DependentUpon>SubgradeOptions.cs</DependentUpon>
     </Compile>
-    <Compile Include="Redundant\ProtectionStyleLister.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Redundant\ProtectionStyleLister.Designer.cs">
-      <DependentUpon>ProtectionStyleLister.cs</DependentUpon>
-    </Compile>
     <Compile Include="DataExport\MileageInfo.cs" />
-    <Compile Include="Redundant\SlopeDataBackup.cs" />
     <Compile Include="DataExport\WorkSheetData.cs" />
     <Compile Include="ApplicationSetup\DllActivator_eZcad.cs" />
     <Compile Include="ApplicationSetup\DocumentModifier.cs" />
-    <Compile Include="ApplicationSetup\myCommands.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>myCommands.resx</DependentUpon>
-    </Compile>
-    <Compile Include="ApplicationSetup\myCommands.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -232,7 +223,6 @@
     <Compile Include="Utility\StaticCriterion.cs" />
     <Compile Include="eZcadUtility\EntityArray2D.cs" />
     <Compile Include="eZcadUtility\ExtensionMethods.cs" />
-    <Compile Include="eZcadUtility\eZConstants.cs" />
     <Compile Include="eZcadUtility\FormOk.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -242,6 +232,9 @@
     <Compile Include="eZcadUtility\Utils.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="ApplicationSetup\ApplicationSetup.resx">
+      <DependentUpon>ApplicationSetup.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="DataExport\CriterionEditor.resx">
       <DependentUpon>CriterionEditor.cs</DependentUpon>
     </EmbeddedResource>
@@ -260,17 +253,10 @@
     <EmbeddedResource Include="SubgradeOptions.resx">
       <DependentUpon>SubgradeOptions.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Redundant\ProtectionStyleLister.resx">
-      <DependentUpon>ProtectionStyleLister.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ApplicationSetup\myCommands.resx">
-      <DependentUpon>myCommands.cs</DependentUpon>
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>myCommands.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="eZcadUtility\FormOk.resx">
       <DependentUpon>FormOk.cs</DependentUpon>
@@ -334,7 +320,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Section.png" />
+    <Folder Include="Resources\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

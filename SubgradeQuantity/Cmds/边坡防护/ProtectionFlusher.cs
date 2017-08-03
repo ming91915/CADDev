@@ -23,7 +23,7 @@ namespace eZcad.SubgradeQuantity.Cmds
         public const string CommandName = "FlushProtection";
 
         /// <summary> 从边坡线所绑定的防护方式的文字对象来设置防护 </summary>
-        [CommandMethod(eZConstants.eZGroupCommnad, CommandName, CommandFlags.UsePickSet)
+        [CommandMethod(ProtectionConstants.eZGroupCommnad, CommandName, CommandFlags.UsePickSet)
         , DisplayName(@"防护保存"), Description("将边坡线所绑定的防护方式的文字保存到边坡线数据中")
             , RibbonItem(@"防护保存", "将边坡线所绑定的防护方式的文字保存到边坡线数据中", ProtectionConstants.ImageDirectory + "FlushProtection_32.png")]
         public void FlushProtection()

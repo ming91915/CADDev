@@ -26,39 +26,12 @@ namespace eZcad.SubgradeQuantity.Cmds
         public const string CommandName = "ExportSlopeInfos";
 
         /// <summary> 将所有的边坡信息提取出来并制成相应表格 </summary>
-        [CommandMethod(eZConstants.eZGroupCommnad, "ExportSlopeInfos", CommandFlags.Modal | CommandFlags.UsePickSet)
+        [CommandMethod(ProtectionConstants.eZGroupCommnad, CommandName, CommandFlags.Modal | CommandFlags.UsePickSet)
         , DisplayName(@"边坡防护"), Description("将所有的边坡信息提取出来并制成相应表格")
         , RibbonItem(@"边坡防护", "将所有的边坡信息提取出来并制成相应表格", ProtectionConstants.ImageDirectory + "DataExport_32.png")]
         public void ExportSlopeInfos()
         {
             DocumentModifier.ExecuteCommand(ExportSlopeInfos);
-        }
-
-        #endregion
-
-        #region ---   从界面中选择可能的边坡线
-
-        /// <summary> 从界面中搜索边坡线 </summary>
-        /// <returns></returns>
-        public static List<Polyline> GetSlopeLines(Editor ed)
-        {
-            // Create our options object
-            var pso = new PromptSelectionOptions();
-
-            // Set our prompts to include our keywords
-            string kws = pso.Keywords.GetDisplayString(true);
-            pso.MessageForAdding = "\n选择多条边坡线 " + kws; // 当用户在命令行中输入A（或Add）时，命令行出现的提示字符。
-            pso.MessageForRemoval = "\n选择多条边坡线 " + kws;
-            // 当用户在命令行中输入Re（或Remove）时，命令行出现的提示字符。
-            // pso.SingleOnly = true;
-            
-            var psr = ed.GetSelection(pso, SlopeLine.Filter);
-
-            if (psr.Status == PromptStatus.OK)
-            {
-                return psr.Value.GetObjectIds().Select(id => id.GetObject(OpenMode.ForRead) as Polyline).ToList();
-            }
-            return null;
         }
 
         #endregion

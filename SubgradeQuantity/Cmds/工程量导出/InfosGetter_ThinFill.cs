@@ -25,7 +25,7 @@ namespace eZcad.SubgradeQuantity.Cmds
         public const string CommandName = "ThinFillShallowCut";
 
         /// <summary> 将所有的边坡信息提取出来并制成相应表格 </summary>
-        [CommandMethod(eZConstants.eZGroupCommnad, "ExportThinFill", CommandFlags.Modal | CommandFlags.UsePickSet)
+        [CommandMethod(ProtectionConstants.eZGroupCommnad, CommandName, CommandFlags.Modal | CommandFlags.UsePickSet)
         , DisplayName(@"低填浅挖"), Description("提取低填浅挖工程数量表")
         , RibbonItem(@"低填浅挖", "提取低填浅挖工程数量表", ProtectionConstants.ImageDirectory + "DataExport_32.png")]
         public void ThinFillShallowCut()

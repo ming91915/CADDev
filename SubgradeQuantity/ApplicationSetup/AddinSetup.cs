@@ -9,6 +9,8 @@ using Autodesk.AutoCAD.Runtime;
 using Autodesk.Windows;
 using eZcad.SubgradeQuantity;
 using eZcad.SubgradeQuantity.Cmds;
+using eZcad.SubgradeQuantity.Utility;
+using eZcad.Utility;
 using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 using Orientation = System.Windows.Controls.Orientation;
 using RibbonButton = Autodesk.Windows.RibbonButton;
@@ -64,7 +66,7 @@ namespace eZcad.SubgradeQuantity
         private const string TabTitle_SubgradeQuantity = "路基工程量";
 
         /// <summary> 添加自定义功能区选项卡 </summary>
-        [CommandMethod("SubgradeQuantityRibbon")]
+        [CommandMethod(ProtectionConstants.eZGroupCommnad, "SubgradeQuantityRibbon",CommandFlags.Modal)]
         public void CreateRibbon()
         {
             if (ComponentManager.Ribbon == null)
@@ -118,6 +120,7 @@ namespace eZcad.SubgradeQuantity
             // ----------------------------- 路基横断面系统 ------------------
             var pnl_SubgSystem = AddPanel(ribTab, "路基系统");
             AddButton(pnl_SubgSystem, method: typeof(SectionsConstructor).GetMethod(SectionsConstructor.CommandName, new Type[0]));
+            AddButton(pnl_SubgSystem, method: typeof(SectionInfosPlayer).GetMethod(SectionInfosPlayer.CommandName, new Type[0]));
             AddButton(pnl_SubgSystem, method: typeof(StationNavigator).GetMethod(StationNavigator.CommandName, new Type[0]));
             AddButton(pnl_SubgSystem, method: typeof(LongitudinalSectionDrawer).GetMethod(LongitudinalSectionDrawer.CommandName, new Type[0]));
 
@@ -126,11 +129,15 @@ namespace eZcad.SubgradeQuantity
             AddButton(pnl_Slope, method: typeof(SlopeConstructor).GetMethod(SlopeConstructor.CommandName, new Type[0]));
             AddButton(pnl_Slope, method: typeof(ProtectionPlacer).GetMethod(ProtectionPlacer.CommandName, new Type[0]));
             AddButton(pnl_Slope, method: typeof(ProtectionFlusher).GetMethod(ProtectionFlusher.CommandName, new Type[0]));
+            AddButton(pnl_Slope, method: typeof(SlopeWalker).GetMethod(SlopeWalker.CommandName, new Type[0]));
+            AddButton(pnl_Slope, method: typeof(SlopeEraser).GetMethod(SlopeEraser.CommandName, new Type[0]));
+            AddButton(pnl_Slope, method: typeof(SlopeSeperator).GetMethod(SlopeSeperator.CommandName, new Type[0]));
             
             // ----------------------------- 工程量的提取 ------------------
             var pnl_Quantity = AddPanel(ribTab, "工程量提取");
             AddButton(pnl_Quantity, method: typeof(InfosGetter_Slope).GetMethod(InfosGetter_Slope.CommandName, new Type[0]));
             AddButton(pnl_Quantity, method: typeof(InfosGetter_ThinFill).GetMethod(InfosGetter_ThinFill.CommandName, new Type[0]));
+            AddButton(pnl_Quantity, method: typeof(InfosGetter_FillCutInters).GetMethod(InfosGetter_FillCutInters.CommandName, new Type[0]));
 
 
             // ----------------------------- 选项设置 ------------------
@@ -169,13 +176,25 @@ namespace eZcad.SubgradeQuantity
             var cmd = commandMethod.GroupName + "." + commandMethod.GlobalName;
 
             var ri = method.GetCustomAttributes(typeof(RibbonItemAttribute)).FirstOrDefault() as RibbonItemAttribute;
+            string buttonText = null;
+            string buttonDescription = null;
             BitmapImage largeImage = null;
-
-            if (File.Exists(ri.LargeImagePath))
+            if (ri != null)
             {
-                largeImage = new BitmapImage(new Uri(ri.LargeImagePath));
+                buttonText = ri.Text;
+                buttonDescription = ri.Description;
+
+                //
+                var fp = Path.GetFullPath(ri.LargeImagePath);
+                Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.Editor.WriteMessage(fp + "\n");
+                if (File.Exists(fp))
+                {
+                    largeImage = new BitmapImage(new Uri(fp));
+                }
             }
-            AddButton(panel, cmd, ri.Text, ri.Description, RibbonItemSize.Large, largeImage);
+
+            var ribButton = CreateButton(cmd, buttonText, buttonDescription, RibbonItemSize.Large, largeImage);
+            panel.Source.Items.Add(ribButton);
         }
 
         /// <summary> 在选项面板中添加一个按钮 </summary>
@@ -186,12 +205,12 @@ namespace eZcad.SubgradeQuantity
         /// <param name="size">图片显示为大图像还是小图像 </param>
         /// <param name="largeImage"> 按钮所对应的图像，其像素大小为 32*32 </param>
         /// <param name="smallImage">按钮所对应的图像，其像素大小为 16*16 </param>
-        private static void AddButton(RibbonPanel panel, string commandName, string buttonText,
+        private static RibbonButton CreateButton(string commandName, string buttonText,
             string description = null,
             RibbonItemSize size = RibbonItemSize.Large, BitmapImage largeImage = null, BitmapImage smallImage = null)
         {
             //create button1
-            RibbonButton ribButton = new RibbonButton
+            var ribButton = new RibbonButton
             {
                 Text = buttonText,
                 Description = description,
@@ -210,11 +229,11 @@ namespace eZcad.SubgradeQuantity
                 // HelpSource = new Uri("www.baidu.com"),
 
                 //pay attention to the SPACE(or line feed) after the command name
-                CommandParameter = commandName + "\n", // "DrawCircle ",
+                CommandParameter = commandName + "\n", // "Circle ",
                 CommandHandler = new AdskCommandHandler()
             };
             //
-            panel.Source.Items.Add(ribButton);
+            return ribButton;
         }
 
         #endregion

@@ -10,7 +10,6 @@ using Autodesk.AutoCAD.Geometry;
 using eZcad.SubgradeQuantity.Cmds;
 using eZcad.SubgradeQuantity.DataExport;
 using eZcad.SubgradeQuantity.Entities;
-using eZcad.SubgradeQuantity.Redundant;
 using eZcad.Utility;
 using Microsoft.Office.Interop.Excel;
 using Application = Microsoft.Office.Interop.Excel.Application;
@@ -22,18 +21,6 @@ namespace eZcad.SubgradeQuantity.Utility
     /// <summary> 与边坡防护相关的一些通用性的操作 </summary>
     public static class ProtectionUtils
     {
-        /// <summary> 可用的防护形式 </summary>
-        public static readonly Dictionary<ProtectionStyle, string> AvailableProtections = new Dictionary
-            <ProtectionStyle, string>
-        {
-            {ProtectionStyle.挂网喷锚6, "挂网喷锚（6m锚杆）"},
-            {ProtectionStyle.锚杆网格梁, "锚杆网格梁"},
-            {ProtectionStyle.浆砌片石, "浆砌片石"},
-            {ProtectionStyle.边坡防护1, "边坡防护1"},
-            {ProtectionStyle.边坡防护2, "边坡防护2"},
-            {ProtectionStyle.边坡防护3, "边坡防护3"}
-        };
-
 
         /// <summary> 路基工程量计算系统 环境配置 </summary>
         /// <param name="docMdf"></param>
@@ -118,8 +105,7 @@ namespace eZcad.SubgradeQuantity.Utility
             }
             return stations.ToArray();
         }
-
-
+        
         /// <summary> 从界面中搜索边坡线 </summary>
         /// <param name="ed"></param>
         /// <returns></returns>
@@ -287,6 +273,7 @@ namespace eZcad.SubgradeQuantity.Utility
         }
 
         #endregion
+
         #region --- 各种比较排序
 
 
@@ -306,11 +293,7 @@ namespace eZcad.SubgradeQuantity.Utility
         {
             return slopeData1.Station.CompareTo(slopeData2.Station);
         }
-        /// <summary> 桩号小的在前面 </summary>
-        public static int CompareStation(SlopeDataBackup slopeData1, SlopeDataBackup slopeData2)
-        {
-            return slopeData1.Station.CompareTo(slopeData2.Station);
-        }
+
         #endregion
 
     }

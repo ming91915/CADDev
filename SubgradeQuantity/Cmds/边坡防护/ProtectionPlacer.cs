@@ -24,7 +24,7 @@ namespace eZcad.SubgradeQuantity.Cmds
         public const string CommandName = "PlaceProtection";
       
         /// <summary> 放置边坡防护的文字 </summary>
-        [CommandMethod(eZConstants.eZGroupCommnad, CommandName, CommandFlags.UsePickSet)
+        [CommandMethod(ProtectionConstants.eZGroupCommnad, CommandName, CommandFlags.UsePickSet)
         , DisplayName(@"修改防护"), Description("放置边坡防护的文字")
             , RibbonItem(@"修改防护", "放置边坡防护的文字", ProtectionConstants.ImageDirectory + "PlaceProtection_32.png")]
         public void PlaceProtection()
