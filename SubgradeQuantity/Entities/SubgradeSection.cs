@@ -840,7 +840,7 @@ namespace eZcad.SubgradeQuantity.Entities
             {
                 var lines = res.Value.GetObjectIds().Select(id => id.GetObject(OpenMode.ForRead)).OfType<Polyline>().ToList();
                 var lefts =
-                    lines.Where(l => SlopeLine.IsSlopeLineLayer(l.Layer, left: false)).ToArray();
+                    lines.Where(l => SlopeLine.IsSlopeLineLayer(l.Layer, left: true)).ToArray();
                 if (lefts.Length > 0)
                 {
                     // 从多个边坡线中搜索某个端点距离中轴线中心最近的那一条

@@ -59,15 +59,5 @@ namespace eZcad.SubgradeQuantity.Properties {
                 resourceCulture = value;
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap Section {
-            get {
-                object obj = ResourceManager.GetObject("Section", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
     }
 }

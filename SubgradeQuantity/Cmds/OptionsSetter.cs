@@ -19,7 +19,7 @@ namespace eZcad.SubgradeQuantity.Cmds
         public const string CommandName = "SubgradeOptions";
 
         /// <summary> 边坡防护的选项设置 </summary>
-        [CommandMethod(eZConstants.eZGroupCommnad, CommandName, CommandFlags.Modal | CommandFlags.UsePickSet)
+        [CommandMethod(ProtectionConstants.eZGroupCommnad, CommandName, CommandFlags.Modal | CommandFlags.UsePickSet)
         , DisplayName(@"设置"), Description("路基工程量相关选项的设置")
         , RibbonItem(@"设置", "路基工程量相关选项的设置", ProtectionConstants.ImageDirectory + "SetOptions_32.png")]
         public void SubgradeOptions()

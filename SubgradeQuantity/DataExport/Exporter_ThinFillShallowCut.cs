@@ -165,9 +165,10 @@ namespace eZcad.SubgradeQuantity.DataExport
             };
 
             // 数据导出到 Excel 
-            var errMsg = ExportDataToExcel(sheet_Infos);
+            string errMsg;
+            var succ = ExportDataToExcel(sheet_Infos,out errMsg);
 
-            if (errMsg != null)
+            if (!succ)
             {
                 var res = MessageBox.Show($"将数据导出到Excel中时出错：{errMsg}，\r\n是否将其以文本的形式导出？", "提示", MessageBoxButton.OKCancel,
                     MessageBoxImage.Error);

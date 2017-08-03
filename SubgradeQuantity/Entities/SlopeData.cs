@@ -11,7 +11,7 @@ namespace eZcad.SubgradeQuantity.Entities
     /// <summary> 每一侧边坡的所有数据 </summary>
     public class SlopeData
     {
-        public static string AppName = "eZSubgradeQuantity";
+        public const string AppName = "eZSubgradeQuantity";
         private const string ctg_Geometry = "几何";
         private const string ctg_Others = "其他";
 

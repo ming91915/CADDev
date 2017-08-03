@@ -1,30 +1,32 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Windows.Forms;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
 using eZcad.AddinManager;
-using eZcad.SubgradeQuantity;
 using eZcad.SubgradeQuantity.Cmds;
 using eZcad.SubgradeQuantity.Entities;
-using eZcad.SubgradeQuantity.Redundant;
 using eZcad.SubgradeQuantity.Utility;
 using eZcad.Utility;
 
-[assembly: CommandClass(typeof(SlopeWalker))]
+[assembly: CommandClass(typeof (SlopeWalker))]
 
 namespace eZcad.SubgradeQuantity.Cmds
 {
-    [EcDescription("边坡信息漫游")]
+    /// <summary> 提取所有的横断面块参照的信息 </summary>
+    [EcDescription("提取所有的横断面块参照的信息")]
     public class SlopeWalker
     {
         #region --- 命令设计
 
+        /// <summary> 命令行命令名称，同时亦作为命令语句所对应的C#代码中的函数的名称 </summary>
+        public const string CommandName = "SlopeWalk";
+
         /// <summary> 提取所有的横断面块参照的信息 </summary>
-        [CommandMethod(eZConstants.eZGroupCommnad, "SlopeWalk", CommandFlags.UsePickSet)
-            , DisplayName(@"边坡信息漫游"), Description("查看指定的边坡对象的信息")]
-        public void EcSlopeWalk()
+        [CommandMethod(ProtectionConstants.eZGroupCommnad, CommandName, CommandFlags.UsePickSet)
+        , DisplayName(@"边坡漫游"), Description("查看指定的边坡对象的信息")
+        , RibbonItem(@"边坡漫游", "查看指定的边坡对象的信息", ProtectionConstants.ImageDirectory + "SlopeWalk_32.png")]
+        public void SlopeWalk()
         {
             DocumentModifier.ExecuteCommand(SlopeWalk);
         }
@@ -63,10 +65,9 @@ namespace eZcad.SubgradeQuantity.Cmds
 
         private Polyline GetSlopeLine(Editor ed, out bool cont)
         {
-
             var op = new PromptEntityOptions("\n选择一条边坡线以进行信息读写");
-            op.SetRejectMessage($"\n选择的多段线必须包含{SlopeDataBackup.AppName}的外部扩展数据");
-            op.AddAllowedClass(typeof(Polyline), exactMatch: true);
+            op.SetRejectMessage($"\n选择的多段线必须包含{SlopeData.AppName}的外部扩展数据");
+            op.AddAllowedClass(typeof (Polyline), exactMatch: true);
             var res = ed.GetEntity(op);
 
             cont = true;

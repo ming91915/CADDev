@@ -645,6 +645,9 @@ namespace eZcad.SubgradeQuantity.Entities
 
         public void ClearXData()
         {
+            //
+            ClearProtectionMethodText();
+            //
             if (!Pline.ExtensionDictionary.IsNull)
             {
                 var extensionDict = Pline.ExtensionDictionary.GetObject(OpenMode.ForWrite) as DBDictionary;

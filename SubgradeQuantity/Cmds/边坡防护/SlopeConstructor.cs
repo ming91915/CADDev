@@ -26,7 +26,7 @@ namespace eZcad.SubgradeQuantity.Cmds
         public const string CommandName = "ConstructSlopes";
 
         /// <summary> 创建边坡并设置每一个边坡的数据 </summary>
-        [CommandMethod(eZConstants.eZGroupCommnad, CommandName, CommandFlags.UsePickSet)
+        [CommandMethod(ProtectionConstants.eZGroupCommnad, CommandName, CommandFlags.UsePickSet)
         , DisplayName(@"创建边坡"), Description("创建边坡并设置每一个边坡的数据")
         , RibbonItem(@"创建边坡", "创建边坡并设置每一个边坡的数据", ProtectionConstants.ImageDirectory + "ConstructSlopes_32.png")]
         public void ConstructSlopes()
@@ -138,7 +138,6 @@ namespace eZcad.SubgradeQuantity.Cmds
 
                     if (slp.XDataToBeCleared)
                     {
-                        slp.ClearProtectionMethodText();
                         slp.ClearXData();
                     }
                 }
@@ -157,7 +156,7 @@ namespace eZcad.SubgradeQuantity.Cmds
 
         /// <summary> 对边坡线的显示样式进行设置 </summary>
         /// <param name="slp"></param>
-        private void SetSlopeUI(SlopeLine slp)
+        public static void SetSlopeUI(SlopeLine slp)
         {
             if (slp.XData.FillCut)
             {

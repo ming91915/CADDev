@@ -159,13 +159,16 @@ namespace eZcad.SubgradeQuantity.DataExport
         /// <summary> 将所有表格中记录的数据导出到指定Excel工作簿的多个工作表中 </summary>
         /// <param name="sheet_Infos"></param>
         /// <returns></returns>
-        protected static string ExportDataToExcel(List<WorkSheetData> sheet_Infos)
+        protected static bool ExportDataToExcel(List<WorkSheetData> sheet_Infos, out string errMsg)
         {
-            string errMsg = null;
             Application excelApp = null;
+            errMsg = null;
+            bool succ = true;
             try
             {
-                var wkbk = GetExcelWorkbook();
+                Workbook wkbk;
+                succ = GetExcelWorkbook(out wkbk);
+
                 if (wkbk != null)
                 {
                     excelApp = wkbk.Application;
@@ -190,14 +193,14 @@ namespace eZcad.SubgradeQuantity.DataExport
                         else
                         {
                             errMsg = $"未找到工作表：{tpInfo.SheetName}";
+                            succ = false;
                         }
+                        wkbk.Save();
                     }
-                    //
-                    wkbk.Save();
                 }
                 else
                 {
-                    errMsg = $"未能打开或者创建Excel工作簿";
+                    errMsg = $"未能打开或者创建 Excel 工作簿";
                 }
             }
             catch (Exception ex)
@@ -212,14 +215,17 @@ namespace eZcad.SubgradeQuantity.DataExport
                     excelApp.ScreenUpdating = true;
                 }
             }
-            return errMsg;
+            return succ;
         }
 
-        private static Workbook GetExcelWorkbook()
+        /// <summary> 让用户在界面中选择一个 Excel 工作簿路径，用来保存对应的数据 </summary>
+        /// <param name="wkbk"></param>
+        /// <returns>true 表示操作成功，此时的<paramref name="wkbk"/>的值也有可能为null，即用户成功取消了操作。</returns>
+        private static bool GetExcelWorkbook(out Workbook wkbk)
         {
             var filePath = Utils.ChooseSaveFile(title: "将数据保存到Excel中", filter: "Excel文件(*.xls)| *.xls");
             // Excel工作簿(*.xlsx)|*.xlsx| Excel二进制工作簿(*.xlsb) |*.xlsb| Excel 97-2003 工作簿(*.xls)|*.xls
-            Workbook wkbk = null;
+            wkbk = null;
             if (filePath != null)
             {
                 Application excelApp = null;
@@ -242,14 +248,20 @@ namespace eZcad.SubgradeQuantity.DataExport
                 }
                 catch (Exception)
                 {
+                    return false;
                     // ignored
                 }
                 if (wkbk != null)
                 {
                     wkbk.Application.Windows[wkbk.Name].Visible = true;
+                    return true;
                 }
             }
-            return wkbk;
+            else
+            {
+                return true;
+            }
+            return false;
         }
 
         #endregion
