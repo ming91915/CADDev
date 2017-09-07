@@ -5,13 +5,16 @@ using System.Reflection;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
+using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.Runtime;
+using Autodesk.AutoCAD.Windows;
 using Autodesk.Windows;
 using eZcad.SubgradeQuantity;
 using eZcad.SubgradeQuantity.Cmds;
 using eZcad.SubgradeQuantity.Utility;
 using eZcad.Utility;
 using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
+using Exception = System.Exception;
 using Orientation = System.Windows.Controls.Orientation;
 using RibbonButton = Autodesk.Windows.RibbonButton;
 using RibbonControl = Autodesk.Windows.RibbonControl;
@@ -66,7 +69,7 @@ namespace eZcad.SubgradeQuantity
         private const string TabTitle_SubgradeQuantity = "路基工程量";
 
         /// <summary> 添加自定义功能区选项卡 </summary>
-        [CommandMethod(ProtectionConstants.eZGroupCommnad, "SubgradeQuantityRibbon",CommandFlags.Modal)]
+        [CommandMethod(ProtectionConstants.eZGroupCommnad, "SubgradeQuantityRibbon", ProtectionConstants.ModelState)]
         public void CreateRibbon()
         {
             if (ComponentManager.Ribbon == null)
@@ -102,50 +105,72 @@ namespace eZcad.SubgradeQuantity
                 };
                 ribCntrl.Tabs.Add(ribTab);
                 //
-                AddControls(ribTab);
+                try
+                {
+                    AddControls(ribTab);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "选项卡工具加载出错\r\n" + ex.StackTrace, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+
                 //set as active tab
                 ribTab.IsActive = true;
             }
             ed.Command(new object[] { "Ribbon" });
         }
 
-        #region --- 在选项卡中添加工具
-
         /// <summary> 在选项卡中添加工具 </summary>
         /// <param name="ribTab"></param>
         private static void AddControls(RibbonTab ribTab)
         {
-            //create and add both panels
-
-            // ----------------------------- 路基横断面系统 ------------------
-            var pnl_SubgSystem = AddPanel(ribTab, "路基系统");
-            AddButton(pnl_SubgSystem, method: typeof(SectionsConstructor).GetMethod(SectionsConstructor.CommandName, new Type[0]));
-            AddButton(pnl_SubgSystem, method: typeof(SectionInfosPlayer).GetMethod(SectionInfosPlayer.CommandName, new Type[0]));
-            AddButton(pnl_SubgSystem, method: typeof(StationNavigator).GetMethod(StationNavigator.CommandName, new Type[0]));
-            AddButton(pnl_SubgSystem, method: typeof(LongitudinalSectionDrawer).GetMethod(LongitudinalSectionDrawer.CommandName, new Type[0]));
-
-            // ----------------------------- 边坡防护的构造 ------------------
-            var pnl_Slope = AddPanel(ribTab, "边坡防护");
-            AddButton(pnl_Slope, method: typeof(SlopeConstructor).GetMethod(SlopeConstructor.CommandName, new Type[0]));
-            AddButton(pnl_Slope, method: typeof(ProtectionPlacer).GetMethod(ProtectionPlacer.CommandName, new Type[0]));
-            AddButton(pnl_Slope, method: typeof(ProtectionFlusher).GetMethod(ProtectionFlusher.CommandName, new Type[0]));
-            AddButton(pnl_Slope, method: typeof(SlopeWalker).GetMethod(SlopeWalker.CommandName, new Type[0]));
-            AddButton(pnl_Slope, method: typeof(SlopeEraser).GetMethod(SlopeEraser.CommandName, new Type[0]));
-            AddButton(pnl_Slope, method: typeof(SlopeSeperator).GetMethod(SlopeSeperator.CommandName, new Type[0]));
+            // ----------------------------- 项目信息 ----------------------------------------
+            var pnl_Project = CreatePanel(ribTab, "项目信息");
+            AddButton(pnl_Project, method: typeof(ProjectInfos).GetMethod(ProjectInfos.CommandName, new Type[0]), size: RibbonItemSize.Large);
             
-            // ----------------------------- 工程量的提取 ------------------
-            var pnl_Quantity = AddPanel(ribTab, "工程量提取");
-            AddButton(pnl_Quantity, method: typeof(InfosGetter_Slope).GetMethod(InfosGetter_Slope.CommandName, new Type[0]));
-            AddButton(pnl_Quantity, method: typeof(InfosGetter_ThinFill).GetMethod(InfosGetter_ThinFill.CommandName, new Type[0]));
-            AddButton(pnl_Quantity, method: typeof(InfosGetter_FillCutInters).GetMethod(InfosGetter_FillCutInters.CommandName, new Type[0]));
+            // ----------------------------- 路基横断面系统 ----------------------------------------
+            var pnl_SubgSystem = CreatePanel(ribTab, "路基系统");
+            AddButton(pnl_SubgSystem, method: typeof(SectionsConstructor).GetMethod(SectionsConstructor.CommandName, new Type[0]), size: RibbonItemSize.Large);
+            AddButton(pnl_SubgSystem, method: typeof(StationNavigator).GetMethod(StationNavigator.CommandName, new Type[0]), size: RibbonItemSize.Large);
+            AddButton(pnl_SubgSystem, method: typeof(LongitudinalSectionDrawer).GetMethod(LongitudinalSectionDrawer.CommandName, new Type[0]), size: RibbonItemSize.Large);
 
+            var spltBtn3 = CreateSplitButton(pnl_SubgSystem, "横断面信息");
+            AddButton(spltBtn3, method: typeof(SectionWalker).GetMethod(SectionWalker.CommandName, new Type[0]), size: RibbonItemSize.Large);
+            AddButton(spltBtn3, method: typeof(SectionInfosPlayer).GetMethod(SectionInfosPlayer.CommandName, new Type[0]), size: RibbonItemSize.Large);
+            
+            // ----------------------------- 边坡防护的构造 ----------------------------------------
+            var pnl_Slope = CreatePanel(ribTab, "边坡防护");
+            AddButton(pnl_Slope, method: typeof(SlopeConstructor).GetMethod(SlopeConstructor.CommandName, new Type[0]), size: RibbonItemSize.Large);
+            AddButton(pnl_Slope, method: typeof(SlopeEraser).GetMethod(SlopeEraser.CommandName, new Type[0]), size: RibbonItemSize.Large);
+            AddButton(pnl_Slope, method: typeof(SlopeWalker).GetMethod(SlopeWalker.CommandName, new Type[0]), size: RibbonItemSize.Large);
+            //
+            var spltBtn1 = CreateSplitButton(pnl_Slope, "边坡修剪");
+            AddButton(spltBtn1, method: typeof(SlopeCutter).GetMethod(SlopeCutter.CommandName, new Type[0]), size: RibbonItemSize.Large);
+            AddButton(spltBtn1, method: typeof(SlopeSegMerge).GetMethod(SlopeSegMerge.CommandName, new Type[0]), size: RibbonItemSize.Large);
+            //
+            AddButton(pnl_Slope, method: typeof(ProtectionPlacer).GetMethod(ProtectionPlacer.CommandName, new Type[0]), size: RibbonItemSize.Large);
+            AddButton(pnl_Slope, method: typeof(SlopeProtTextModifier).GetMethod(SlopeProtTextModifier.CommandName, new Type[0]), size: RibbonItemSize.Large);
+            AddButton(pnl_Slope, method: typeof(ProtectionFlusher).GetMethod(ProtectionFlusher.CommandName, new Type[0]), size: RibbonItemSize.Large);
 
-            // ----------------------------- 选项设置 ------------------
-            var pnl_Settings = AddPanel(ribTab, "设置");
-            AddButton(pnl_Settings, method: typeof(OptionsSetter).GetMethod(OptionsSetter.CommandName, new Type[0]));
+            // ----------------------------- 工程量的提取 ----------------------------------------
+            var pnl_Quantity = CreatePanel(ribTab, "工程量提取");
+            AddButton(pnl_Quantity, method: typeof(SubgradeEnvir).GetMethod(SubgradeEnvir.CommandName, new Type[0]), size: RibbonItemSize.Large);
+            AddButton(pnl_Quantity, method: typeof(CriterionEditor).GetMethod(CriterionEditor.CommandName, new Type[0]), size: RibbonItemSize.Large);
+            AddButton(pnl_Quantity, method: typeof(InfosGetter_Slope).GetMethod(InfosGetter_Slope.CommandName, new Type[0]), size: RibbonItemSize.Large);
+
+            var spltBtn2 = CreateSplitButton(pnl_Quantity, "一般工程量");
+            AddButton(spltBtn2, method: typeof(InfosGetter_ThinFill).GetMethod(InfosGetter_ThinFill.CommandName, new Type[0]), size: RibbonItemSize.Large);
+            AddButton(spltBtn2, method: typeof(InfosGetter_HighFill).GetMethod(InfosGetter_HighFill.CommandName, new Type[0]), size: RibbonItemSize.Large);
+            AddButton(spltBtn2, method: typeof(InfosGetter_SteepSlope).GetMethod(InfosGetter_SteepSlope.CommandName, new Type[0]), size: RibbonItemSize.Large);
+            AddButton(spltBtn2, method: typeof(InfosGetter_StairExcav).GetMethod(InfosGetter_StairExcav.CommandName, new Type[0]), size: RibbonItemSize.Large);
+        
+            AddButton(pnl_Quantity, method: typeof(InfosGetter_FillCutInters).GetMethod(InfosGetter_FillCutInters.CommandName, new Type[0]), size: RibbonItemSize.Large);
+
+            // ----------------------------- 选项设置 ----------------------------------------
+            // var pnl_Settings = CreatePanel(ribTab, "设置");
         }
 
-        private static RibbonPanel AddPanel(RibbonTab sourceTab, string panelTitle)
+        private static RibbonPanel CreatePanel(RibbonTab sourceTab, string panelTitle)
         {
             //create the panel source
             RibbonPanelSource ribPanelSource = new RibbonPanelSource();
@@ -158,47 +183,35 @@ namespace eZcad.SubgradeQuantity
             return ribPanel;
         }
 
-        #endregion
-
         #region --- 添加按钮
 
-        private static void AddButton(RibbonPanel panel, MethodInfo method)
+        private static void AddButton(RibbonPanel panel, MethodInfo method, RibbonItemSize size)
         {
-            if (!method.IsPublic) return;
-
-            // 命令
-            var commandMethod =
-                method.GetCustomAttributes(typeof(CommandMethodAttribute)).First() as CommandMethodAttribute;
-            if (commandMethod == null)
-            {
-                return;
-            }
-            var cmd = commandMethod.GroupName + "." + commandMethod.GlobalName;
-
-            var ri = method.GetCustomAttributes(typeof(RibbonItemAttribute)).FirstOrDefault() as RibbonItemAttribute;
-            string buttonText = null;
-            string buttonDescription = null;
-            BitmapImage largeImage = null;
-            if (ri != null)
-            {
-                buttonText = ri.Text;
-                buttonDescription = ri.Description;
-
-                //
-                var fp = Path.GetFullPath(ri.LargeImagePath);
-                Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.Editor.WriteMessage(fp + "\n");
-                if (File.Exists(fp))
-                {
-                    largeImage = new BitmapImage(new Uri(fp));
-                }
-            }
-
-            var ribButton = CreateButton(cmd, buttonText, buttonDescription, RibbonItemSize.Large, largeImage);
+            string commandName;
+            string buttonText;
+            string description;
+            BitmapImage largeImage;
+            BitmapImage smallImage;
+            GetMethodElements(method, out commandName, out buttonText, out description, out largeImage, out smallImage);
+            //
+            var ribButton = CreateButton(commandName, buttonText, description, size, largeImage);
             panel.Source.Items.Add(ribButton);
         }
 
+        private static void AddButton(RibbonSplitButton splitButton, MethodInfo method, RibbonItemSize size)
+        {
+            string commandName;
+            string buttonText;
+            string description;
+            BitmapImage largeImage;
+            BitmapImage smallImage;
+            GetMethodElements(method, out commandName, out buttonText, out description, out largeImage, out smallImage);
+            //
+            var ribButton = CreateButton(commandName, buttonText, description, size, largeImage);
+            splitButton.Items.Add(ribButton);
+        }
+
         /// <summary> 在选项面板中添加一个按钮 </summary>
-        /// <param name="panel">按钮所在的选项面板</param>
         /// <param name="commandName">按钮所对应的命令名，命令后不能加空格</param>
         /// <param name="buttonText">按钮的名称</param>
         /// <param name="description">按钮的功能描述</param>
@@ -237,6 +250,63 @@ namespace eZcad.SubgradeQuantity
         }
 
         #endregion
+
+        private static RibbonSplitButton CreateSplitButton(RibbonPanel panel, string buttonText)
+        {
+            var sb = new RibbonSplitButton()
+            {
+                Text = buttonText,
+                ShowText = true,
+                Size = RibbonItemSize.Large,
+                ListStyle = RibbonSplitButtonListStyle.List,
+            };
+            panel.Source.Items.Add(sb);
+            return sb;
+        }
+
+        /// <summary> 从方法的Attribute中提取界面所需要的元素 </summary>
+        private static void GetMethodElements(MethodInfo method, out string commandName, out string buttonText,
+           out string description, out BitmapImage largeImage, out BitmapImage smallImage)
+        {
+            commandName = null;
+            buttonText = null;
+            description = null;
+            largeImage = null;
+            smallImage = null;
+            // 命令
+            var commandMethod =
+                method.GetCustomAttributes(typeof(CommandMethodAttribute)).First() as CommandMethodAttribute;
+            if (commandMethod == null)
+            {
+                return;
+            }
+            commandName = commandMethod.GroupName + "." + commandMethod.GlobalName;
+
+            var ri = method.GetCustomAttributes(typeof(RibbonItemAttribute)).FirstOrDefault() as RibbonItemAttribute;
+            if (ri != null)
+            {
+                buttonText = ri.Text;
+                description = ri.Description;
+
+                //
+                if (!string.IsNullOrEmpty(ri.LargeImagePath))
+                {
+                    var fp = Path.GetFullPath(ri.LargeImagePath);
+                    if (File.Exists(fp))
+                    {
+                        largeImage = new BitmapImage(new Uri(fp));
+                    }
+                }
+                if (!string.IsNullOrEmpty(ri.SmallImagePath))
+                {
+                    var fp = Path.GetFullPath(ri.SmallImagePath);
+                    if (File.Exists(fp))
+                    {
+                        smallImage = new BitmapImage(new Uri(fp));
+                    }
+                }
+            }
+        }
 
         /// <summary> 一个通用的类，用来响应各种 RibbonButton 按钮的事件 </summary>
         public class AdskCommandHandler : ICommand

@@ -1,11 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Windows.Forms;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
 using eZcad.AddinManager;
 using eZcad.SubgradeQuantity.Cmds;
+using eZcad.SubgradeQuantity.ParameterForm;
 using eZcad.SubgradeQuantity.Utility;
 using eZcad.Utility;
 
@@ -13,8 +16,8 @@ using eZcad.Utility;
 
 namespace eZcad.SubgradeQuantity.Cmds
 {
-    [EcDescription("放置边坡防护的文字")]
-    public class ProtectionPlacer
+    [EcDescription(CommandDescription)]
+    public class ProtectionPlacer : ICADExCommand
     {
         private DocumentModifier _docMdf;
 
@@ -22,20 +25,49 @@ namespace eZcad.SubgradeQuantity.Cmds
 
         /// <summary> 命令行命令名称，同时亦作为命令语句所对应的C#代码中的函数的名称 </summary>
         public const string CommandName = "PlaceProtection";
-      
+        private const string CommandText = @"防护布置";
+        private const string CommandDescription = @"放置边坡防护的文字";
+
         /// <summary> 放置边坡防护的文字 </summary>
         [CommandMethod(ProtectionConstants.eZGroupCommnad, CommandName, CommandFlags.UsePickSet)
-        , DisplayName(@"修改防护"), Description("放置边坡防护的文字")
-            , RibbonItem(@"修改防护", "放置边坡防护的文字", ProtectionConstants.ImageDirectory + "PlaceProtection_32.png")]
+        , DisplayName(CommandText), Description(CommandDescription)
+            , RibbonItem(CommandText, CommandDescription, ProtectionConstants.ImageDirectory + "PlaceProtection_32.png")]
         public void PlaceProtection()
         {
             DocumentModifier.ExecuteCommand(PlaceProtection);
         }
 
+        public ExternalCommandResult Execute(SelectionSet impliedSelection, ref string errorMessage,
+            ref IList<ObjectId> elementSet)
+        {
+            var s = new ProtectionPlacer();
+            return AddinManagerDebuger.DebugInAddinManager(s.PlaceProtection,
+                impliedSelection, ref errorMessage, ref elementSet);
+        }
+
+        #endregion
+
         /// <summary> 放置边坡防护的文字 </summary>
-        public void PlaceProtection(DocumentModifier docMdf, SelectionSet impliedSelection)
+        public ExternalCmdResult PlaceProtection(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
             _docMdf = docMdf;
+            var fm = PF_PlaceProt.GetUniqueInstance(docMdf, impliedSelection);
+            var res = fm.ShowDialog();
+            if (res == DialogResult.OK)
+            {
+                return ExternalCmdResult.Commit;
+            }
+            else
+            {
+                return ExternalCmdResult.Cancel;
+            }
+        }
+
+        #region --- 通过命令行的方式进行操作
+
+        /// <summary> 放置边坡防护的文字 </summary>
+        public ExternalCmdResult PlaceProtectionOnCommandLine(DocumentModifier docMdf, SelectionSet impliedSelection)
+        {
             bool changeSingle;
             string newText;
             var succ = SetNewText(docMdf, out newText, out changeSingle);
@@ -51,10 +83,8 @@ namespace eZcad.SubgradeQuantity.Cmds
                     ChangeMultiTexts(newText);
                 }
             }
-
+            return ExternalCmdResult.Commit;
         }
-
-        #endregion
 
         #region --- 基本操作选项的设置
 
@@ -224,5 +254,6 @@ namespace eZcad.SubgradeQuantity.Cmds
                 txt.DowngradeOpen();
             }
         }
+        #endregion
     }
 }

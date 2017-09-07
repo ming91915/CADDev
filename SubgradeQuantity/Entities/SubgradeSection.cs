@@ -6,6 +6,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using eZcad.SubgradeQuantity.Entities;
+using eZcad.SubgradeQuantity.Options;
 using eZcad.SubgradeQuantity.Utility;
 using eZcad.Utility;
 
@@ -43,7 +44,7 @@ namespace eZcad.SubgradeQuantity.Entities
 
         private static readonly SelectionFilter _filter = new SelectionFilter(new[]{
                 new TypedValue((int) DxfCode.Start, "LINE"),
-                new TypedValue((int) DxfCode.LayerName, ProtectionOptions.LayerName_CenterAxis)
+                new TypedValue((int) DxfCode.LayerName, Options_LayerNames.LayerName_CenterAxis)
                 });
         /// <summary> 从 AutoCAD 界面中过滤出道路中线对象的过滤规则 </summary>
         public static SelectionFilter Filter
@@ -124,7 +125,7 @@ namespace eZcad.SubgradeQuantity.Entities
             var infoBlock = FindInfoBlock(docMdf.acEditor, centerLine);
             if (infoBlock != null)
             {
-                var att = infoBlock.GetAttributeReference(ProtectionOptions.StationFieldDef);
+                var att = infoBlock.GetAttributeReference(Options_General.StationFieldDef);
                 string station = att?.TextString;
 
                 if (station != null)
@@ -241,8 +242,10 @@ namespace eZcad.SubgradeQuantity.Entities
             if (!succ) return;  // 必须有路面对象
             xdata.LeftRoadSurfaceExists = true;
             xdata.LeftRoadSurfaceHandle = leftRoadSurf.Handle;
+            xdata.LeftRoadEdge = leftRoadSurf.EndPoint;
             xdata.RightRoadSurfaceExists = true;
             xdata.RightRoadSurfaceHandle = rightRoadSurf.Handle;
+            xdata.RightRoadEdge = rightRoadSurf.EndPoint;
 
             // 路槽
             Polyline leftRoadCushion;
@@ -384,7 +387,7 @@ namespace eZcad.SubgradeQuantity.Entities
             var filterWall = new[]
             {
                 new TypedValue((int) DxfCode.Start, "INSERT"),
-                new TypedValue((int) DxfCode.LayerName, ProtectionOptions.LayerName_SectionInfo),
+                new TypedValue((int) DxfCode.LayerName, Options_LayerNames.LayerName_SectionInfo),
                 // new TypedValue((int) DxfCode.BlockName, ProtectionOptions.BlockName_SectionInfo),
                 // 黄色 HDMD.HDM.SHUJ..横断面绘图模板 - 3点带横坡  "HDMD.HDM.SHUJ..横断面绘图模板-带标高"
             };
@@ -431,7 +434,7 @@ namespace eZcad.SubgradeQuantity.Entities
             var filterWall = new[]
             {
                 new TypedValue((int) DxfCode.Start, "INSERT"),
-                new TypedValue((int) DxfCode.LayerName, ProtectionOptions.LayerName_CenterElevation),
+                new TypedValue((int) DxfCode.LayerName, Options_LayerNames.LayerName_CenterElevation),
                 // new TypedValue((int) DxfCode.BlockName, ProtectionOptions.BlockName_CenterElevation),
                 // 黄色  "HDMD.ITEM.ZLJ.ZFG..横断面绘图模板-带标高"
             };
@@ -481,8 +484,8 @@ namespace eZcad.SubgradeQuantity.Entities
             {
                 new TypedValue((int) DxfCode.Start, "LWPOLYLINE"),
                 new TypedValue((int) DxfCode.Operator, "<OR"),
-                new TypedValue((int) DxfCode.LayerName, ProtectionOptions.LayerName_GroundSurface_Left),
-                new TypedValue((int) DxfCode.LayerName, ProtectionOptions.LayerName_GroundSurface_Right),
+                new TypedValue((int) DxfCode.LayerName, Options_LayerNames.LayerName_GroundSurface_Left),
+                new TypedValue((int) DxfCode.LayerName, Options_LayerNames.LayerName_GroundSurface_Right),
                 new TypedValue((int) DxfCode.Operator, "OR>")
             };
 
@@ -495,7 +498,7 @@ namespace eZcad.SubgradeQuantity.Entities
                 var lines =
                     res.Value.GetObjectIds().Select(id => id.GetObject(OpenMode.ForRead)).OfType<Polyline>().ToList();
 
-                var lefts = lines.Where(r => r.Layer == ProtectionOptions.LayerName_GroundSurface_Left);
+                var lefts = lines.Where(r => r.Layer == Options_LayerNames.LayerName_GroundSurface_Left);
                 Point3d inters;
                 foreach (var l in lefts)
                 {
@@ -507,7 +510,7 @@ namespace eZcad.SubgradeQuantity.Entities
                     }
                 }
 
-                var rights = lines.Where(r => r.Layer == ProtectionOptions.LayerName_GroundSurface_Right);
+                var rights = lines.Where(r => r.Layer == Options_LayerNames.LayerName_GroundSurface_Right);
                 foreach (var l in rights)
                 {
                     if (IntersectCenterLine(l.StartPoint, l.EndPoint, out inters))
@@ -553,7 +556,9 @@ namespace eZcad.SubgradeQuantity.Entities
                 var minPt = pl.GetLineSegmentAt(pl.NumberOfVertices - 2).EndPoint;
                 pl = xdata.RightGroundSurfaceHandle.GetDBObject<Polyline>(DocMdf.acDataBase);
                 var maxPt = pl.GetLineSegmentAt(pl.NumberOfVertices - 2).EndPoint;
-                return new Extents3d(minPt, maxPt);
+                return new Extents3d(
+                    new Point3d(Math.Min(minPt.X, maxPt.X), Math.Min(minPt.Y, maxPt.Y), Math.Min(minPt.Z, maxPt.Z)),
+                    new Point3d(Math.Max(minPt.X, maxPt.X), Math.Max(minPt.Y, maxPt.Y), Math.Max(minPt.Z, maxPt.Z)));
             }
             // 出错的情况下随便给一个默认值
             return new Extents3d(new Point3d(-1, -1, 0), new Point3d(1, 1, 0));
@@ -569,8 +574,8 @@ namespace eZcad.SubgradeQuantity.Entities
             {
                 new TypedValue((int) DxfCode.Start, "LWPOLYLINE"),
                 new TypedValue((int) DxfCode.Operator, "<OR"),
-                new TypedValue((int) DxfCode.LayerName, ProtectionOptions.LayerName_RoadSurface_Left),
-                new TypedValue((int) DxfCode.LayerName, ProtectionOptions.LayerName_RoadSurface_Right),
+                new TypedValue((int) DxfCode.LayerName, Options_LayerNames.LayerName_RoadSurface_Left),
+                new TypedValue((int) DxfCode.LayerName, Options_LayerNames.LayerName_RoadSurface_Right),
                 new TypedValue((int) DxfCode.Operator, "OR>")
             };
 
@@ -582,7 +587,7 @@ namespace eZcad.SubgradeQuantity.Entities
                 var lines =
                     res.Value.GetObjectIds().Select(id => id.GetObject(OpenMode.ForRead)).OfType<Polyline>().ToList();
 
-                var lefts = lines.Where(r => r.Layer == ProtectionOptions.LayerName_RoadSurface_Left);
+                var lefts = lines.Where(r => r.Layer == Options_LayerNames.LayerName_RoadSurface_Left);
                 Point3d inters;
                 foreach (var l in lefts)
                 {
@@ -593,7 +598,7 @@ namespace eZcad.SubgradeQuantity.Entities
                     }
                 }
 
-                var rights = lines.Where(r => r.Layer == ProtectionOptions.LayerName_RoadSurface_Right);
+                var rights = lines.Where(r => r.Layer == Options_LayerNames.LayerName_RoadSurface_Right);
                 foreach (var l in rights)
                 {
                     if (IntersectCenterLine(l.StartPoint, l.EndPoint, out inters))
@@ -626,8 +631,8 @@ namespace eZcad.SubgradeQuantity.Entities
             {
                 new TypedValue((int) DxfCode.Start, "LWPOLYLINE"),
                 new TypedValue((int) DxfCode.Operator, "<OR"),
-                new TypedValue((int) DxfCode.LayerName, ProtectionOptions.LayerName_RoadCushion_Left),
-                new TypedValue((int) DxfCode.LayerName, ProtectionOptions.LayerName_RoadCushion_Right),
+                new TypedValue((int) DxfCode.LayerName, Options_LayerNames.LayerName_RoadCushion_Left),
+                new TypedValue((int) DxfCode.LayerName, Options_LayerNames.LayerName_RoadCushion_Right),
                 new TypedValue((int) DxfCode.Operator, "OR>")
             };
 
@@ -639,7 +644,7 @@ namespace eZcad.SubgradeQuantity.Entities
                 var lines =
                     res.Value.GetObjectIds().Select(id => id.GetObject(OpenMode.ForRead)).OfType<Polyline>().ToList();
 
-                var lefts = lines.Where(r => r.Layer == ProtectionOptions.LayerName_RoadCushion_Left);
+                var lefts = lines.Where(r => r.Layer == Options_LayerNames.LayerName_RoadCushion_Left);
                 Point3d inters;
                 foreach (var l in lefts)
                 {
@@ -651,7 +656,7 @@ namespace eZcad.SubgradeQuantity.Entities
                     }
                 }
 
-                var rights = lines.Where(r => r.Layer == ProtectionOptions.LayerName_RoadCushion_Right);
+                var rights = lines.Where(r => r.Layer == Options_LayerNames.LayerName_RoadCushion_Right);
                 foreach (var l in rights)
                 {
                     if (IntersectCenterLine(l.StartPoint, l.EndPoint, out inters))
@@ -679,8 +684,8 @@ namespace eZcad.SubgradeQuantity.Entities
             {
                 new TypedValue((int) DxfCode.Start, "LWPOLYLINE"),
                 new TypedValue((int) DxfCode.Operator, "<OR"),
-                new TypedValue((int) DxfCode.LayerName, ProtectionOptions.LayerName_Boundary_Left),
-                new TypedValue((int) DxfCode.LayerName, ProtectionOptions.LayerName_Boundary_Right),
+                new TypedValue((int) DxfCode.LayerName, Options_LayerNames.LayerName_Boundary_Left),
+                new TypedValue((int) DxfCode.LayerName, Options_LayerNames.LayerName_Boundary_Right),
                 new TypedValue((int) DxfCode.Operator, "OR>")
             };
 
@@ -693,14 +698,14 @@ namespace eZcad.SubgradeQuantity.Entities
                     res.Value.GetObjectIds().Select(id => id.GetObject(OpenMode.ForRead)).OfType<Polyline>().ToList();
 
                 // 从多个挡墙线中搜索某个端点距离中轴线中心最近的那一条
-                var lefts = lines.Where(r => r.Layer == ProtectionOptions.LayerName_Boundary_Left);
+                var lefts = lines.Where(r => r.Layer == Options_LayerNames.LayerName_Boundary_Left);
                 var slp = GetClosestPolyLine(lefts, _MiddlePt);
                 if (slp != null)
                 {
                     leftBoundary = slp as Polyline;
                 }
                 //
-                var rights = lines.Where(r => r.Layer == ProtectionOptions.LayerName_Boundary_Right);
+                var rights = lines.Where(r => r.Layer == Options_LayerNames.LayerName_Boundary_Right);
                 slp = GetClosestPolyLine(rights, _MiddlePt);
                 if (slp != null)
                 {
@@ -719,7 +724,7 @@ namespace eZcad.SubgradeQuantity.Entities
             var filterType = new[]
             {
                 new TypedValue((int) DxfCode.Start, "LWPOLYLINE"),
-                new TypedValue((int) DxfCode.LayerName, ProtectionOptions.LayerName_Stairs),
+                new TypedValue((int) DxfCode.LayerName, Options_LayerNames.LayerName_Stairs),
             };
 
             var res = DocMdf.acEditor.SelectCrossingWindow(
@@ -790,8 +795,8 @@ namespace eZcad.SubgradeQuantity.Entities
             {
                 new TypedValue((int) DxfCode.Start, "LWPOLYLINE"),
                 new TypedValue((int) DxfCode.Operator, "<OR"),
-                new TypedValue((int) DxfCode.LayerName, ProtectionOptions.LayerName_RetainingWall_Left),
-                new TypedValue((int) DxfCode.LayerName, ProtectionOptions.LayerName_RetainingWall_Right),
+                new TypedValue((int) DxfCode.LayerName, Options_LayerNames.LayerName_RetainingWall_Left),
+                new TypedValue((int) DxfCode.LayerName, Options_LayerNames.LayerName_RetainingWall_Right),
                 new TypedValue((int) DxfCode.Operator, "OR>")
             };
 
@@ -804,14 +809,14 @@ namespace eZcad.SubgradeQuantity.Entities
                     res.Value.GetObjectIds().Select(id => id.GetObject(OpenMode.ForRead)).OfType<Polyline>().Where(r => r.Closed).ToList();
 
                 // 从多个挡墙线中搜索某个端点距离中轴线中心最近的那一条
-                var lefts = lines.Where(r => r.Layer == ProtectionOptions.LayerName_RetainingWall_Left);
+                var lefts = lines.Where(r => r.Layer == Options_LayerNames.LayerName_RetainingWall_Left);
                 var slp = GetClosestPolyLine(lefts, _MiddlePt);
                 if (slp != null)
                 {
                     leftRetainingWall = slp as Polyline;
                 }
                 //
-                var rights = lines.Where(r => r.Layer == ProtectionOptions.LayerName_RetainingWall_Right);
+                var rights = lines.Where(r => r.Layer == Options_LayerNames.LayerName_RetainingWall_Right);
                 slp = GetClosestPolyLine(rights, _MiddlePt);
                 if (slp != null)
                 {
@@ -848,7 +853,7 @@ namespace eZcad.SubgradeQuantity.Entities
                     if (slp != null)
                     {
                         leftSlope = slp as Polyline;
-                        leftFill = slp.Layer == ProtectionOptions.LayerName_Slope_Left_Fill;
+                        leftFill = slp.Layer == Options_LayerNames.LayerName_Slope_Left_Fill;
                     }
                 }
                 var rights =
@@ -860,7 +865,7 @@ namespace eZcad.SubgradeQuantity.Entities
                     if (slp != null)
                     {
                         rightSlope = slp as Polyline;
-                        rightFill = slp.Layer == ProtectionOptions.LayerName_Slope_Right_Fill;
+                        rightFill = slp.Layer == Options_LayerNames.LayerName_Slope_Right_Fill;
                     }
                 }
             }
@@ -895,12 +900,12 @@ namespace eZcad.SubgradeQuantity.Entities
             {
                 new TypedValue((int) DxfCode.Start, "LWPOLYLINE"),
                 new TypedValue((int) DxfCode.Operator, "<OR"),
-                new TypedValue((int) DxfCode.LayerName, ProtectionOptions.LayerName_DrainageDitch_Left),
-                new TypedValue((int) DxfCode.LayerName, ProtectionOptions.LayerName_DrainageDitch_Right),
-                new TypedValue((int) DxfCode.LayerName, ProtectionOptions.LayerName_CatchWater_Left),
-                new TypedValue((int) DxfCode.LayerName, ProtectionOptions.LayerName_CatchWater_Right),
-                new TypedValue((int) DxfCode.LayerName, ProtectionOptions.LayerName_SideDitch_Left),
-                new TypedValue((int) DxfCode.LayerName, ProtectionOptions.LayerName_SideDitch_Right),
+                new TypedValue((int) DxfCode.LayerName, Options_LayerNames.LayerName_DrainageDitch_Left),
+                new TypedValue((int) DxfCode.LayerName, Options_LayerNames.LayerName_DrainageDitch_Right),
+                new TypedValue((int) DxfCode.LayerName, Options_LayerNames.LayerName_CatchWater_Left),
+                new TypedValue((int) DxfCode.LayerName, Options_LayerNames.LayerName_CatchWater_Right),
+                new TypedValue((int) DxfCode.LayerName, Options_LayerNames.LayerName_SideDitch_Left),
+                new TypedValue((int) DxfCode.LayerName, Options_LayerNames.LayerName_SideDitch_Right),
                 new TypedValue((int) DxfCode.Operator, "OR>")
             };
 
@@ -912,12 +917,12 @@ namespace eZcad.SubgradeQuantity.Entities
             if (res.Status == PromptStatus.OK)
             {
                 var lines = res.Value.GetObjectIds().Select(id => id.GetObject(OpenMode.ForRead)).OfType<Polyline>().ToList();
-                leftDrainageDitch = GetDitch(lines.Where(l => l.Layer == ProtectionOptions.LayerName_DrainageDitch_Left).ToArray()) as Polyline;
-                rightDrainageDitch = GetDitch(lines.Where(l => l.Layer == ProtectionOptions.LayerName_DrainageDitch_Right).ToArray()) as Polyline;
-                leftCatchWater = GetDitch(lines.Where(l => l.Layer == ProtectionOptions.LayerName_CatchWater_Left).ToArray()) as Polyline;
-                rightCatchWater = GetDitch(lines.Where(l => l.Layer == ProtectionOptions.LayerName_CatchWater_Right).ToArray()) as Polyline;
-                leftSideDitch = GetDitch(lines.Where(l => l.Layer == ProtectionOptions.LayerName_SideDitch_Left).ToArray()) as Polyline;
-                rightSideDitch = GetDitch(lines.Where(l => l.Layer == ProtectionOptions.LayerName_SideDitch_Right).ToArray()) as Polyline;
+                leftDrainageDitch = GetDitch(lines.Where(l => l.Layer == Options_LayerNames.LayerName_DrainageDitch_Left).ToArray()) as Polyline;
+                rightDrainageDitch = GetDitch(lines.Where(l => l.Layer == Options_LayerNames.LayerName_DrainageDitch_Right).ToArray()) as Polyline;
+                leftCatchWater = GetDitch(lines.Where(l => l.Layer == Options_LayerNames.LayerName_CatchWater_Left).ToArray()) as Polyline;
+                rightCatchWater = GetDitch(lines.Where(l => l.Layer == Options_LayerNames.LayerName_CatchWater_Right).ToArray()) as Polyline;
+                leftSideDitch = GetDitch(lines.Where(l => l.Layer == Options_LayerNames.LayerName_SideDitch_Left).ToArray()) as Polyline;
+                rightSideDitch = GetDitch(lines.Where(l => l.Layer == Options_LayerNames.LayerName_SideDitch_Right).ToArray()) as Polyline;
             }
             return true;
         }
@@ -1005,7 +1010,9 @@ namespace eZcad.SubgradeQuantity.Entities
 
         #endregion
 
-        /// <summary> 提取断面中对应的边坡对象 </summary>
+        #region --- 与边坡相关的操作
+
+        /// <summary> 提取断面中对应的边坡对象。在某些断面中，可能根本就不会画出边坡线，此时返回 null </summary>
         /// <param name="left">true 表示提取左边的边坡， false 表示提取右边的边坡</param>
         /// <returns></returns>
         public SlopeLine GetSlopeLine(bool left)
@@ -1038,6 +1045,8 @@ namespace eZcad.SubgradeQuantity.Entities
             }
             return null;
         }
+
+        #endregion
 
         #region --- AutoCAD中几何坐标 与 横断面图中的 标高进行对应
 

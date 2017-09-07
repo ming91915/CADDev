@@ -27,7 +27,7 @@ namespace eZcad.Addins
         /// 
         /// </summary>
         /// <returns></returns>
-        public void GetVectorFromText(DocumentModifier docMdf, SelectionSet impliedSelection)
+        public ExternalCmdResult GetVectorFromText(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
             // 确定是要按行添加还是按列添加
             if (_addRow == null)
@@ -52,7 +52,7 @@ namespace eZcad.Addins
                 // 将数据保存到表格中
                 SaveDataToExcel(arr);
             }
-
+            return ExternalCmdResult.Commit;
         }
 
         /// <summary> 提示用户通过界面选择文字 </summary>
@@ -274,7 +274,7 @@ namespace eZcad.Addins
 
         /// <summary> 从文档中的表格排布的文字中提取出表格信息 </summary>
         /// <returns> 对整个二维表格的集合进行排序时，采用文本的坐标Y值大的在前面。这种排序方法的最终结果是：一个单元格中有多个文本时，Y值小的在后面，X是无序的。</returns>
-        public void GetTableFromText(DocumentModifier docMdf, SelectionSet impliedSelection)
+        public ExternalCmdResult GetTableFromText(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
 
             var ed = docMdf.acActiveDocument.Editor;
@@ -320,7 +320,9 @@ namespace eZcad.Addins
             else
             {
                 MessageBox.Show("行与列都必须选择至少两个点，以框出一个表格矩形。", "提示", MessageBoxButton.OK, MessageBoxImage.Error);
+                return ExternalCmdResult.Cancel;
             }
+            return ExternalCmdResult.Commit;
         }
 
         /// <summary> 在界面中选择一行点或者一列点，用来进行表格的单元格划分 </summary>

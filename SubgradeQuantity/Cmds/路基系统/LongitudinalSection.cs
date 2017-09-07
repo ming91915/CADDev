@@ -7,6 +7,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
+using eZcad.AddinManager;
 using eZcad.SubgradeQuantity.Cmds;
 using eZcad.SubgradeQuantity.Entities;
 using eZcad.SubgradeQuantity.Utility;
@@ -18,7 +19,8 @@ using eZstd.Enumerable;
 namespace eZcad.SubgradeQuantity.Cmds
 {
     /// <summary> 沿着道路纵向绘制边坡线 </summary>
-    public class LongitudinalSectionDrawer
+    [EcDescription("沿着道路纵向绘制边坡线")]
+    public class LongitudinalSectionDrawer : ICADExCommand
     {
         private DocumentModifier _docMdf;
 
@@ -26,22 +28,36 @@ namespace eZcad.SubgradeQuantity.Cmds
 
         /// <summary> 命令行命令名称，同时亦作为命令语句所对应的C#代码中的函数的名称 </summary>
         public const string CommandName = "LongitudinalSection";
+        private const string CommandText = @"绘制纵断面";
+        private const string CommandDescription = @"沿着道路纵向绘制边坡线与挡墙";
 
         /// <summary> 沿着道路纵向绘制边坡线 </summary>
         [CommandMethod(ProtectionConstants.eZGroupCommnad, CommandName, CommandFlags.UsePickSet)
-        , DisplayName(@"绘制纵断面"), Description("沿着道路纵向绘制边坡线与挡墙")
-            , RibbonItem(@"绘制纵断面", "沿着道路纵向绘制边坡线与挡墙", ProtectionConstants.ImageDirectory + "LongitudinalSection_32.png")]
+        , DisplayName(CommandText), Description(CommandDescription)
+            , RibbonItem(CommandText, CommandDescription, ProtectionConstants.ImageDirectory + "LongitudinalSection_32.png")]
         public void LongitudinalSection()
         {
             DocumentModifier.ExecuteCommand(LongitudinalSection);
         }
 
+        public ExternalCommandResult Execute(SelectionSet impliedSelection, ref string errorMessage,
+            ref IList<ObjectId> elementSet)
+        {
+            var s = new LongitudinalSectionDrawer();
+            return AddinManagerDebuger.DebugInAddinManager(s.LongitudinalSection,
+                impliedSelection, ref errorMessage, ref elementSet);
+        }
+
+        #endregion
+
+
         /// <summary> 沿着道路纵向绘制边坡线 </summary>
-        public void LongitudinalSection(DocumentModifier docMdf, SelectionSet impliedSelection)
+        public ExternalCmdResult LongitudinalSection(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
             _docMdf = docMdf;
             ProtectionUtils.SubgradeEnvironmentConfiguration(docMdf);
             var allSections = ProtectionUtils.GetAllSections(docMdf, sort: true);
+            if (allSections == null || allSections.Length <= 2) return ExternalCmdResult.Cancel;
             if (allSections.Length > 1)
             {
                 //
@@ -58,7 +74,7 @@ namespace eZcad.SubgradeQuantity.Cmds
                 // 选择绘图的基点
                 Point3d p3;
                 var succ = GetBasePt(_docMdf, out p3);
-                if (!succ) return;
+                if (!succ) return ExternalCmdResult.Cancel;
 
                 var basePt2D = new Point2d(p3.X, p3.Y);
                 //
@@ -68,7 +84,7 @@ namespace eZcad.SubgradeQuantity.Cmds
                 var ss = EditStateIdentifier.GetCurrentEditState(_docMdf);
                 ss.CurrentBTR.UpgradeOpen();
                 var layer_Slope = Utils.GetOrCreateLayer(_docMdf, ProtectionConstants.LayerName_LongitudinalSlopes);
-                docMdf.acDataBase.Clayer = layer_Slope.Id;
+                // docMdf.acDataBase.Clayer = layer_Slope.Id;
 
                 // 绘制中轴线
                 var roadCenterPl = CreatePolyline(allStations, new double[allStations.Length], basePt2D, minStation, rx,
@@ -124,9 +140,9 @@ namespace eZcad.SubgradeQuantity.Cmds
                 //
                 ss.CurrentBTR.DowngradeOpen();
             }
+            return ExternalCmdResult.Commit;
         }
 
-        #endregion
 
         /// <summary>
         /// 

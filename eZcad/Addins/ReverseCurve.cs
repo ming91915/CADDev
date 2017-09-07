@@ -24,7 +24,7 @@ namespace eZcad.Addins
         /// <summary> 将指定的曲线的起始点反转 </summary>
         /// <param name="docMdf"></param>
         /// <param name="impliedSelection"> 用户在执行方法之前已经选择好的对象。</param>
-        public static void Execute(DocumentModifier docMdf, SelectionSet impliedSelection)
+        public static ExternalCmdResult Execute(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
             docMdf.acEditor.Command();
 
@@ -55,6 +55,7 @@ namespace eZcad.Addins
 
                 c.DowngradeOpen();
             }
+            return ExternalCmdResult.Commit;
         }
         
         private static Curve PickOneCurve(DocumentModifier docMdf)

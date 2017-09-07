@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Autodesk.AutoCAD.ApplicationServices;
+using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
+using eZcad.SubgradeQuantity.Utility;
 using Microsoft.Win32;
 
 namespace eZcad.Utility
@@ -34,46 +36,6 @@ namespace eZcad.Utility
                     return null;
             }
 
-        }
-
-        // 块定义，插入模型空间  
-        public static ObjectId BlkInDb(BlockTableRecord block, Point3d pt, Database db)
-        {
-            BlockReference blkRef = null;
-
-            ObjectId id = new ObjectId();
-
-            using (Transaction tr = db.TransactionManager.StartTransaction())
-            {
-                // 打开模型空间  
-                BlockTable bt = tr.GetObject(db.BlockTableId, OpenMode.ForRead) as BlockTable;
-                BlockTableRecord modeSpce = tr.GetObject(bt[BlockTableRecord.ModelSpace], OpenMode.ForWrite) as BlockTableRecord;
-                //  
-
-                // 新建一个块引用  
-                blkRef = new BlockReference(pt, block.ObjectId);
-                id = modeSpce.AppendEntity(blkRef);
-                tr.AddNewlyCreatedDBObject(blkRef, true);
-
-                // 遍历块记录中的所有实体，加入块引用中  
-                foreach (ObjectId idTemp in block)
-                {
-                    // 判断该实体是否是块定义 ，也可以以块定义方式打开，但是会产生事物嵌套  
-                    if (idTemp.ObjectClass.Equals(Autodesk.AutoCAD.Runtime.RXObject.GetClass(typeof(AttributeDefinition))))
-                    {
-                        AttributeDefinition adDef = tr.GetObject(idTemp, OpenMode.ForRead) as AttributeDefinition;
-                        if (adDef != null)
-                        {
-                            AttributeReference ar = new AttributeReference(adDef.Position, adDef.TextString, adDef.Tag, new ObjectId());
-                            blkRef.AttributeCollection.AppendAttribute(ar);
-                        }
-                    }
-                }
-
-                tr.Commit();
-            }
-
-            return id;
         }
 
         /// <summary> 将插件程序注册到注册表中 </summary>
@@ -177,6 +139,44 @@ Windows Registry Editor Version 5.00
             return null;
         }
 
+        /// <summary> 直接修改字典中 Xrecord 类型数据的属性 </summary>
+        /// <param name="dict"> 用户必须自行确保此时 dict 已经打开写入权限 </param>
+        /// <param name="buffer"> 要添加或者修改的键中的新值 </param>
+        /// <remarks>也可以不通过修改属性的方法，而参考<seealso cref="OverlayDictValue"/>函数直接将同名键删除然后新建的方式来进行同名键值的刷新。</remarks>
+        public static void ModifyDictXrecord(Transaction trans, DBDictionary dict, string key, ResultBuffer buffer)
+        {
+            if (dict.Contains(key))
+            {
+                var rec = dict.GetAt(key).GetObject(OpenMode.ForWrite) as Xrecord;
+                rec.Data = buffer;
+                rec.DowngradeOpen();
+            }
+            else
+            {
+                var rec = new Xrecord() { Data = buffer };
+                dict.SetAt(key, rec);
+                trans.AddNewlyCreatedDBObject(rec, true);
+            }
+        }
+
+        /// <summary> 先移除同名键，然后再通过SetAt添加新的同名键值对 </summary>
+        /// <param name="trans"></param>
+        /// <param name="dict"> 用户必须自行确保此时 dict 已经打开写入权限 </param>
+        /// <param name="key">要进行添加或者修改的键</param>
+        /// <param name="value">要添加或者刷新的新值，可以是 <seealso cref="Xrecord"/>、<seealso cref="DBDictionary"/> 等类型 </param>
+        /// <remarks>对于<seealso cref="DBDictionary"/>的键值对的修改，一般是要求先将键值对添加到<seealso cref="DBDictionary"/>中，然后再对<param name="value"></param>值的属性进行设置</remarks>
+        public static void OverlayDictValue(Transaction trans, DBDictionary dict, string key, DBObject value)
+        {
+            if (dict.Contains(key))
+            {
+                // 对于同名键，如果直接SetAt，而不先将其从字典容器中移除的话，可以正常地进行数据的修改，但是在执行Undo操作时，此键值对会直接被删除，而不会还原到其修改前的值。
+                dict.Remove(key);
+            }
+            dict.SetAt(key, value);
+            // 如果在将字典对象添加到其容器字典之前，就用 AddNewlyCreatedDBObject ，则会出现报错：eNotInDatabase
+            trans.AddNewlyCreatedDBObject(value, true);
+        }
+
         /// <summary> 如果数据库中有此图层，则直接返回，如果没有，则创建对应图层 </summary>
         /// <param name="docMdf"></param>
         /// <param name="layerName"></param>
@@ -200,7 +200,19 @@ Windows Registry Editor Version 5.00
                 return ltr;
             }
         }
-        
+
+        /// <summary> 索引水位线图层 </summary>
+        /// <returns></returns>
+        public static LayerTableRecord GetOrCreateLayer_WaterLine(DocumentModifier docMdf)
+        {
+            var l = GetOrCreateLayer(docMdf, ProtectionConstants.LayerName_WaterLine);
+            l.UpgradeOpen();
+            l.Color = Color.FromColor(System.Drawing.Color.Aqua);
+            l.LineWeight = LineWeight.LineWeight070;
+            l.DowngradeOpen();
+            return l;
+        }
+
         /// <summary>
         /// 从数据库中按名称搜索或者创建出<seealso cref="RegAppTableRecord"/>对象
         /// </summary>
@@ -353,6 +365,26 @@ Windows Registry Editor Version 5.00
                 ed.SetCurrentView(view);
             }
         }
+
         #endregion
+
+        #region ---   XData XRecord 相关操作
+
+        /// <summary> 将一个布尔值转换为对应的 ExtendedData </summary>
+        public static TypedValue SetExtendedDataBool(bool value)
+        {
+            return new TypedValue((int)DxfCode.ExtendedDataInteger16, value);
+        }
+
+        /// <summary> 从 ExtendedData 值中提取出对应的 布尔值  </summary>
+        public static bool GetExtendedDataBool(TypedValue buff)
+        {
+            return (Int16)buff.Value == 1;
+        }
+
+        #endregion
+
+        /// <summary> 将焦点从操作的<seealso cref="System.Windows.Forms.Form"/>转移到 AutoCAD 主界面窗口。此操作在对 无模态窗口 操作时非常有用。 </summary>
+        public static void FocusOnMainUIWindow() { Application.MainWindow.Focus(); }
     }
 }

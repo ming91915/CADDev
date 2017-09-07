@@ -27,7 +27,7 @@ namespace eZcad.Addins
         }
 
         /// <summary> 在新选择集中过滤出与当前选择集不相交的对象 </summary>
-        public static void IntersectSelSet(DocumentModifier docMdf, SelectionSet impliedSelection)
+        public static ExternalCmdResult IntersectSelSet(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
             var ed = docMdf.acEditor;
             if (impliedSelection != null && impliedSelection.Count > 0)
@@ -62,7 +62,9 @@ namespace eZcad.Addins
             else
             {
                 docMdf.WriteNow("\n请先选择要用来取交集的源对象集合。");
+            return ExternalCmdResult.Cancel;
             }
+            return ExternalCmdResult.Commit;
         }
 
         /// <summary>

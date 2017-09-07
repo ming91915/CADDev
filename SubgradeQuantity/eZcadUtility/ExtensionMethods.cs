@@ -65,16 +65,27 @@ namespace eZcad.Utility
 
         #region ---   几何操作
 
-        /// <summary> 将三维多段线投影到XY平面上，以转换为二维多段线 </summary>
+        /// <summary> 将三维折线多段线投影到XY平面上，以转换为二维多段线 </summary>
         /// <param name="pl"></param>
         /// <returns></returns>
-        public static CompositeCurve2d Get2dCurve(this Polyline pl)
+        public static CompositeCurve2d Get2dLinearCurve(this Polyline pl)
+        {
+            return (pl.GetGeCurve() as CompositeCurve3d).Get2dLinearCurve();
+        }
+
+        /// <summary> 将三维折线多段线投影到XY平面上，以转换为二维多段线 </summary>
+        /// <param name="pl"></param>
+        /// <returns></returns>
+        public static CompositeCurve2d Get2dLinearCurve(this CompositeCurve3d pl)
         {
             LineSegment2d seg2d;
-            var seg2ds = new Curve2d[pl.NumberOfVertices - 1];
-            for (int i = 0; i < pl.NumberOfVertices - 1; i++)
+            var curve3ds = pl.GetCurves();
+            var seg2ds = new Curve2d[curve3ds.Length];
+            Curve3d c;
+            for (int i = 0; i < curve3ds.Length; i++)
             {
-                seg2d = pl.GetLineSegment2dAt(i);
+                c = curve3ds[i];
+                seg2d = new LineSegment2d(c.StartPoint.ToXYPlane(), c.EndPoint.ToXYPlane());
                 seg2ds[i] = (seg2d);
             }
             return new CompositeCurve2d(seg2ds);
@@ -97,6 +108,18 @@ namespace eZcad.Utility
             var id = handle.GetObjectId(db);
             return id.GetObject(OpenMode.ForRead) as T;
         }
+        #endregion
+
+        #region ---   Exception
+
+
+        /// <summary> 具体的报错信息与报错位置 </summary>
+        /// <returns></returns>
+        public static string AppendMessage(this Exception ex)
+        {
+            return "\r\n" + ex.Message + "\r\n" + ex.StackTrace;
+        }
+
         #endregion
 
     }

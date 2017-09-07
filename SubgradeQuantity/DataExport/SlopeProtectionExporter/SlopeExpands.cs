@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using eZcad.SubgradeQuantity.Entities;
 
 namespace eZcad.SubgradeQuantity.DataExport
@@ -12,9 +13,8 @@ namespace eZcad.SubgradeQuantity.DataExport
 
             public double Station { get; }
 
-            /// <summary> 其值可能为 null，表示此桩号断面上没有对应边坡 </summary>
+            /// <summary> 此属性不会为 null，如果某桩号某一侧没有边坡对象（是几何图形都没有，而不是因为挡墙覆盖而没有）时，则此属性的值为<seealso cref="SlopeData"/>的默认实例对象 </summary>
             public SlopeData XData { get; }
-
             //
             /// <summary> key 表示子边坡的Index。集合中可能没有任何元素，表示此边坡中没有任何子边坡对象。 </summary>
             public Dictionary<double, SlopeSegInfo> SlopeInfo { get; private set; }
@@ -27,7 +27,7 @@ namespace eZcad.SubgradeQuantity.DataExport
             /// <summary> 构造函数 </summary>
             /// <param name="station"></param>
             /// <param name="slopeLine">此参数的值可能为 null ，表示此桩号断面上没有对应边坡 </param>
-            public SlopeExpands(double station, SlopeLine slopeLine)
+            public SlopeExpands(double station, SlopeLine slopeLine,bool onLeft)
             {
                 //
                 Station = station;
@@ -39,7 +39,7 @@ namespace eZcad.SubgradeQuantity.DataExport
                 }
                 else
                 {
-                    XData = new SlopeData(station);
+                    XData = new SlopeData(station,onLeft);
                 }
                 // ConstructSlopeSegInfo();
                 foreach (var sd in XData.Slopes)
@@ -68,7 +68,7 @@ namespace eZcad.SubgradeQuantity.DataExport
 
             public double BackArea { get; set; }
             public double FrontArea { get; set; }
-            
+
             public SlopeSegInfo(double frontStation, double frontArea, double backStation, double backArea)
             {
                 FrontStation = frontStation;
@@ -84,6 +84,7 @@ namespace eZcad.SubgradeQuantity.DataExport
         }
 
         /// <summary> 在某一断面的边坡中，指定类型的防护方式所点的范围 </summary>
+        [Flags]
         private enum ProtectionRange
         {
             /// <summary> 边坡中没有任何一个子边坡的防护方式与指定的防护相匹配 </summary>
@@ -99,7 +100,10 @@ namespace eZcad.SubgradeQuantity.DataExport
             AllSection = AllSlopes + AllPlatforms,
 
             /// <summary> 边坡中只有部分边坡或平台应用对应的防护方式 </summary>
-            PartialSlopeSegs = 4,
+            PartialSlopes = 4,
+
+            /// <summary> 边坡中只有部分边坡或平台应用对应的防护方式 </summary>
+            PartialPlatforms = 8,
         }
 
     }

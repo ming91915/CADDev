@@ -1,12 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>
-    </ProductVersion>
-    <SchemaVersion>
-    </SchemaVersion>
     <ProjectGuid>{9F3B3C1D-DCD2-4E9C-9FE1-8CE3EA7BB160}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -14,10 +11,7 @@
     <AssemblyName>SubgradeQuantity</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <FileUpgradeFlags>
-    </FileUpgradeFlags>
-    <UpgradeBackupLocation />
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -36,6 +30,7 @@
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -43,50 +38,281 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <DocumentationFile>..\bin\SubgradeQuantity.xml</DocumentationFile>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>..\bin\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DocumentationFile>..\bin\SubgradeQuantity.xml</DocumentationFile>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <OutputPath>bin\x64\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>
-    </StartupObject>
+    <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <!--ACA References Begin-->
-    <!--ACA Refences End-->
-    <!--AME Referebces Begin-->
-    <!--AME Reference End-->
+    <Compile Include="ApplicationSetup\AddinManagerDebuger.cs" />
+    <Compile Include="ApplicationSetup\AddinSetup.cs" />
+    <Compile Include="ApplicationSetup\ApplicationSetup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ApplicationSetup\ApplicationSetup.Designer.cs">
+      <DependentUpon>ApplicationSetup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ApplicationSetup\DllActivator_SubgradeQuantity.cs" />
+    <Compile Include="ApplicationSetup\DocumentModifier.cs" />
+    <Compile Include="ApplicationSetup\RibbonButtonAttribute.cs" />
+    <Compile Include="Cmds\Ec_DebugTemplate.cs" />
+    <Compile Include="Cmds\Ec_SubgradeQuantity.cs" />
+    <Compile Include="Cmds\ProjectInfos.cs" />
+    <Compile Include="Cmds\工程量导出\CriterionEditor.cs" />
+    <Compile Include="Cmds\工程量导出\InfosGetter_FillCutInters.cs" />
+    <Compile Include="Cmds\工程量导出\InfosGetter_HighFill.cs" />
+    <Compile Include="Cmds\工程量导出\InfosGetter_Slope.cs" />
+    <Compile Include="Cmds\工程量导出\InfosGetter_StairExcav.cs" />
+    <Compile Include="Cmds\工程量导出\InfosGetter_SteepSlope.cs" />
+    <Compile Include="Cmds\工程量导出\InfosGetter_ThinFill.cs" />
+    <Compile Include="Cmds\工程量导出\SubgradeEnvir.cs" />
+    <Compile Include="Cmds\路基系统\LongitudinalSection.cs" />
+    <Compile Include="Cmds\路基系统\SectionInfosPlayer.cs" />
+    <Compile Include="Cmds\路基系统\SectionsConstructor.cs" />
+    <Compile Include="Cmds\路基系统\SectionWalker.cs" />
+    <Compile Include="Cmds\路基系统\StationNavigator.cs" />
+    <Compile Include="Cmds\边坡防护\ProtectionFlusher.cs" />
+    <Compile Include="Cmds\边坡防护\ProtectionPlacer.cs" />
+    <Compile Include="Cmds\边坡防护\SlopeConstructor.cs" />
+    <Compile Include="Cmds\边坡防护\SlopeCutter.cs" />
+    <Compile Include="Cmds\边坡防护\SlopeEraser.cs" />
+    <Compile Include="Cmds\边坡防护\SlopeProtTextModifier.cs" />
+    <Compile Include="Cmds\边坡防护\SlopeSegMerge.cs" />
+    <Compile Include="Cmds\边坡防护\SlopeWalker.cs" />
+    <Compile Include="DataExport\DataExporter.cs" />
+    <Compile Include="DataExport\Exporter_FillCutInters.cs" />
+    <Compile Include="DataExport\Exporter_FillCutIntersBackup.cs" />
+    <Compile Include="DataExport\Exporter_HighFillDeepCut.cs" />
+    <Compile Include="DataExport\Exporter_StairsExcavCross.cs" />
+    <Compile Include="DataExport\Exporter_StairsExcavLong.cs" />
+    <Compile Include="DataExport\Exporter_SteepSlope.cs" />
+    <Compile Include="DataExport\Exporter_ThinFillShallowCut.cs" />
+    <Compile Include="DataExport\Exporter_ThinFillShallowCutInterpolateBackup.cs" />
+    <Compile Include="DataExport\LongitudinalSection.cs" />
+    <Compile Include="DataExport\SlopeProtectionExporter\Exporter_SlopeProtection.cs" />
+    <Compile Include="DataExport\SlopeProtectionExporter\DataRow.cs" />
+    <Compile Include="DataExport\SlopeProtectionExporter\SlopeExpands.cs" />
+    <Compile Include="DataExport\SlopeProtectionExporter\SlopeSegsGeom.cs" />
+    <Compile Include="DataExport\SlopeProtectionExporter\SlopeSegsGeomBackup.cs" />
+    <Compile Include="DataExport\StationInfo.cs" />
+    <Compile Include="DataExport\WorkSheetData.cs" />
+    <Compile Include="Entities\AllStations.cs" />
+    <Compile Include="Entities\CrossSectionRange.cs" />
+    <Compile Include="Entities\RetainingWall.cs" />
+    <Compile Include="Entities\SectionInfo.cs" />
+    <Compile Include="Entities\ProtTextData.cs" />
+    <Compile Include="Entities\SlopeData.cs" />
+    <Compile Include="Entities\SlopeLine.cs" />
+    <Compile Include="Entities\SoilRockRange.cs" />
+    <Compile Include="Entities\StationRangeEntity.cs" />
+    <Compile Include="Entities\Structure.cs" />
+    <Compile Include="Entities\SubgradeSection.cs" />
+    <Compile Include="eZcadUtility\CurrentEditState.cs" />
+    <Compile Include="eZcadUtility\EntityArray2D.cs" />
+    <Compile Include="eZcadUtility\ExtensionMethods.cs" />
+    <Compile Include="eZcadUtility\FormOk.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="eZcadUtility\TextUtils.cs" />
+    <Compile Include="eZcadUtility\Utils.cs" />
+    <Compile Include="Options\DbXdata.cs" />
+    <Compile Include="Options\Form_CriterionEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Options\Form_CriterionEditor.Designer.cs">
+      <DependentUpon>Form_CriterionEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Options\Form_ProjectInfos.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Options\Form_ProjectInfos.Designer.cs">
+      <DependentUpon>Form_ProjectInfos.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Options\Form_SubgradeEnvir.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Options\Form_SubgradeEnvir.Designer.cs">
+      <DependentUpon>Form_SubgradeEnvir.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Options\Options_Collections.cs" />
+    <Compile Include="Options\Options_General.cs" />
+    <Compile Include="Options\Options_LayerNames.cs" />
+    <Compile Include="Options\StaticCriterion.cs" />
+    <Compile Include="Options\StaticCriterions.cs" />
+    <Compile Include="ParameterForm\ModalPForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ParameterForm\ModalPForm.Designer.cs">
+      <DependentUpon>ModalPForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ParameterForm\ModelessPForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ParameterForm\ModelessPForm.Designer.cs">
+      <DependentUpon>ModelessPForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ParameterForm\ModelessPF_SeperateByElev.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ParameterForm\ModelessPF_SeperateByElev.Designer.cs">
+      <DependentUpon>ModelessPF_SeperateByElev.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ParameterForm\PF_ExportFillCutInters.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ParameterForm\PF_ExportFillCutInters.Designer.cs">
+      <DependentUpon>PF_ExportFillCutInters.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ParameterForm\PF_ModifyProtectionText.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ParameterForm\PF_ModifyProtectionText.Designer.cs">
+      <DependentUpon>PF_ModifyProtectionText.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ParameterForm\PF_PlaceProt.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ParameterForm\PF_PlaceProt.Designer.cs">
+      <DependentUpon>PF_PlaceProt.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ParameterForm\PF_SeperateByElev.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ParameterForm\PF_SeperateByElev.Designer.cs">
+      <DependentUpon>PF_SeperateByElev.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PropertyEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PropertyEditor.designer.cs">
+      <DependentUpon>PropertyEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SlopeProtection\AutoProtection\AutoProtectionCriterions.cs" />
+    <Compile Include="SlopeProtection\AutoProtection\AutoProtectionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SlopeProtection\AutoProtection\AutoProtectionForm.Designer.cs">
+      <DependentUpon>AutoProtectionForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SlopeProtection\AutoProtection\AutoProtectionForm_PlatformCriterionController.cs" />
+    <Compile Include="SlopeProtection\AutoProtection\AutoProtectionForm_SlopeCriterionController.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SlopeProtection\AutoProtection\SchemeRenameForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SlopeProtection\AutoProtection\SchemeRenameForm.Designer.cs">
+      <DependentUpon>SchemeRenameForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SlopeProtection\ForceProtection.cs" />
+    <Compile Include="SlopeProtection\ISlopeSeg.cs" />
+    <Compile Include="SlopeProtection\Platform.cs" />
+    <Compile Include="SlopeProtection\ProtectionTags.cs" />
+    <Compile Include="SlopeProtection\Slope.cs" />
+    <Compile Include="SlopeProtection\SlopeSegLister.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SlopeProtection\SlopeSegLister.Designer.cs">
+      <DependentUpon>SlopeSegLister.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Utility\ProtectionConstants.cs" />
+    <Compile Include="Utility\ProtectionUtils.cs" />
+    <EmbeddedResource Include="ApplicationSetup\ApplicationSetup.resx">
+      <DependentUpon>ApplicationSetup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="eZcadUtility\FormOk.resx">
+      <DependentUpon>FormOk.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Options\Form_CriterionEditor.resx">
+      <DependentUpon>Form_CriterionEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Options\Form_ProjectInfos.resx">
+      <DependentUpon>Form_ProjectInfos.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Options\Form_SubgradeEnvir.resx">
+      <DependentUpon>Form_SubgradeEnvir.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ParameterForm\ModalPForm.resx">
+      <DependentUpon>ModalPForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ParameterForm\ModelessPForm.resx">
+      <DependentUpon>ModelessPForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ParameterForm\ModelessPF_SeperateByElev.resx">
+      <DependentUpon>ModelessPF_SeperateByElev.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ParameterForm\PF_ExportFillCutInters.resx">
+      <DependentUpon>PF_ExportFillCutInters.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ParameterForm\PF_ModifyProtectionText.resx">
+      <DependentUpon>PF_ModifyProtectionText.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ParameterForm\PF_PlaceProt.resx">
+      <DependentUpon>PF_PlaceProt.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ParameterForm\PF_SeperateByElev.resx">
+      <DependentUpon>PF_SeperateByElev.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <EmbeddedResource Include="PropertyEditor.resx">
+      <DependentUpon>PropertyEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SlopeProtection\AutoProtection\AutoProtectionForm.resx">
+      <DependentUpon>AutoProtectionForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SlopeProtection\AutoProtection\SchemeRenameForm.resx">
+      <DependentUpon>SchemeRenameForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SlopeProtection\SlopeSegLister.resx">
+      <DependentUpon>SlopeSegLister.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <None Include="Resources\icons\SubgradeIcons.psd" />
+    <None Include="Resources\icons\路基防护.cuix" />
+    <None Include="Resources\SQ_纬地横断面绘图模板.dwg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.5.2 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="accoremgd">
       <HintPath>C:\Softwares\Civil Engineering\AutoCAD 2016\accoremgd.dll</HintPath>
       <Private>False</Private>
@@ -107,220 +333,60 @@
     <Reference Include="Microsoft.Office.Interop.Excel, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core">
-      <RequiredTargetFramework>4.0</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xaml" />
-    <Reference Include="System.Xml.Linq">
-      <RequiredTargetFramework>4.0</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Data.DataSetExtensions">
-      <RequiredTargetFramework>4.0</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
-    <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ApplicationSetup\AddinManagerDebuger.cs" />
-    <Compile Include="ApplicationSetup\ApplicationSetup.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="ApplicationSetup\ApplicationSetup.Designer.cs">
-      <DependentUpon>ApplicationSetup.cs</DependentUpon>
-    </Compile>
-    <Compile Include="ApplicationSetup\RibbonButtonAttribute.cs" />
-    <Compile Include="Cmds\Ec_SubgradeQuantity.cs" />
-    <Compile Include="Cmds\工程量导出\InfosGetter_FillCutInters.cs" />
-    <Compile Include="Cmds\路基系统\StationNavigator.cs" />
-    <Compile Include="ApplicationSetup\AddinSetup.cs" />
-    <Compile Include="Cmds\工程量导出\InfosGetter_ThinFill.cs" />
-    <Compile Include="Cmds\边坡防护\SeperateByElev.cs" />
-    <Compile Include="Cmds\边坡防护\SlopeEraser.cs" />
-    <Compile Include="Cmds\边坡防护\ProtectionFlusher.cs" />
-    <Compile Include="Cmds\OptionsSetter.cs" />
-    <Compile Include="Cmds\路基系统\SectionsConstructor.cs" />
-    <Compile Include="Cmds\路基系统\LongitudinalSection.cs" />
-    <Compile Include="Cmds\边坡防护\ProtectionPlacer.cs" />
-    <Compile Include="Cmds\边坡防护\SlopeConstructor.cs" />
-    <Compile Include="Cmds\边坡防护\SlopeWalker.cs" />
-    <Compile Include="Cmds\路基系统\SectionInfosHandler.cs" />
-    <Compile Include="DataExport\SlopeProtectionExporter\ProtMtdInfo.cs" />
-    <Compile Include="DataExport\SlopeProtectionExporter\SlopeExpands.cs" />
-    <Compile Include="DataExport\SlopeProtectionExporter\SlopeSegsGeom.cs" />
-    <Compile Include="Entities\AllStations.cs" />
-    <Compile Include="Entities\RetainingWall.cs" />
-    <Compile Include="Cmds\工程量导出\InfosGetter_Slope.cs" />
-    <Compile Include="DataExport\CriterionEditor.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="DataExport\CriterionEditor.Designer.cs">
-      <DependentUpon>CriterionEditor.cs</DependentUpon>
-    </Compile>
-    <Compile Include="DataExport\Exporter_ThinFillShallowCut.cs" />
-    <Compile Include="DataExport\SlopeProtectionExporter\Exporter_SlopeProtection.cs" />
-    <Compile Include="DataExport\DataExporter.cs" />
-    <Compile Include="SlopeProtection\AutoProtectionForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SlopeProtection\AutoProtectionForm.Designer.cs">
-      <DependentUpon>AutoProtectionForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="SlopeProtection\PlatformCriterionController.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SlopeProtection\SlopeCriterionController.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SlopeProtection\AutoProtectionCriterions.cs" />
-    <Compile Include="Utility\ProtectionConstants.cs" />
-    <Compile Include="Entities\SectionInfo.cs" />
-    <Compile Include="SlopeProtection\ISlopeSeg.cs" />
-    <Compile Include="Entities\SlopeData.cs" />
-    <Compile Include="SlopeProtection\SlopeSegLister.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SlopeProtection\SlopeSegLister.Designer.cs">
-      <DependentUpon>SlopeSegLister.cs</DependentUpon>
-    </Compile>
-    <Compile Include="PropertyEditor.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="PropertyEditor.designer.cs">
-      <DependentUpon>PropertyEditor.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Entities\SubgradeSection.cs" />
-    <Compile Include="Utility\ProtectionOptions.cs" />
-    <Compile Include="Utility\ProtectionUtils.cs" />
-    <Compile Include="Entities\SlopeLine.cs" />
-    <Compile Include="MatchOptionsForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="MatchOptionsForm.Designer.cs">
-      <DependentUpon>MatchOptionsForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="SubgradeOptions.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SubgradeOptions.Designer.cs">
-      <DependentUpon>SubgradeOptions.cs</DependentUpon>
-    </Compile>
-    <Compile Include="DataExport\MileageInfo.cs" />
-    <Compile Include="DataExport\WorkSheetData.cs" />
-    <Compile Include="ApplicationSetup\DllActivator_eZcad.cs" />
-    <Compile Include="ApplicationSetup\DocumentModifier.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="Utility\StaticCriterion.cs" />
-    <Compile Include="eZcadUtility\EntityArray2D.cs" />
-    <Compile Include="eZcadUtility\ExtensionMethods.cs" />
-    <Compile Include="eZcadUtility\FormOk.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="eZcadUtility\SolidUtils.cs" />
-    <Compile Include="eZcadUtility\TextUtils.cs" />
-    <Compile Include="eZcadUtility\CurrentEditState.cs" />
-    <Compile Include="eZcadUtility\Utils.cs" />
+    <Content Include="Resources\icons\ConstructSlopes_32.png" />
+    <Content Include="Resources\icons\DataExport_32.png" />
+    <Content Include="Resources\icons\DeleteProtection_32.png" />
+    <Content Include="Resources\icons\EraseSlope_32.png" />
+    <Content Include="Resources\icons\ExportFillCutIntersections_32.png" />
+    <Content Include="Resources\icons\FlushProtection_32.png" />
+    <Content Include="Resources\icons\HighFill_32.png" />
+    <Content Include="Resources\icons\LongitudinalSection_32.png" />
+    <Content Include="Resources\icons\Navigator_32.png" />
+    <Content Include="Resources\icons\PlaceProtection_32.png" />
+    <Content Include="Resources\icons\ProjectInfos_32.png" />
+    <Content Include="Resources\icons\SectionInfos_32.png" />
+    <Content Include="Resources\icons\Section_32.png" />
+    <Content Include="Resources\icons\SegMerge_32.png" />
+    <Content Include="Resources\icons\SepByElev_32.png" />
+    <Content Include="Resources\icons\SetOptions_32.png" />
+    <Content Include="Resources\icons\SlopeWalk_32.png" />
+    <Content Include="Resources\icons\StairExcav_32.png" />
+    <Content Include="Resources\icons\SteepSlope_32.png" />
+    <Content Include="Resources\icons\Structures_32.png" />
+    <Content Include="Resources\icons\ThinFill_32.png" />
   </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="ApplicationSetup\ApplicationSetup.resx">
-      <DependentUpon>ApplicationSetup.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DataExport\CriterionEditor.resx">
-      <DependentUpon>CriterionEditor.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SlopeProtection\AutoProtectionForm.resx">
-      <DependentUpon>AutoProtectionForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SlopeProtection\SlopeSegLister.resx">
-      <DependentUpon>SlopeSegLister.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="PropertyEditor.resx">
-      <DependentUpon>PropertyEditor.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MatchOptionsForm.resx">
-      <DependentUpon>MatchOptionsForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SubgradeOptions.resx">
-      <DependentUpon>SubgradeOptions.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="eZcadUtility\FormOk.resx">
-      <DependentUpon>FormOk.cs</DependentUpon>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <BootstrapperPackage Include=".NETFramework,Version=v4.0">
-      <Visible>False</Visible>
-      <ProductName>Microsoft .NET Framework 4 %28x86 and x64%29</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
-      <Visible>False</Visible>
-      <ProductName>Windows Installer 3.1</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <COMReference Include="AutoCAD">
-      <Guid>{4E3F492A-FB57-4439-9BF0-1567ED84A3A9}</Guid>
-      <VersionMajor>1</VersionMajor>
-      <VersionMinor>0</VersionMinor>
-      <Lcid>0</Lcid>
-      <WrapperTool>tlbimp</WrapperTool>
-      <Isolated>False</Isolated>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </COMReference>
-    <COMReference Include="stdole">
-      <Guid>{00020430-0000-0000-C000-000000000046}</Guid>
-      <VersionMajor>2</VersionMajor>
-      <VersionMinor>0</VersionMinor>
-      <Lcid>0</Lcid>
-      <WrapperTool>primary</WrapperTool>
-      <Isolated>False</Isolated>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </COMReference>
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\..\eZOffice\eZx_API\eZx_API.csproj">
       <Project>{60bf7d52-330a-4ed2-9632-4efb8fb6f231}</Project>
       <Name>eZx_API</Name>
+      <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\..\eZstd\Projects\eZstd\eZstd.csproj">
       <Project>{fb9b6528-5424-4b7a-aeba-6733450dc44b}</Project>
       <Name>eZstd</Name>
+      <Private>True</Private>
     </ProjectReference>
     <ProjectReference Include="..\eZcad_AddinManager\eZcad_AddinManager.csproj">
       <Project>{835fa817-ebe4-4c2b-91d4-a6b945878105}</Project>
       <Name>eZcad_AddinManager</Name>
       <Private>False</Private>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Resources\" />
+    <ProjectReference Include="SQControls\SQControls.csproj">
+      <Project>{A70160DF-0AA8-4BD2-88B6-C8E34D870658}</Project>
+      <Name>SQControls</Name>
+      <Private>False</Private>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

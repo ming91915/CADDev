@@ -28,7 +28,7 @@ namespace eZcad.Addins
         }
 
         /// <summary> 在新选择集中过滤出与当前选择集不相交的对象 </summary>
-        public static void ScaleText(DocumentModifier docMdf, SelectionSet impliedSelection)
+        public static ExternalCmdResult ScaleText(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
             var texts = GetTexts(docMdf);
             //
@@ -61,6 +61,7 @@ namespace eZcad.Addins
                 }
             }
             docMdf.acActiveDocument.Editor.Regen();
+            return  ExternalCmdResult.Commit;
         }
 
         [CommandMethod("GetTexts", CommandFlags.UsePickSet)]

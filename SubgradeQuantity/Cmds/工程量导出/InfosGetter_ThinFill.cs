@@ -4,6 +4,7 @@ using System.Linq;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
+using eZcad.AddinManager;
 using eZcad.SubgradeQuantity.Cmds;
 using eZcad.SubgradeQuantity.DataExport;
 using eZcad.SubgradeQuantity.Entities;
@@ -15,7 +16,8 @@ using eZcad.Utility;
 namespace eZcad.SubgradeQuantity.Cmds
 {
     /// <summary> 提取并计算边坡防护工程量 </summary>
-    public class InfosGetter_ThinFill
+        [EcDescription(CommandDescription)]
+    public class InfosGetter_ThinFill : ICADExCommand
     {
         private DocumentModifier _docMdf;
 
@@ -24,25 +26,36 @@ namespace eZcad.SubgradeQuantity.Cmds
         /// <summary> 命令行命令名称，同时亦作为命令语句所对应的C#代码中的函数的名称 </summary>
         public const string CommandName = "ThinFillShallowCut";
 
+        private const string CommandText = @"低填浅挖";
+        private const string CommandDescription = @"提取低填浅挖工程数量表";
+
         /// <summary> 将所有的边坡信息提取出来并制成相应表格 </summary>
-        [CommandMethod(ProtectionConstants.eZGroupCommnad, CommandName, CommandFlags.Modal | CommandFlags.UsePickSet)
-        , DisplayName(@"低填浅挖"), Description("提取低填浅挖工程数量表")
-        , RibbonItem(@"低填浅挖", "提取低填浅挖工程数量表", ProtectionConstants.ImageDirectory + "DataExport_32.png")]
+        [CommandMethod(ProtectionConstants.eZGroupCommnad, CommandName, ProtectionConstants.ModelState | CommandFlags.UsePickSet)
+        , DisplayName(CommandText), Description(CommandDescription)
+        , RibbonItem(CommandText, CommandDescription, ProtectionConstants.ImageDirectory + "ThinFill_32.png")]
         public void ThinFillShallowCut()
         {
             DocumentModifier.ExecuteCommand(ThinFillShallowCut);
         }
 
+        public ExternalCommandResult Execute(SelectionSet impliedSelection, ref string errorMessage,
+                ref IList<ObjectId> elementSet)
+        {
+            var sp = new InfosGetter_ThinFill();
+            return AddinManagerDebuger.DebugInAddinManager(sp.ThinFillShallowCut,
+                impliedSelection, ref errorMessage, ref elementSet);
+        }
+
         #endregion
 
         /// <summary> 将所有的边坡信息提取出来并制成相应表格 </summary>
-        public void ThinFillShallowCut(DocumentModifier docMdf, SelectionSet impliedSelection)
+        public ExternalCmdResult ThinFillShallowCut(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
             _docMdf = docMdf;
             ProtectionUtils.SubgradeEnvironmentConfiguration(docMdf);
 
-            var centerLines = ProtectionUtils.GetSections(docMdf.acEditor);
-            if (centerLines == null || centerLines.Count == 0) return;
+            var centerLines = ProtectionUtils.SelecteSections(docMdf.acEditor);
+            if (centerLines == null || centerLines.Count == 0) return ExternalCmdResult.Cancel;
 
             // 
             // 所有的断面
@@ -72,12 +85,7 @@ namespace eZcad.SubgradeQuantity.Cmds
             // 将边坡防护数据导出
             var exporter = new Exporter_ThinFillShallowCut(docMdf, handledSections, allSections);
             exporter.ExportThinFillShallowCut();
+            return ExternalCmdResult.Commit;
         }
-
-
-        #region ---   从界面中选择可能的道路中线轴线
-
-
-        #endregion
     }
 }

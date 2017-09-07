@@ -8,10 +8,10 @@ namespace eZcad.SubgradeQuantity
 {
     public class AddinManagerDebuger
     {
-        public static ExternalCommandResult DebugInAddinManager(DocumentModifier.ExternalCommand cmd,
+        public static ExternalCommandResult DebugInAddinManager(ExternalCommand cmd,
             SelectionSet impliedSelection, ref string errorMessage, ref IList<ObjectId> elementSet)
         {
-            var dat = new DllActivator_eZcad();
+            var dat = new DllActivator_SubgradeQuantity();
             dat.ActivateReferences();
 
             using (var docMdf = new DocumentModifier(true))
@@ -21,10 +21,23 @@ namespace eZcad.SubgradeQuantity
                     // 先换个行，显示效果更清爽
                     docMdf.WriteNow("\n");
 
-                    cmd(docMdf, impliedSelection);
+                    var canCommit = cmd(docMdf, impliedSelection);
                     //
-                    docMdf.acTransaction.Commit();
-                    return ExternalCommandResult.Succeeded;
+                    switch (canCommit)
+                    {
+                        case ExternalCmdResult.Commit:
+                            docMdf.acTransaction.Commit();
+                            return ExternalCommandResult.Succeeded;
+                            break;
+                        case ExternalCmdResult.Cancel:
+                            docMdf.acTransaction.Abort();
+                            return ExternalCommandResult.Cancelled;
+                            break;
+                        default:
+                            docMdf.acTransaction.Abort();
+                            return ExternalCommandResult.Cancelled;
+                            break;
+                    }
                 }
                 catch (Exception ex)
                 {

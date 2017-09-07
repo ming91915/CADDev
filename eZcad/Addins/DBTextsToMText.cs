@@ -30,7 +30,7 @@ namespace eZcad.Addins
         }
 
         /// <summary> 将单行文字转换为多行文字 </summary>
-        public static void ConvertDBTextsToMText(DocumentModifier docMdf, SelectionSet impliedSelection)
+        public static ExternalCmdResult ConvertDBTextsToMText(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
            if (ManualMode(docMdf))
             {
@@ -40,6 +40,7 @@ namespace eZcad.Addins
             {
                 ConvertInAutoMode(docMdf);
             }
+           return ExternalCmdResult.Commit;
         }
 
         private static void ConvertInAutoMode(DocumentModifier docMdf)

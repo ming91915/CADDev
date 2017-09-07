@@ -1,0 +1,68 @@
+﻿using System.Collections.Generic;
+using System.ComponentModel;
+using System.Windows;
+using System.Windows.Forms;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.Runtime;
+using eZcad.AddinManager;
+using eZcad.SubgradeQuantity.Cmds;
+using eZcad.SubgradeQuantity.DataExport;
+using eZcad.SubgradeQuantity.Options;
+using eZcad.SubgradeQuantity.Utility;
+using eZcad.Utility;
+
+[assembly: CommandClass(typeof(eZcad.SubgradeQuantity.Cmds.ProjectInfos))]
+
+namespace eZcad.SubgradeQuantity.Cmds
+{
+    /// <summary> 路基工程量相关选项的设置 </summary>
+    [EcDescription(CommandDescription)]
+    public class ProjectInfos : ICADExCommand
+    {
+        #region --- 命令设计
+
+        /// <summary> 命令行命令名称，同时亦作为命令语句所对应的C#代码中的函数的名称 </summary>
+        public const string CommandName = "SetProjectInfos";
+        private const string CommandText = @"项目信息";
+        private const string CommandDescription = @"道路路基工程量的基础项目信息设置";
+
+        /// <summary> 边坡防护的选项设置 </summary>
+        [CommandMethod(ProtectionConstants.eZGroupCommnad, CommandName, ProtectionConstants.ModelState | CommandFlags.UsePickSet)
+        , DisplayName(CommandText), Description(CommandDescription)
+        , RibbonItem(CommandText, CommandDescription, ProtectionConstants.ImageDirectory + "ProjectInfos_32.png")]
+        public void SetProjectInfos()
+        {
+            DocumentModifier.ExecuteCommand(SetProjectInfos);
+        }
+
+        public ExternalCommandResult Execute(SelectionSet impliedSelection, ref string errorMessage,
+            ref IList<ObjectId> elementSet)
+        {
+            var s = new ProjectInfos();
+            return AddinManagerDebuger.DebugInAddinManager(s.SetProjectInfos,
+                impliedSelection, ref errorMessage, ref elementSet);
+        }
+
+
+        #endregion  /// <summary> 边坡防护的选项设置 </summary>
+        public ExternalCmdResult SetProjectInfos(DocumentModifier docMdf, SelectionSet impliedSelection)
+        {
+            // var allXdataTypes = DbXdata.GetAllXdataTypes();
+            var handledXdataTypes = DbXdata.DatabaseXdataType.General | DbXdata.DatabaseXdataType.LayerNames;
+            DbXdata.RefreshOptionsFromDb(docMdf, handledXdataTypes);
+
+            var f = new Form_ProjectInfos(docMdf);
+            var res = f.ShowDialog(null);
+            if (res == DialogResult.OK)
+            {
+                DbXdata.FlushXData(docMdf, handledXdataTypes);
+            }
+            else if (res == DialogResult.Cancel)
+            {
+                DbXdata.RefreshOptionsFromDb(docMdf, handledXdataTypes);
+            }
+            return ExternalCmdResult.Cancel;
+        }
+    }
+}

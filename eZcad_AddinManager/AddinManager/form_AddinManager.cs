@@ -9,6 +9,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows.Forms;
 using eZcad_AddinManager;
+using Application = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace eZcad.AddinManager
 {
@@ -305,8 +306,13 @@ namespace eZcad.AddinManager
             AddinManagerAssembly asm = ndCommand.Parent.Tag as AddinManagerAssembly;
             //
             string assemblyPath = asm.Path;
-            // 将窗口缩小
-            this.WindowState = FormWindowState.Minimized;
+
+            //  ---------- 将窗口缩小 ----------
+            if (checkBox_MinimizeWhileRun.Checked)
+            {
+                this.WindowState = FormWindowState.Minimized;
+            }
+
             // 执行外部命令
             ExCommandExecutor.InvokeExternalCommand(assemblyPath, exCommand);
         }

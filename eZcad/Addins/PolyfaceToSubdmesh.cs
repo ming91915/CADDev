@@ -23,7 +23,7 @@ namespace eZcad.Addins
         }
 
         /// <summary> 将多面网络转换为细分网格 </summary>
-        public static void Convert(DocumentModifier docMdf, SelectionSet impliedSelection)
+        public static ExternalCmdResult Convert(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
             var mtd = ChooseMethod(docMdf.acEditor);
 
@@ -38,6 +38,7 @@ namespace eZcad.Addins
                 ConvertSubDmeshToPolyfaceMesh(docMdf, deleteOriginal);
 
             }
+            return ExternalCmdResult.Commit;
         }
 
         private static void ConvertPolyfaceToSubDmesh(DocumentModifier docMdf, bool deletePolyfaceMesh)

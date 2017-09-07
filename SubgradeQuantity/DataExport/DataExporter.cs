@@ -4,17 +4,14 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using Autodesk.AutoCAD.Geometry;
 using eZcad.SubgradeQuantity.Entities;
 using eZcad.SubgradeQuantity.Utility;
-using eZcad.Utility;
 using eZstd.MarshalReflection;
-using eZstd.Mathematics;
+using eZstd.Miscellaneous;
 using eZx_API.Entities;
 using Microsoft.Office.Interop.Excel;
 using Application = Microsoft.Office.Interop.Excel.Application;
-using MessageBox = System.Windows.MessageBox;
-using Utils = eZstd.Miscellaneous.Utils;
+using MessageBox = System.Windows.Forms.MessageBox;
 using Window = Microsoft.Office.Interop.Excel.Window;
 
 namespace eZcad.SubgradeQuantity.DataExport
@@ -40,24 +37,97 @@ namespace eZcad.SubgradeQuantity.DataExport
 
         protected readonly DocumentModifier _docMdf;
 
-        /// <summary> 整个项目中的所有横断面 </summary>
-        protected readonly IList<SubgradeSection> AllSections;
+        ///// <summary> 整个项目中的所有横断面 </summary>
+        //protected readonly IList<SubgradeSection> AllSections;
 
+        /// <summary> 整个项目中的所有桩号，小桩号位于集合前面 </summary>
         protected readonly double[] AllStations;
+
+        ///// <summary> 整个道路中所有横断面的数据，小桩号位于集合前面 </summary>
+        //protected readonly SectionInfo[] AllSectionDatas;
 
         #endregion
 
         /// <summary> 构造函数 </summary>
         /// <param name="docMdf"></param>
-        /// <param name="allSections">整个项目中的所有断面 </param>
-        public DataExporter(DocumentModifier docMdf, IList<SubgradeSection> allSections)
+        /// <param name="allStaions">整个项目中的所有断面，小桩号必须位于集合前面 </param>
+        public DataExporter(DocumentModifier docMdf, double[] allStaions)
         {
             _docMdf = docMdf;
-            AllSections = allSections;
+            //   AllSections = allSections;
             //
-            AllStations = allSections.Select(r => r.XData.Station).ToArray();
-            ;
+            // AllSectionDatas = allSections.Select(r => r.XData).ToArray();
+            // AllStations = AllSectionDatas.Select(r => r.Station).ToArray();
+            AllStations = allStaions;
         }
+
+        #region --- 构造每个断面所占的几何区间
+
+        /// <summary> 初始化所有断面所占据的几何区间 </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="allStations"></param>
+        /// <returns></returns>
+        public static SortedDictionary<double, CrossSectionRange<T>> InitializeGeometricRange<T>(double[] allStations) where T : HalfValue, new()
+        {
+            var allSections = new SortedDictionary<double, CrossSectionRange<T>>();
+            T backValue;
+            T frontValue;
+            var count = allStations.Length;
+            double lastStation = allStations[0];
+            for (int i = 0; i < count - 1; i++)
+            {
+                var nextStation = (allStations[i] + allStations[i + 1]) / 2;
+                backValue = new T();
+                backValue.SetParentStation(allStations[i]);
+                backValue.EdgeStation = lastStation;
+                //
+                frontValue = new T();
+                frontValue.SetParentStation(allStations[i]);
+                frontValue.EdgeStation = nextStation;
+                //
+                var s1 = new CrossSectionRange<T>(allStations[i], backValue, frontValue);
+                allSections.Add(allStations[i], s1);
+                lastStation = nextStation;
+            }
+            // 最后一个区间
+            backValue = new T();
+            backValue.SetParentStation(allStations[count - 1]);
+            backValue.EdgeStation = lastStation;
+            //
+            frontValue = new T();
+            frontValue.SetParentStation(allStations[count - 1]);
+            frontValue.EdgeStation = allStations[count - 1];
+            var s2 = new CrossSectionRange<T>(allStations[count - 1], backValue, frontValue);
+            allSections.Add(allStations[count - 1], s2);
+            //
+            return allSections;
+        }
+
+        /// <summary> 考虑桥梁隧道等结构物对边坡工程量的修正 </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sections">单独的断面集合</param>
+        /// <param name="blockStructures"></param>
+        protected void CutWithBlocks<T>(List<CrossSectionRange<T>> sections, List<Structure> blockStructures) where T : HalfValue
+        {
+            foreach (var bs in blockStructures)
+            {
+                var s = sections.FirstOrDefault(r => r.StationInbetween == bs.ConnectedBackStaion);
+                if (s != null)
+                {
+                    // 说明此断面刚好位于指定的结构后面（桩号比结构起始桩号小一点）
+                    s.FrontValue.CutByBlock(bs.StartStation);
+                }
+                s = sections.FirstOrDefault(r => r.StationInbetween == bs.ConnectedFrontStaion);
+                if (s != null)
+                {
+                    // 说明此断面刚好位于指定的结构前面（桩号比结构起始桩号大一点）
+                    s.BackValue.CutByBlock(bs.EndStation);
+                }
+            }
+        }
+
+        #endregion
+
 
         #region --- 排序与插值
 
@@ -154,12 +224,56 @@ namespace eZcad.SubgradeQuantity.DataExport
 
         #endregion
 
+
+        /// <summary> 将多个断面区间进行合并 </summary>
+        /// <param name="selectedSlopes">多个区间对象的集合</param>
+        /// <returns></returns>
+        protected List<CrossSectionRange<T>> MergeLinkedSections<T>(List<CrossSectionRange<T>> selectedSlopes) where T : HalfValue
+        {
+            if (selectedSlopes.Count == 0) return selectedSlopes;
+
+            var res = new List<CrossSectionRange<T>>();
+            var lastRange = selectedSlopes[0];
+            res.Add(lastRange);
+            for (int i = 1; i < selectedSlopes.Count; i++)
+            {
+                var rg = selectedSlopes[i];
+                var succ = lastRange.TryMerge(rg);
+                if (!succ)
+                {
+                    res.Add(rg);
+                    lastRange = rg;
+                }
+            }
+            return res;
+        }
+
+        #region --- 数据导出到 Excel 或 文本
+
+        public static void ExportWorkSheetDatas(List<WorkSheetData> sheet_Infos)
+        {
+            // 数据导出到 Excel 
+            string errMsg;
+            var succ = ExportDataToExcel(sheet_Infos, out errMsg);
+
+            if (!succ)
+            {
+                var res = MessageBox.Show($"将数据导出到Excel中时出错：{errMsg}，\r\n是否将其以文本的形式导出？", @"提示",
+                    MessageBoxButtons.OKCancel, MessageBoxIcon.Error);
+                if (res == DialogResult.OK)
+                {
+                    // 数据导出到 Txt 
+                    ExportAllDataToDirectory(sheet_Infos);
+                }
+            }
+        }
+
         #region --- 数据导出到 Excel
 
         /// <summary> 将所有表格中记录的数据导出到指定Excel工作簿的多个工作表中 </summary>
         /// <param name="sheet_Infos"></param>
         /// <returns></returns>
-        protected static bool ExportDataToExcel(List<WorkSheetData> sheet_Infos, out string errMsg)
+        private static bool ExportDataToExcel(List<WorkSheetData> sheet_Infos, out string errMsg)
         {
             Application excelApp = null;
             errMsg = null;
@@ -272,7 +386,7 @@ namespace eZcad.SubgradeQuantity.DataExport
         /// 将所有表格中记录的数据导出到指定文件夹中的多个文本中
         /// </summary>
         /// <param name="typeInfos"></param>
-        protected static void ExportAllDataToDirectory(List<WorkSheetData> typeInfos)
+        private static void ExportAllDataToDirectory(List<WorkSheetData> typeInfos)
         {
             string dirPath = null;
             var fbd = new FolderBrowserDialog()
@@ -339,5 +453,18 @@ namespace eZcad.SubgradeQuantity.DataExport
         }
 
         #endregion
+
+        #endregion
+
+        /// <summary> 某项工程量指标出现在横断面的哪一侧 </summary>
+        [Flags]
+        protected enum SectionSide
+        {
+            无 = 0,
+            左 = 1,
+            右 = 2,
+            /// <summary> 横断面左右两侧 </summary>
+            全幅 = 左 | 右,
+        }
     }
 }

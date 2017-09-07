@@ -7,6 +7,7 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
 using eZcad.SubgradeQuantity.Cmds;
 using eZcad.SubgradeQuantity.Entities;
+using eZcad.SubgradeQuantity.Options;
 using eZcad.SubgradeQuantity.Utility;
 using eZcad.Utility;
 
@@ -23,7 +24,7 @@ namespace eZcad.SubgradeQuantity.Cmds
 
         /// <summary> 命令行命令名称，同时亦作为命令语句所对应的C#代码中的函数的名称 </summary>
         public const string CommandName = "ConstructSections";
- 
+
         /// <summary> 根据 AutoCAD 中的几何图形构造出完整的路基横断面信息系统 </summary>
         [CommandMethod(ProtectionConstants.eZGroupCommnad, CommandName, CommandFlags.UsePickSet)
             , DisplayName(@"构造路基断面"), Description("根据 AutoCAD 中的几何图形构造出完整的路基横断面信息系统")
@@ -34,7 +35,7 @@ namespace eZcad.SubgradeQuantity.Cmds
         }
 
         /// <summary> 根据 AutoCAD 中的几何图形构造出完整的路基横断面信息系统 </summary>
-        public void ConstructSections(DocumentModifier docMdf, SelectionSet impliedSelection)
+        public ExternalCmdResult ConstructSections(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
             ProtectionUtils.SubgradeEnvironmentConfiguration(docMdf);
 
@@ -61,6 +62,7 @@ namespace eZcad.SubgradeQuantity.Cmds
                 }
                 MessageBox.Show($"添加{sectionAxes.Count}个横断面", @"成功");
             }
+            return ExternalCmdResult.Commit;
         }
 
         #endregion
@@ -70,7 +72,7 @@ namespace eZcad.SubgradeQuantity.Cmds
             var filterType = new[]
         {
                 new TypedValue((int) DxfCode.Start, "LINE"),
-                new TypedValue((int) DxfCode.LayerName, ProtectionOptions.LayerName_CenterAxis),
+                new TypedValue((int) DxfCode.LayerName, Options_LayerNames.LayerName_CenterAxis),
             };
 
             // 请求在图形区域选择对象

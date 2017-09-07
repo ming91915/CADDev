@@ -28,7 +28,7 @@ namespace eZcad.Addins
         }
 
         /// <summary> 在新选择集中过滤出与当前选择集不相交的对象 </summary>
-        public static void ScaleDimText(DocumentModifier docMdf, SelectionSet impliedSelection)
+        public static ExternalCmdResult ScaleDimText(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
 
             var app = Application.AcadApplication as AcadApplication;
@@ -38,7 +38,7 @@ namespace eZcad.Addins
             var tran = docMdf.acTransaction;
 
             var dims = SelectDims((docMdf));
-            if (dims == null || dims.Length == 0) return;
+            if (dims == null || dims.Length == 0) return ExternalCmdResult.Cancel;
             //
             var res = docMdf.acEditor.GetDouble("设置标注单位的缩放比例:");
             double scaleRatio = 0;
@@ -48,7 +48,7 @@ namespace eZcad.Addins
             }
             else
             {
-                return;
+                return ExternalCmdResult.Cancel;
             }
             // 进行缩放
             foreach (var dimId in dims)
@@ -84,6 +84,7 @@ namespace eZcad.Addins
                     }
                 }
             }
+            return ExternalCmdResult.Commit;
         }
         
         /// <summary>

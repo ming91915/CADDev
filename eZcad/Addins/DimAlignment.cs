@@ -24,15 +24,15 @@ namespace eZcad.Addins
         }
 
         /// <summary> 在新选择集中过滤出与当前选择集不相交的对象 </summary>
-        public static void AlignDim(DocumentModifier docMdf, SelectionSet impliedSelection)
+        public static ExternalCmdResult AlignDim(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
             var c = PickOneCurve(docMdf);
-            if (c == null) return;
+            if (c == null) return ExternalCmdResult.Cancel;
             c.Highlight();
             //
             var dims = SelectDims(docMdf);
             c.Unhighlight();
-            if (dims == null || dims.Length == 0) return;
+            if (dims == null || dims.Length == 0) return ExternalCmdResult.Cancel;
             //
             foreach (var dimId in dims)
             {
@@ -50,6 +50,7 @@ namespace eZcad.Addins
                     dim.DowngradeOpen();
                 }
             }
+            return ExternalCmdResult.Commit;
         }
 
         private static void AlignDimsToLine(DocumentModifier docMdf, RotatedDimension dim, Curve c)

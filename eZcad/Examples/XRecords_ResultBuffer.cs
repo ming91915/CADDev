@@ -128,11 +128,15 @@ namespace eZcad.Examples
                     DBDictionary extensionDict =
                         (DBDictionary)trans.GetObject(ent.ExtensionDictionary, OpenMode.ForRead);
 
-                    // DBDictionary 中插入 DBDictionary
+
+                    //  ---------  DBDictionary 中插入 DBDictionary ，注意操作顺序：先添加到父字典，再添加到数据库 -------------
                     var newDb = new DBDictionary();
                     extensionDict.SetAt("MyData", newDb);
+
                     // 如果在将字典对象添加到其容器字典 extensionDict 之前，就用 AddNewlyCreatedDBObject ，则会出现报错：eNotInDatabase
                     trans.AddNewlyCreatedDBObject(newDb, true);
+                    //  ----------------------------------------------------------
+
 
                     // DBDictionary 中插入 Xrecord
                     var rec = new Xrecord() { Data = new ResultBuffer(new TypedValue { }) };

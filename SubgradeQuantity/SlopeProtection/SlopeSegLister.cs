@@ -264,6 +264,14 @@ namespace eZcad.SubgradeQuantity.SlopeProtection
             column.Width = 70;
             column.DefaultCellStyle = dicimalStyle2;
             dgv.Columns.Add(column);
+            // -------------------------
+
+            column = new DataGridViewTextBoxColumn();
+            column.DataPropertyName = "SegHeight";
+            column.Name = "坡高(m)";
+            column.Width = 70;
+            column.DefaultCellStyle = dicimalStyle2;
+            dgv.Columns.Add(column);
 
             // -------------------------
             column = new DataGridViewTextBoxColumn();
@@ -276,6 +284,8 @@ namespace eZcad.SubgradeQuantity.SlopeProtection
             column = new DataGridViewTextBoxColumn();
             column.DataPropertyName = "ProtectionLength";
             column.Name = "防护长度(m)";
+            column.ReadOnly = true;
+            column.ToolTipText = @"如果子边坡并不需要全长设置防护，则可将其设置为需要防护的长度值";
             column.Width = 100;
             column.DefaultCellStyle = dicimalStyle3;
             column.ValueType = typeof(double); // 限定此列的数据类型必须为数值
@@ -395,14 +405,14 @@ namespace eZcad.SubgradeQuantity.SlopeProtection
         #region --- 边坡 分区段 进行自动防护
 
         /// <summary> 对边坡进行自动防护的规则 </summary>
-        private AutoProtectionCriterions _autoSpCriterion = new AutoProtectionCriterions();
+        private AutoProtectionCriterions _autoSpCriterion;
 
         /// <summary> 导入自动防护规则 </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void btn_btn_ImportProtectRull_Click(object sender, EventArgs e)
         {
-            var f = new AutoProtectionForm();
+            var f = AutoProtectionForm.GetUniqueInstance();
             var res = f.ShowDialog();
             if (res == DialogResult.OK)
             {
@@ -425,7 +435,14 @@ namespace eZcad.SubgradeQuantity.SlopeProtection
                 }
                 dgv.Refresh();
             }
-
+            else
+            {
+                var res = MessageBox.Show(@"请先选择自动防护规则", @"提示", MessageBoxButtons.OKCancel, MessageBoxIcon.Information);
+                if (res == DialogResult.OK)
+                {
+                    btn_btn_ImportProtectRull_Click(null, null);
+                }
+            }
         }
 
         #endregion

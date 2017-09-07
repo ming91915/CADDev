@@ -21,10 +21,10 @@ namespace eZcad.Examples
 
         #region --- GetSelection
 
-        public static void GetSelection()
+        public static void GetSelectionWithFilter()
         {
             // 创建一个 TypedValue 数组，用于定义过滤条件
-            var acTypValAr = new TypedValue[]
+            var filterTypes = new TypedValue[]
             {
                 new TypedValue((int) DxfCode.Color, 5),
                 new TypedValue((int) DxfCode.Start, "CIRCLE"),
@@ -41,25 +41,23 @@ namespace eZcad.Examples
                 new TypedValue((int) DxfCode.Start, "DIMENSION"),
                 // 将标注类型限制为转角标注与对齐标注
                 new TypedValue((int) DxfCode.Operator, "<OR"),
-                new TypedValue(100, "AcDbAlignedDimension)"),
-                new TypedValue(100, "AcDbRotatedDimension))"),
+                new TypedValue(100, "AcDbAlignedDimension"),
+                new TypedValue(100, "AcDbRotatedDimension"),
                 new TypedValue((int) DxfCode.Operator, "OR>")
             };
             */
 
-            // 将过滤条件赋值给SelectionFilter对象
-            var acSelFtr = new SelectionFilter(acTypValAr);
 
             //获取当前文档编辑器
             Editor acDocEd = Application.DocumentManager.MdiActiveDocument.Editor;
 
             // 请求在图形区域选择对象
-            var acSSPrompt = acDocEd.GetSelection(acSelFtr);
+            var res = acDocEd.GetSelection(new SelectionFilter(filterTypes));
 
             // 如果提示状态OK，表示对象已选
-            if (acSSPrompt.Status == PromptStatus.OK)
+            if (res.Status == PromptStatus.OK)
             {
-                var acSSet = acSSPrompt.Value;
+                var acSSet = res.Value;
                 Application.ShowAlertDialog("Number of objects selected: " + acSSet.Count.ToString());
             }
             else
@@ -74,32 +72,32 @@ namespace eZcad.Examples
             Editor ed = doc.Editor;
 
             // Create our options object
-            var pso = new PromptSelectionOptions();
+            var op = new PromptSelectionOptions();
 
             // Add our keywords
-            pso.Keywords.Add("First");
-            pso.Keywords.Add("Second");
+            op.Keywords.Add("First");
+            op.Keywords.Add("Second");
 
             // Set our prompts to include our keywords
-            string kws = pso.Keywords.GetDisplayString(true);
-            pso.MessageForAdding = "\nPlease add objects to selection or " + kws; // 当用户在命令行中输入A（或Add）时，命令行出现的提示字符。
-            pso.MessageForRemoval = "\nPlease remove objects from selection or " + kws;
+            string kws = op.Keywords.GetDisplayString(true);
+            op.MessageForAdding = "\nPlease add objects to selection or " + kws; // 当用户在命令行中输入A（或Add）时，命令行出现的提示字符。
+            op.MessageForRemoval = "\nPlease remove objects from selection or " + kws;
             // 当用户在命令行中输入Re（或Remove）时，命令行出现的提示字符。
 
             // Implement a callback for when keywords are entered
             // 当用户在命令行中输入关键字时进行对应操作。
-            pso.KeywordInput +=
+            op.KeywordInput +=
                 delegate (object sender, SelectionTextInputEventArgs e)
                 {
                     ed.WriteMessage("\nKeyword entered: {0}", e.Input);
                 };
 
             // Finally run the selection and show any results
-            var psr = ed.GetSelection(pso);
+            var res = ed.GetSelection(op);
 
-            if (psr.Status == PromptStatus.OK)
+            if (res.Status == PromptStatus.OK)
             {
-                ed.WriteMessage($"\n{psr.Value.Count} object{(psr.Value.Count == 1 ? "" : "s")} selected.");
+                ed.WriteMessage($"\n{res.Value.Count} object{(res.Value.Count == 1 ? "" : "s")} selected.");
             }
         }
 
@@ -314,6 +312,29 @@ namespace eZcad.Examples
                 return res.Value;
             }
             return 0;
+        }
+
+        /// <summary> 在命令行中获取一个小数值 </summary>
+        /// <param name="value">成功获得的数值</param>
+        /// <returns>操作成功，则返回 true，操作失败或手动取消操作，则返回 false</returns>
+        private static bool GetDouble(Editor ed, out double value)
+        {
+            value = double.MaxValue;
+            var op = new PromptDoubleOptions(message: "\n用来进行剪切的标高：")
+            {
+                AllowNegative = true,
+                AllowNone = false,
+                AllowZero = true,
+                AllowArbitraryInput = false
+            };
+            //
+            var res = ed.GetDouble(op);
+            if (res.Status == PromptStatus.OK)
+            {
+                value = res.Value;
+                return true;
+            }
+            return false;
         }
     }
 }

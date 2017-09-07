@@ -200,7 +200,7 @@ Windows Registry Editor Version 5.00
                 return ltr;
             }
         }
-        
+
         /// <summary>
         /// 从数据库中按名称搜索或者创建出<seealso cref="RegAppTableRecord"/>对象
         /// </summary>
@@ -354,5 +354,9 @@ Windows Registry Editor Version 5.00
             }
         }
         #endregion
+
+        /// <summary> 将焦点从操作的<seealso cref="System.Windows.Forms.Form"/>转移到 AutoCAD 主界面窗口。此操作在对 无模态窗口 操作时非常有用。 </summary>
+        public static void FocusOnMainUIWindow() { Application.MainWindow.Focus(); }
+
     }
 }
