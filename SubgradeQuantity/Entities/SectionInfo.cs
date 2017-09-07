@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Text;
-using System.Windows;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using eZcad.Utility;
 
 namespace eZcad.SubgradeQuantity.Entities
@@ -33,17 +34,16 @@ namespace eZcad.SubgradeQuantity.Entities
         private const string ctg_General = "通用";
         private const string ctg_Left = "左侧";
         private const string ctg_Right = "右侧";
-        //private const string ctg_Others = "其他";
 
         #region --- XData Fields
 
         #region --- General
 
         /// <summary> 是否进行过一次完整的计算 </summary>
-        [Category(ctg_General), ReadOnly(true), Description("计算值")]
+        [Category(ctg_General), ReadOnly(true), Description("是否进行过一次完整的计算")]
         public bool FullyCalculated { get; set; }
 
-        [Category(ctg_General), ReadOnly(false), Description("桩号")]
+        [Category(ctg_General), ReadOnly(true), Description("桩号")]
         public double Station { get; set; }
 
         /// <summary> 道路中心线所对应的路面标高 </summary>
@@ -59,117 +59,196 @@ namespace eZcad.SubgradeQuantity.Entities
         public double CenterElevation_Cushion { get; set; }
 
         /// <summary> 道路中心线在图形坐标系中的 X 值 </summary>
-        [Category(ctg_General), ReadOnly(false), Description("道路中心线在图形坐标系中的 X 值")]
+        [Category(ctg_General), ReadOnly(true), Description("道路中心线在图形坐标系中的 X 值")]
         public double CenterX { get; set; }
 
         /// <summary> 道路中心线与路面交点在图形坐标系中的 Y 值 </summary>
-        [Category(ctg_General), ReadOnly(false), Description("道路中心线与路面交点在图形坐标系中的 Y 值")]
+        [Category(ctg_General), ReadOnly(true), Description("道路中心线与路面交点在图形坐标系中的 Y 值")]
         public double CenterY { get; set; }
 
-        /// <summary> 横断面信息的块参数对象 </summary>
-        public Handle InfoBlockHandle;
+        /// <summary> 横断面信息的块参照对象 </summary>
+        [Category(ctg_General), ReadOnly(false), Description(" 横断面信息的块参照对象")]
+        public Handle InfoBlockHandle { get; set; }
 
+        /// <summary> 自然地面下存在台阶 </summary>
+        [Category(ctg_General), ReadOnly(true), Description(" 自然地面下存在台阶")]
         public bool StairExists { get; set; }
+
         /// <summary> 自然地面下面的台阶（台阶对象由多个多段线构成） </summary>
-        public Handle[] StairHandles = new Handle[0];
+        [Category(ctg_General), ReadOnly(true), Description(" 自然地面下面的台阶线条集合（台阶对象由多个多段线构成）")]
+        public Handle[] StairHandles { get; set; }
 
         #endregion
 
         #region --- Left
 
+        [Category(ctg_Left), ReadOnly(true), Description("是否有匹配的左侧自然地表线（必须有）")]
         public bool LeftGroundSurfaceExists { get; set; }
+
         /// <summary> 自然地表面 </summary>
-        public Handle LeftGroundSurfaceHandle;
+        [Category(ctg_Left), ReadOnly(true), Description("匹配的左侧自然地表线的句柄值")]
+        public Handle LeftGroundSurfaceHandle { get; set; }
 
+        [Category(ctg_Left), ReadOnly(true), Description("是否有匹配的左侧路面线（必须有）")]
         public bool LeftRoadSurfaceExists { get; set; }
+
         /// <summary> 路面 </summary>
-        public Handle LeftRoadSurfaceHandle;
+        [Category(ctg_Left), ReadOnly(true), Description("匹配的左侧路面线的句柄值")]
+        public Handle LeftRoadSurfaceHandle { get; set; }
 
+        /// <summary> 左路面边缘点（包括土路肩的最边缘点）的几何坐标 </summary>
+        [Category(ctg_Left), ReadOnly(true), Description("左路面边缘点（包括土路肩的最边缘点）的几何坐标")]
+        public Point3d LeftRoadEdge { get; set; }
+
+        [Category(ctg_Left), ReadOnly(true), Description("是否有匹配的左侧路槽线")]
         public bool LeftRoadCushionExists { get; set; }
-        /// <summary> 路槽 </summary>
-        public Handle LeftRoadCushionHandle;
 
+        /// <summary> 路槽 </summary>
+        [Category(ctg_Left), ReadOnly(true), Description("匹配的左侧路槽线的句柄值")]
+        public Handle LeftRoadCushionHandle { get; set; }
+
+        /// <summary> 有挡墙，但是不确定是路肩墙、路堑墙，还是路堤墙 </summary>
+        [Category(ctg_Left), ReadOnly(true), Description("左侧有挡墙，但是不确定是路肩墙、路堑墙，还是路堤墙")]
         public bool LeftRetainingWallExists { get; set; }
 
         /// <summary> 挡土墙 </summary>
-        public Handle LeftRetainingWallHandle;
+        [Category(ctg_Left), ReadOnly(true), Description("左侧挡墙的句柄值，但是不确定是路肩墙、路堑墙，还是路堤墙")]
+        public Handle LeftRetainingWallHandle { get; set; }
 
+        [Category(ctg_Left), ReadOnly(true), Description("是否有匹配的左侧用地界线")]
         public bool LeftBoundaryExists { get; set; }
+
         /// <summary> 用地界 </summary>
-        public Handle LeftBoundaryHandle;
+        [Category(ctg_Left), ReadOnly(true), Description("匹配的左侧用地界线的句柄值")]
+        public Handle LeftBoundaryHandle { get; set; }
 
         // ---------------------------------------------------------------------------
-        /// <summary> 左边坡对象存在，但是可能没有实际的边坡（比如边坡线非常短，短于指定的最小坡长；又或者边坡线与挡墙线重合，即没有真实的物理边坡） </summary>
+        /// <summary> 左边坡线存在，但是可能没有实际的边坡（比如边坡线非常短，短于指定的最小坡长；又或者边坡线与挡墙线重合，即没有真实的物理边坡） </summary>
+        [Category(ctg_Left), ReadOnly(true),
+         Description("左边坡线存在，但是可能没有实际的边坡（比如边坡线非常短，短于指定的最小坡长；又或者边坡线与挡墙线重合，即没有真实的物理边坡）")]
         public bool LeftSlopeExists { get; set; }
+
         /// <summary> 边坡 </summary>
-        public Handle LeftSlopeHandle;
-        /// <summary> 边坡为填方还是挖方 </summary>
-        public bool LeftSlopeFill = true;
+        [Category(ctg_Left), ReadOnly(true), Description("左侧边坡线的句柄值")]
+        public Handle LeftSlopeHandle { get; set; }
+
+        /// <summary> 左侧边坡为填方还是挖方，如果没有边坡线，默认为填方 </summary>
+        [Category(ctg_Left), ReadOnly(true), Description("左侧边坡为填方还是挖方，如果没有边坡线，默认为填方")]
+        public bool LeftSlopeFill { get; set; }
 
         // ---------------------------------------------------------------------------
+        [Category(ctg_Left), ReadOnly(true), Description("是否有匹配的左侧排水沟（填方坡底）")]
         public bool LeftDrainageDitchExists { get; set; }
+
         /// <summary> 排水沟（填方坡底） </summary>
-        public Handle LeftDrainageDitchHandle;
+        [Category(ctg_Left), ReadOnly(true), Description("匹配的左侧排水沟（填方坡底）的句柄值")]
+        public Handle LeftDrainageDitchHandle { get; set; }
 
+        [Category(ctg_Left), ReadOnly(true), Description("是否有匹配的左侧截水沟（挖方坡顶）")]
         public bool LeftCatchWaterExists { get; set; }
-        /// <summary> 截水沟（挖方坡顶） </summary>
-        public Handle LeftCatchWaterHandle;
 
+        /// <summary> 截水沟（挖方坡顶） </summary>
+        [Category(ctg_Left), ReadOnly(true), Description("匹配的左侧截水沟（挖方坡顶）的句柄值")]
+        public Handle LeftCatchWaterHandle { get; set; }
+
+        [Category(ctg_Left), ReadOnly(true), Description("是否有匹配的左侧边沟（挖方坡底）")]
         public bool LeftSideDitchExists { get; set; }
+
         /// <summary> 边沟（挖方坡底） </summary>
-        public Handle LeftSideDitchHandle;
+        [Category(ctg_Left), ReadOnly(true), Description("匹配的左侧边沟（挖方坡底）的句柄值")]
+        public Handle LeftSideDitchHandle { get; set; }
 
         #endregion
 
         #region --- Right
 
+        [Category(ctg_Right), ReadOnly(true), Description("是否有匹配的右侧自然地表线（必须有）")]
         public bool RightGroundSurfaceExists { get; set; }
+
         /// <summary> 自然地表面 </summary>
-        public Handle RightGroundSurfaceHandle;
+        [Category(ctg_Right), ReadOnly(true), Description("匹配的右侧自然地表线的句柄值")]
+        public Handle RightGroundSurfaceHandle { get; set; }
 
+        [Category(ctg_Right), ReadOnly(true), Description("是否有匹配的右侧路面线（必须有）")]
         public bool RightRoadSurfaceExists { get; set; }
+
         /// <summary> 路面 </summary>
-        public Handle RightRoadSurfaceHandle;
+        [Category(ctg_Right), ReadOnly(true), Description("匹配的右侧路面线的句柄值")]
+        public Handle RightRoadSurfaceHandle { get; set; }
 
+        /// <summary> 左路面边缘点（包括土路肩的最边缘点）的几何坐标 </summary>
+        [Category(ctg_Right), ReadOnly(true), Description("左路面边缘点（包括土路肩的最边缘点）的几何坐标")]
+        public Point3d RightRoadEdge { get; set; }
+
+        [Category(ctg_Right), ReadOnly(true), Description("是否有匹配的右侧路槽线")]
         public bool RightRoadCushionExists { get; set; }
+
         /// <summary> 路槽 </summary>
-        public Handle RightRoadCushionHandle;
+        [Category(ctg_Right), ReadOnly(true), Description("匹配的右侧路槽线的句柄值")]
+        public Handle RightRoadCushionHandle { get; set; }
 
+        /// <summary> 有挡墙，但是不确定是路肩墙、路堑墙，还是路堤墙 </summary>
+        [Category(ctg_Right), ReadOnly(true), Description("右侧有挡墙，但是不确定是路肩墙、路堑墙，还是路堤墙")]
         public bool RightRetainingWallExists { get; set; }
+
         /// <summary> 挡土墙 </summary>
-        public Handle RightRetainingWallHandle;
+        [Category(ctg_Right), ReadOnly(true), Description("右侧挡墙的句柄值，但是不确定是路肩墙、路堑墙，还是路堤墙")]
+        public Handle RightRetainingWallHandle { get; set; }
 
+        [Category(ctg_Right), ReadOnly(true), Description("是否有匹配的右侧用地界线")]
         public bool RightBoundaryExists { get; set; }
+
         /// <summary> 用地界 </summary>
-        public Handle RightBoundaryHandle;
+        [Category(ctg_Right), ReadOnly(true), Description("匹配的右侧用地界线的句柄值")]
+        public Handle RightBoundaryHandle { get; set; }
 
         // ---------------------------------------------------------------------------
-        /// <summary> 右边坡对象存在，但是可能没有实际的边坡（比如边坡线非常短，短于指定的最小坡长；又或者边坡线与挡墙线重合，即没有真实的物理边坡） </summary>
+        /// <summary> 左边坡线存在，但是可能没有实际的边坡（比如边坡线非常短，短于指定的最小坡长；又或者边坡线与挡墙线重合，即没有真实的物理边坡） </summary>
+        [Category(ctg_Right), ReadOnly(true),
+         Description("左边坡线存在，但是可能没有实际的边坡（比如边坡线非常短，短于指定的最小坡长；又或者边坡线与挡墙线重合，即没有真实的物理边坡）")]
         public bool RightSlopeExists { get; set; }
+
         /// <summary> 边坡 </summary>
-        public Handle RightSlopeHandle;
-        /// <summary> 边坡为填方还是挖方 </summary>
-        public bool RightSlopeFill = true;
+        [Category(ctg_Right), ReadOnly(true), Description("右侧边坡线的句柄值")]
+        public Handle RightSlopeHandle { get; set; }
+
+        /// <summary> 右侧边坡为填方还是挖方，如果没有边坡线，默认为填方 </summary>
+        [Category(ctg_Right), ReadOnly(true), Description("右侧边坡为填方还是挖方，如果没有边坡线，默认为填方")]
+        public bool RightSlopeFill { get; set; }
 
         // ---------------------------------------------------------------------------
-        /// <summary> 排水沟（填方坡底） </summary>
+        [Category(ctg_Right), ReadOnly(true), Description("是否有匹配的右侧排水沟（填方坡底）")]
         public bool RightDrainageDitchExists { get; set; }
+
         /// <summary> 排水沟（填方坡底） </summary>
-        public Handle RightDrainageDitchHandle;
+        [Category(ctg_Right), ReadOnly(true), Description("匹配的右侧排水沟（填方坡底）的句柄值")]
+        public Handle RightDrainageDitchHandle { get; set; }
 
-        /// <summary> 截水沟（挖方坡顶） </summary>
+        [Category(ctg_Right), ReadOnly(true), Description("是否有匹配的右侧截水沟（挖方坡顶）")]
         public bool RightCatchWaterExists { get; set; }
+
         /// <summary> 截水沟（挖方坡顶） </summary>
-        public Handle RightCatchWaterHandle;
+        [Category(ctg_Right), ReadOnly(true), Description("匹配的右侧截水沟（挖方坡顶）的句柄值")]
+        public Handle RightCatchWaterHandle { get; set; }
 
-        /// <summary> 边沟（挖方坡底） </summary>
+        [Category(ctg_Right), ReadOnly(true), Description("是否有匹配的右侧边沟（挖方坡底）")]
         public bool RightSideDitchExists { get; set; }
+
         /// <summary> 边沟（挖方坡底） </summary>
-        public Handle RightSideDitchHandle;
+        [Category(ctg_Right), ReadOnly(true), Description("匹配的右侧边沟（挖方坡底）的句柄值")]
+        public Handle RightSideDitchHandle { get; set; }
 
         #endregion
 
         #endregion
+
+        /// <summary> 构造函数 </summary>
+        public SectionInfo()
+        {
+            LeftSlopeFill = true;
+            RightSlopeFill = true;
+            StairHandles = new Handle[0];
+        }
 
         #region ---   数据 与 ResultBuffer 的转换
 
@@ -181,19 +260,19 @@ namespace eZcad.SubgradeQuantity.Entities
             var xData = new SectionInfo();
             bool foundAtLeastOne = false;
             // 从 AutoCAD 中读取
-            var xd = centerline.GetXDataForApplication(SectionInfo.AppNameGeneral);
+            var xd = centerline.GetXDataForApplication(AppNameGeneral);
             if (xd != null)
             {
                 foundAtLeastOne = true;
                 xData.FromResultBuffer(xd);
             }
-            xd = centerline.GetXDataForApplication(SectionInfo.AppNameLeft);
+            xd = centerline.GetXDataForApplication(AppNameLeft);
             if (xd != null)
             {
                 foundAtLeastOne = true;
                 xData.FromResultBuffer(xd);
             }
-            xd = centerline.GetXDataForApplication(SectionInfo.AppNameRight);
+            xd = centerline.GetXDataForApplication(AppNameRight);
             if (xd != null)
             {
                 foundAtLeastOne = true;
@@ -218,18 +297,18 @@ namespace eZcad.SubgradeQuantity.Entities
                 var sl = this;
                 try
                 {
-                    sl.FullyCalculated = (Int16)buffs[1].Value == 1;
-                    sl.Station = (double)buffs[2].Value;
-                    sl.CenterElevation_Road = (double)buffs[3].Value;
-                    sl.CenterElevation_Ground = (double)buffs[4].Value;
-                    sl.CenterElevation_Cushion = (double)buffs[5].Value;
-                    sl.CenterX = (double)buffs[6].Value;
-                    sl.CenterY = (double)buffs[7].Value;
+                    sl.FullyCalculated = Utils.GetExtendedDataBool(buffs[1]);
+                    sl.Station = (double) buffs[2].Value;
+                    sl.CenterElevation_Road = (double) buffs[3].Value;
+                    sl.CenterElevation_Ground = (double) buffs[4].Value;
+                    sl.CenterElevation_Cushion = (double) buffs[5].Value;
+                    sl.CenterX = (double) buffs[6].Value;
+                    sl.CenterY = (double) buffs[7].Value;
                     sl.InfoBlockHandle = Utils.ConvertToHandle(buffs[8].Value.ToString());
 
                     // 台阶
                     baseId = 8;
-                    sl.StairExists = (Int16)buffs[baseId + 1].Value == 1;
+                    sl.StairExists = Utils.GetExtendedDataBool(buffs[baseId + 1]);
                     var stairsCount = buffs.Length - baseId - 2;
                     var stairHandles = new Handle[stairsCount];
                     for (int i = 0; i < stairsCount; i++)
@@ -248,37 +327,40 @@ namespace eZcad.SubgradeQuantity.Entities
 
                 try
                 {
-                    sl.LeftGroundSurfaceExists = (Int16)buffs[1].Value == 1;
+                    sl.LeftGroundSurfaceExists = Utils.GetExtendedDataBool(buffs[1]);
                     sl.LeftGroundSurfaceHandle = Utils.ConvertToHandle(buffs[2].Value.ToString());
 
-                    sl.LeftRoadSurfaceExists = (Int16)buffs[3].Value == 1;
+                    sl.LeftRoadSurfaceExists = Utils.GetExtendedDataBool(buffs[3]);
                     sl.LeftRoadSurfaceHandle = Utils.ConvertToHandle(buffs[4].Value.ToString());
+                    sl.LeftRoadEdge = (Point3d) buffs[5].Value;
 
-                    sl.LeftRoadCushionExists = (Int16)buffs[5].Value == 1;
-                    sl.LeftRoadCushionHandle = Utils.ConvertToHandle(buffs[6].Value.ToString());
+                    baseId = 5;
+                    sl.LeftRoadCushionExists = Utils.GetExtendedDataBool(buffs[baseId + 1]);
+                    sl.LeftRoadCushionHandle = Utils.ConvertToHandle(buffs[baseId + 2].Value.ToString());
 
-                    sl.LeftRetainingWallExists = (Int16)buffs[7].Value == 1;
-                    sl.LeftRetainingWallHandle = Utils.ConvertToHandle(buffs[8].Value.ToString());
+                    sl.LeftRetainingWallExists = Utils.GetExtendedDataBool(buffs[baseId + 3]);
+                    sl.LeftRetainingWallHandle = Utils.ConvertToHandle(buffs[baseId + 4].Value.ToString());
 
-                    sl.LeftBoundaryExists = (Int16)buffs[9].Value == 1;
-                    sl.LeftBoundaryHandle = Utils.ConvertToHandle(buffs[10].Value.ToString());
+                    sl.LeftBoundaryExists = Utils.GetExtendedDataBool(buffs[baseId + 5]);
+                    sl.LeftBoundaryHandle = Utils.ConvertToHandle(buffs[baseId + 6].Value.ToString());
 
                     // 边坡相关
-                    sl.LeftSlopeExists = (Int16)buffs[11].Value == 1;
-                    sl.LeftSlopeHandle = Utils.ConvertToHandle(buffs[12].Value.ToString());
-                    sl.LeftSlopeFill = (Int16)buffs[13].Value == 1;
+                    sl.LeftSlopeExists = Utils.GetExtendedDataBool(buffs[baseId + 7]);
+                    sl.LeftSlopeHandle = Utils.ConvertToHandle(buffs[baseId + 8].Value.ToString());
+                    sl.LeftSlopeFill = Utils.GetExtendedDataBool(buffs[baseId + 9]);
 
                     // 排水沟相关
-                    baseId = 13;
-                    sl.LeftDrainageDitchExists = (Int16)buffs[baseId + 1].Value == 1;
+                    baseId = 14;
+                    sl.LeftDrainageDitchExists = Utils.GetExtendedDataBool(buffs[baseId + 1]);
                     sl.LeftDrainageDitchHandle = Utils.ConvertToHandle(buffs[baseId + 2].Value.ToString());
-                    sl.LeftCatchWaterExists = (Int16)buffs[baseId + 3].Value == 1;
+                    sl.LeftCatchWaterExists = Utils.GetExtendedDataBool(buffs[baseId + 3]);
                     sl.LeftCatchWaterHandle = Utils.ConvertToHandle(buffs[baseId + 4].Value.ToString());
-                    sl.LeftSideDitchExists = (Int16)buffs[baseId + 5].Value == 1;
+                    sl.LeftSideDitchExists = Utils.GetExtendedDataBool(buffs[baseId + 5]);
                     sl.LeftSideDitchHandle = Utils.ConvertToHandle(buffs[baseId + 6].Value.ToString());
                 }
                 catch (Exception ex)
                 {
+                    Debug.Print("提取横断面左侧数据出错" + "\r\n" + ex.Message + ex.StackTrace);
                 }
             }
             else if (appName == AppNameRight)
@@ -286,37 +368,40 @@ namespace eZcad.SubgradeQuantity.Entities
                 var sl = this;
                 try
                 {
-                    sl.RightGroundSurfaceExists = (Int16)buffs[1].Value == 1;
+                    sl.RightGroundSurfaceExists = Utils.GetExtendedDataBool(buffs[1]);
                     sl.RightGroundSurfaceHandle = Utils.ConvertToHandle(buffs[2].Value.ToString());
 
-                    sl.RightRoadSurfaceExists = (Int16)buffs[3].Value == 1;
+                    sl.RightRoadSurfaceExists = Utils.GetExtendedDataBool(buffs[3]);
                     sl.RightRoadSurfaceHandle = Utils.ConvertToHandle(buffs[4].Value.ToString());
+                    sl.RightRoadEdge = (Point3d) buffs[5].Value;
 
-                    sl.RightRoadCushionExists = (Int16)buffs[5].Value == 1;
-                    sl.RightRoadCushionHandle = Utils.ConvertToHandle(buffs[6].Value.ToString());
+                    baseId = 5;
+                    sl.RightRoadCushionExists = Utils.GetExtendedDataBool(buffs[baseId + 1]);
+                    sl.RightRoadCushionHandle = Utils.ConvertToHandle(buffs[baseId + 2].Value.ToString());
 
-                    sl.RightRetainingWallExists = (Int16)buffs[7].Value == 1;
-                    sl.RightRetainingWallHandle = Utils.ConvertToHandle(buffs[8].Value.ToString());
+                    sl.RightRetainingWallExists = Utils.GetExtendedDataBool(buffs[baseId + 3]);
+                    sl.RightRetainingWallHandle = Utils.ConvertToHandle(buffs[baseId + 4].Value.ToString());
 
-                    sl.RightBoundaryExists = (Int16)buffs[9].Value == 1;
-                    sl.RightBoundaryHandle = Utils.ConvertToHandle(buffs[10].Value.ToString());
+                    sl.RightBoundaryExists = Utils.GetExtendedDataBool(buffs[baseId + 5]);
+                    sl.RightBoundaryHandle = Utils.ConvertToHandle(buffs[baseId + 6].Value.ToString());
 
                     // 边坡相关
-                    sl.RightSlopeExists = (Int16)buffs[11].Value == 1;
-                    sl.RightSlopeHandle = Utils.ConvertToHandle(buffs[12].Value.ToString());
-                    sl.RightSlopeFill = (Int16)buffs[13].Value == 1;
+                    sl.RightSlopeExists = Utils.GetExtendedDataBool(buffs[baseId + 7]);
+                    sl.RightSlopeHandle = Utils.ConvertToHandle(buffs[baseId + 8].Value.ToString());
+                    sl.RightSlopeFill = Utils.GetExtendedDataBool(buffs[baseId + 9]);
 
                     // 排水沟相关
-                    baseId = 13;
-                    sl.RightDrainageDitchExists = (Int16)buffs[baseId + 1].Value == 1;
+                    baseId = 14;
+                    sl.RightDrainageDitchExists = Utils.GetExtendedDataBool(buffs[baseId + 1]);
                     sl.RightDrainageDitchHandle = Utils.ConvertToHandle(buffs[baseId + 2].Value.ToString());
-                    sl.RightCatchWaterExists = (Int16)buffs[baseId + 3].Value == 1;
+                    sl.RightCatchWaterExists = Utils.GetExtendedDataBool(buffs[baseId + 3]);
                     sl.RightCatchWaterHandle = Utils.ConvertToHandle(buffs[baseId + 4].Value.ToString());
-                    sl.RightSideDitchExists = (Int16)buffs[baseId + 5].Value == 1;
+                    sl.RightSideDitchExists = Utils.GetExtendedDataBool(buffs[baseId + 5]);
                     sl.RightSideDitchHandle = Utils.ConvertToHandle(buffs[baseId + 6].Value.ToString());
                 }
                 catch (Exception ex)
                 {
+                    Debug.Print("提取横断面右侧数据出错" + "\r\n" + ex.Message + ex.StackTrace);
                 }
             }
         }
@@ -329,76 +414,79 @@ namespace eZcad.SubgradeQuantity.Entities
                 case InfoType.General:
                     buff = new ResultBuffer
                         (
-                        new TypedValue((int)DxfCode.ExtendedDataRegAppName, AppNameGeneral),
-                        new TypedValue((int)DxfCode.ExtendedDataInteger16, FullyCalculated),
-                        new TypedValue((int)DxfCode.ExtendedDataReal, Station),
-                        new TypedValue((int)DxfCode.ExtendedDataReal, CenterElevation_Road),
-                        new TypedValue((int)DxfCode.ExtendedDataReal, CenterElevation_Ground),
-                        new TypedValue((int)DxfCode.ExtendedDataReal, CenterElevation_Cushion),
-                        new TypedValue((int)DxfCode.ExtendedDataReal, CenterX),
-                        new TypedValue((int)DxfCode.ExtendedDataReal, CenterY),
-                        new TypedValue((int)DxfCode.ExtendedDataHandle, InfoBlockHandle),
-                        new TypedValue((int)DxfCode.ExtendedDataInteger16, StairExists)
+                        new TypedValue((int) DxfCode.ExtendedDataRegAppName, AppNameGeneral),
+                        Utils.SetExtendedDataBool(FullyCalculated),
+                        new TypedValue((int) DxfCode.ExtendedDataReal, Station),
+                        new TypedValue((int) DxfCode.ExtendedDataReal, CenterElevation_Road),
+                        new TypedValue((int) DxfCode.ExtendedDataReal, CenterElevation_Ground),
+                        new TypedValue((int) DxfCode.ExtendedDataReal, CenterElevation_Cushion),
+                        new TypedValue((int) DxfCode.ExtendedDataReal, CenterX),
+                        new TypedValue((int) DxfCode.ExtendedDataReal, CenterY),
+                        new TypedValue((int) DxfCode.ExtendedDataHandle, InfoBlockHandle),
+                        Utils.SetExtendedDataBool(StairExists)
                         );
                     // 台阶
                     for (int i = 0; i < StairHandles.Length; i++)
                     {
-                        buff.Add(new TypedValue((int)DxfCode.ExtendedDataHandle, StairHandles[i]));
+                        buff.Add(new TypedValue((int) DxfCode.ExtendedDataHandle, StairHandles[i]));
                     }
                     break;
                 case InfoType.Left:
+
                     buff = new ResultBuffer
                         (
-                        new TypedValue((int)DxfCode.ExtendedDataRegAppName, AppNameLeft),
-                        new TypedValue((int)DxfCode.ExtendedDataInteger16, LeftGroundSurfaceExists),
-                        new TypedValue((int)DxfCode.ExtendedDataHandle, LeftGroundSurfaceHandle),
-                        new TypedValue((int)DxfCode.ExtendedDataInteger16, LeftRoadSurfaceExists),
-                        new TypedValue((int)DxfCode.ExtendedDataHandle, LeftRoadSurfaceHandle),
-                        new TypedValue((int)DxfCode.ExtendedDataInteger16, LeftRoadCushionExists),
-                        new TypedValue((int)DxfCode.ExtendedDataHandle, LeftRoadCushionHandle),
-                        new TypedValue((int)DxfCode.ExtendedDataInteger16, LeftRetainingWallExists),
-                        new TypedValue((int)DxfCode.ExtendedDataHandle, LeftRetainingWallHandle),
-                        new TypedValue((int)DxfCode.ExtendedDataInteger16, LeftBoundaryExists),
-                        new TypedValue((int)DxfCode.ExtendedDataHandle, LeftBoundaryHandle),
+                        new TypedValue((int) DxfCode.ExtendedDataRegAppName, AppNameLeft),
+                        Utils.SetExtendedDataBool(LeftGroundSurfaceExists),
+                        new TypedValue((int) DxfCode.ExtendedDataHandle, LeftGroundSurfaceHandle),
+                        Utils.SetExtendedDataBool(LeftRoadSurfaceExists),
+                        new TypedValue((int) DxfCode.ExtendedDataHandle, LeftRoadSurfaceHandle),
+                        new TypedValue((int) DxfCode.ExtendedDataXCoordinate, LeftRoadEdge),
+                        Utils.SetExtendedDataBool(LeftRoadCushionExists),
+                        new TypedValue((int) DxfCode.ExtendedDataHandle, LeftRoadCushionHandle),
+                        Utils.SetExtendedDataBool(LeftRetainingWallExists),
+                        new TypedValue((int) DxfCode.ExtendedDataHandle, LeftRetainingWallHandle),
+                        Utils.SetExtendedDataBool(LeftBoundaryExists),
+                        new TypedValue((int) DxfCode.ExtendedDataHandle, LeftBoundaryHandle),
                         // 边坡相关
-                        new TypedValue((int)DxfCode.ExtendedDataInteger16, LeftSlopeExists),
-                        new TypedValue((int)DxfCode.ExtendedDataHandle, LeftSlopeHandle),
-                        new TypedValue((int)DxfCode.ExtendedDataInteger16, LeftSlopeFill),
+                        Utils.SetExtendedDataBool(LeftSlopeExists),
+                        new TypedValue((int) DxfCode.ExtendedDataHandle, LeftSlopeHandle),
+                        Utils.SetExtendedDataBool(LeftSlopeFill),
                         // 排水沟相关
-                        new TypedValue((int)DxfCode.ExtendedDataInteger16, LeftDrainageDitchExists),
-                        new TypedValue((int)DxfCode.ExtendedDataHandle, LeftDrainageDitchHandle),
-                        new TypedValue((int)DxfCode.ExtendedDataInteger16, LeftCatchWaterExists),
-                        new TypedValue((int)DxfCode.ExtendedDataHandle, LeftCatchWaterHandle),
-                        new TypedValue((int)DxfCode.ExtendedDataInteger16, LeftSideDitchExists),
-                        new TypedValue((int)DxfCode.ExtendedDataHandle, LeftSideDitchHandle)
+                        Utils.SetExtendedDataBool(LeftDrainageDitchExists),
+                        new TypedValue((int) DxfCode.ExtendedDataHandle, LeftDrainageDitchHandle),
+                        Utils.SetExtendedDataBool(LeftCatchWaterExists),
+                        new TypedValue((int) DxfCode.ExtendedDataHandle, LeftCatchWaterHandle),
+                        Utils.SetExtendedDataBool(LeftSideDitchExists),
+                        new TypedValue((int) DxfCode.ExtendedDataHandle, LeftSideDitchHandle)
                         );
                     break;
                 case InfoType.Right:
                     buff = new ResultBuffer
-                   (
-                   new TypedValue((int)DxfCode.ExtendedDataRegAppName, AppNameRight),
-                   new TypedValue((int)DxfCode.ExtendedDataInteger16, RightGroundSurfaceExists),
-                   new TypedValue((int)DxfCode.ExtendedDataHandle, RightGroundSurfaceHandle),
-                   new TypedValue((int)DxfCode.ExtendedDataInteger16, RightRoadSurfaceExists),
-                   new TypedValue((int)DxfCode.ExtendedDataHandle, RightRoadSurfaceHandle),
-                   new TypedValue((int)DxfCode.ExtendedDataInteger16, RightRoadCushionExists),
-                   new TypedValue((int)DxfCode.ExtendedDataHandle, RightRoadCushionHandle),
-                   new TypedValue((int)DxfCode.ExtendedDataInteger16, RightRetainingWallExists),
-                   new TypedValue((int)DxfCode.ExtendedDataHandle, RightRetainingWallHandle),
-                   new TypedValue((int)DxfCode.ExtendedDataInteger16, RightBoundaryExists),
-                   new TypedValue((int)DxfCode.ExtendedDataHandle, RightBoundaryHandle),
-                   // 边坡相关
-                   new TypedValue((int)DxfCode.ExtendedDataInteger16, RightSlopeExists),
-                   new TypedValue((int)DxfCode.ExtendedDataHandle, RightSlopeHandle),
-                   new TypedValue((int)DxfCode.ExtendedDataInteger16, RightSlopeFill),
-                   // 排水沟相关
-                   new TypedValue((int)DxfCode.ExtendedDataInteger16, RightDrainageDitchExists),
-                   new TypedValue((int)DxfCode.ExtendedDataHandle, RightDrainageDitchHandle),
-                   new TypedValue((int)DxfCode.ExtendedDataInteger16, RightCatchWaterExists),
-                   new TypedValue((int)DxfCode.ExtendedDataHandle, RightCatchWaterHandle),
-                   new TypedValue((int)DxfCode.ExtendedDataInteger16, RightSideDitchExists),
-                   new TypedValue((int)DxfCode.ExtendedDataHandle, RightSideDitchHandle)
-                   );
+                        (
+                        new TypedValue((int) DxfCode.ExtendedDataRegAppName, AppNameRight),
+                        Utils.SetExtendedDataBool(RightGroundSurfaceExists),
+                        new TypedValue((int) DxfCode.ExtendedDataHandle, RightGroundSurfaceHandle),
+                        Utils.SetExtendedDataBool(RightRoadSurfaceExists),
+                        new TypedValue((int) DxfCode.ExtendedDataHandle, RightRoadSurfaceHandle),
+                        new TypedValue((int) DxfCode.ExtendedDataXCoordinate, RightRoadEdge),
+                        Utils.SetExtendedDataBool(RightRoadCushionExists),
+                        new TypedValue((int) DxfCode.ExtendedDataHandle, RightRoadCushionHandle),
+                        Utils.SetExtendedDataBool(RightRetainingWallExists),
+                        new TypedValue((int) DxfCode.ExtendedDataHandle, RightRetainingWallHandle),
+                        Utils.SetExtendedDataBool(RightBoundaryExists),
+                        new TypedValue((int) DxfCode.ExtendedDataHandle, RightBoundaryHandle),
+                        // 边坡相关
+                        Utils.SetExtendedDataBool(RightSlopeExists),
+                        new TypedValue((int) DxfCode.ExtendedDataHandle, RightSlopeHandle),
+                        Utils.SetExtendedDataBool(RightSlopeFill),
+                        // 排水沟相关
+                        Utils.SetExtendedDataBool(RightDrainageDitchExists),
+                        new TypedValue((int) DxfCode.ExtendedDataHandle, RightDrainageDitchHandle),
+                        Utils.SetExtendedDataBool(RightCatchWaterExists),
+                        new TypedValue((int) DxfCode.ExtendedDataHandle, RightCatchWaterHandle),
+                        Utils.SetExtendedDataBool(RightSideDitchExists),
+                        new TypedValue((int) DxfCode.ExtendedDataHandle, RightSideDitchHandle)
+                        );
                     break;
             }
             return buff;
@@ -414,10 +502,10 @@ namespace eZcad.SubgradeQuantity.Entities
             if (clearAll)
             {
                 buff =
-              new ResultBuffer(
-                        new TypedValue((int)DxfCode.ExtendedDataRegAppName, AppNameGeneral),
-                        new TypedValue((int)DxfCode.ExtendedDataRegAppName, AppNameLeft),
-                        new TypedValue((int)DxfCode.ExtendedDataRegAppName, AppNameRight));
+                    new ResultBuffer(
+                        new TypedValue((int) DxfCode.ExtendedDataRegAppName, AppNameGeneral),
+                        new TypedValue((int) DxfCode.ExtendedDataRegAppName, AppNameLeft),
+                        new TypedValue((int) DxfCode.ExtendedDataRegAppName, AppNameRight));
                 // 此时，Entity中的XData集合里，对应AppName下的所有数据，连同AppName这一项本身，都在实体中删除了。
                 // 但是此AppName在 RegAppTable 中对应的 RegAppTableRecord 定义还是存在的。
             }
@@ -425,9 +513,15 @@ namespace eZcad.SubgradeQuantity.Entities
             {
                 switch (type)
                 {
-                    case InfoType.General: buff = new ResultBuffer(new TypedValue((int)DxfCode.ExtendedDataRegAppName, AppNameGeneral)); break;
-                    case InfoType.Left: buff = new ResultBuffer(new TypedValue((int)DxfCode.ExtendedDataRegAppName, AppNameLeft)); break;
-                    case InfoType.Right: buff = new ResultBuffer(new TypedValue((int)DxfCode.ExtendedDataRegAppName, AppNameRight)); break;
+                    case InfoType.General:
+                        buff = new ResultBuffer(new TypedValue((int) DxfCode.ExtendedDataRegAppName, AppNameGeneral));
+                        break;
+                    case InfoType.Left:
+                        buff = new ResultBuffer(new TypedValue((int) DxfCode.ExtendedDataRegAppName, AppNameLeft));
+                        break;
+                    case InfoType.Right:
+                        buff = new ResultBuffer(new TypedValue((int) DxfCode.ExtendedDataRegAppName, AppNameRight));
+                        break;
                 }
             }
             return buff;
@@ -447,6 +541,128 @@ namespace eZcad.SubgradeQuantity.Entities
         public double GetEleFromY(double y)
         {
             return CenterElevation_Road - CenterY + y;
+        }
+
+        #endregion
+
+        #region --- 常用方法
+
+        /// <summary> 道路中心为填方 </summary>
+        /// <returns></returns>
+        public bool IsCenterFill()
+        {
+            return CenterElevation_Road >= CenterElevation_Ground;
+        }
+
+        /// <summary>
+        /// 计算道路横断面的某一侧中，从路面中心到边坡外边缘的范围内，属于填方的区域在 AutoCAD 几何中的 X 范围
+        /// </summary>
+        /// <param name="sec"></param>
+        /// <param name="left"></param>
+        /// <param name="slp"> 某一侧边坡，其值可能为null，表示此侧没有边坡线 </param>
+        /// <param name="cGround"></param>
+        /// <param name="db"></param>
+        /// <param name="edgeXleft">此侧边坡的填方左边界</param>
+        /// <param name="edgeXright">此侧边坡的填方右边界</param>
+        /// <returns>如果没有填方区域，则返回 false </returns>
+        public bool GetFillSlopeXRange(bool left, SlopeLine slp, CompositeCurve2d cGround, Database db,
+            out double edgeXleft, out double edgeXright)
+        {
+            edgeXleft = 0.0;
+            edgeXright = 0.0;
+            var centerFill = IsCenterFill();
+            var slopeFill = slp == null || slp.XData.FillCut;
+
+            if (!centerFill && (slp == null || !slopeFill)) return false;
+
+            // 确定进行搜索的左右边界：路基边缘（或边坡脚） 到 道路中线
+            double roadEdge = left ? LeftRoadEdge.X : RightRoadEdge.X;
+
+            double slopeEdge = roadEdge; // 边坡的坡脚的 X 值
+            if (slp != null && slp.XData.Slopes.Count > 0)
+            {
+                var data = slp.XData;
+                slopeEdge = data.Slopes[data.Slopes.Count - 1].OuterPoint.X;
+            }
+            if (centerFill && slopeFill)
+            {
+                // 道路中心与边坡均为填方
+                double edgeX1 = CenterX;
+
+                edgeXleft = Math.Min(edgeX1, slopeEdge);
+                edgeXright = Math.Max(edgeX1, slopeEdge);
+            }
+            else
+            {
+                // 说明 坡脚与道路中心这二者中有一个为挖方，另一个为填方
+                var roadSurfHandle = left ? LeftRoadSurfaceHandle : RightRoadSurfaceHandle;
+                var roadSurf = roadSurfHandle.GetDBObject<Polyline>(db);
+                var cRoad = roadSurf.Get2dLinearCurve();
+                var inters = new CurveCurveIntersector2d(cRoad, cGround);
+                double iX;
+                if (inters.NumberOfIntersectionPoints > 0)
+                {
+                    iX = inters.GetIntersectionPoint(0).X;
+                }
+                else
+                {
+                    // 这种情况极少会出现，但测试中确实会有，即自然地面线与挖方坡底边沟相交，而不与路面相交
+                    iX = roadEdge;
+                }
+                // 自然地面与路面的交点
+                var roadWidth = Math.Abs((roadEdge - CenterX));
+                var innerRatio = Math.Abs((iX - CenterX)/roadWidth);
+                if ((centerFill && innerRatio > 0.5))
+                {
+                    // 靠道路中心为填方，边坡为挖方
+                    if (left)
+                    {
+                        edgeXleft = iX;
+                        edgeXright = CenterX;
+                    }
+                    else
+                    {
+                        edgeXleft = CenterX;
+                        edgeXright = iX;
+                    }
+                }
+                else if (!centerFill && innerRatio <= 0.5)
+                {
+                    // 靠道路中心为挖方，边坡为填方
+                    if (left)
+                    {
+                        edgeXleft = slopeEdge;
+                        edgeXright = iX;
+                    }
+                    else
+                    {
+                        edgeXleft = iX;
+                        edgeXright = slopeEdge;
+                    }
+                }
+                else
+                {
+                    // 填方区域太小
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /// <summary> 某侧边坡是否有路肩墙（因为某侧的挡土墙对象有可能是护脚墙） </summary>
+        /// <param name="left"></param>
+        /// <param name="slp">其值可以为null，表明此侧没有边坡对象</param>
+        /// <returns></returns>
+        public bool HasShoulderWall(bool left, SlopeLine slp)
+        {
+            // 有挡墙，但不一定是路肩墙
+            var hasRetainingWall = left ? LeftRetainingWallExists : RightRetainingWallExists;
+            if (hasRetainingWall && (slp != null && slp.XData.FillCut && slp.XData.Slopes.Count == 0))
+            {
+                // 说明有路肩墙
+                return true;
+            }
+            return false;
         }
 
         #endregion
@@ -501,6 +717,11 @@ namespace eZcad.SubgradeQuantity.Entities
                 }
             }
             return res;
+        }
+
+        public override string ToString()
+        {
+            return $"桩号: {Station},路面标高: {CenterElevation_Road}";
         }
 
         #endregion

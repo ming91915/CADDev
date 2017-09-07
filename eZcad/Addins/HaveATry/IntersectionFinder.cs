@@ -65,7 +65,7 @@ namespace eZcad.Addins.HaveATry
                 foreach (var paperId in paperIds)
                 {
                     var gp = new Group(paperId.Key, true);
-
+                    // ProtectionUtils.OverlayDictValue(trans, container, DictKey_Platforms, dbPlatforms);
                     groups.SetAt(paperId.Key, gp);
 
                     gp.Append(paperId.Value);

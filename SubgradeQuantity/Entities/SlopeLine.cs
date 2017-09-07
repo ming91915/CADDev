@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using eZcad.SubgradeQuantity.Cmds;
+using eZcad.SubgradeQuantity.Options;
 using eZcad.SubgradeQuantity.SlopeProtection;
 using eZcad.SubgradeQuantity.Utility;
 using eZcad.Utility;
+using eZstd.Enumerable;
 
 namespace eZcad.SubgradeQuantity.Entities
 {
@@ -37,11 +40,29 @@ namespace eZcad.SubgradeQuantity.Entities
 
                 new TypedValue((int) DxfCode.Start, "LWPOLYLINE"),
                 new TypedValue((int) DxfCode.Operator, "<OR"),
-                new TypedValue((int) DxfCode.LayerName, ProtectionOptions.LayerName_Slope_Left_Cut),
-                new TypedValue((int) DxfCode.LayerName, ProtectionOptions.LayerName_Slope_Right_Cut),
-                new TypedValue((int) DxfCode.LayerName, ProtectionOptions.LayerName_Slope_Left_Fill),
-                new TypedValue((int) DxfCode.LayerName, ProtectionOptions.LayerName_Slope_Right_Fill),
+                new TypedValue((int) DxfCode.LayerName, Options_LayerNames.LayerName_Slope_Left_Cut),
+                new TypedValue((int) DxfCode.LayerName, Options_LayerNames.LayerName_Slope_Right_Cut),
+                new TypedValue((int) DxfCode.LayerName, Options_LayerNames.LayerName_Slope_Left_Fill),
+                new TypedValue((int) DxfCode.LayerName, Options_LayerNames.LayerName_Slope_Right_Fill),
                 new TypedValue((int) DxfCode.Operator, "OR>")});
+
+        private static readonly SelectionFilter _filterLeft = new SelectionFilter(new[]{
+
+                new TypedValue((int) DxfCode.Start, "LWPOLYLINE"),
+                new TypedValue((int) DxfCode.Operator, "<OR"),
+                new TypedValue((int) DxfCode.LayerName, Options_LayerNames.LayerName_Slope_Left_Cut),
+                new TypedValue((int) DxfCode.LayerName, Options_LayerNames.LayerName_Slope_Left_Fill),
+                new TypedValue((int) DxfCode.Operator, "OR>")});
+
+        private static readonly SelectionFilter _filterRight = new SelectionFilter(new[]{
+
+                new TypedValue((int) DxfCode.Start, "LWPOLYLINE"),
+                new TypedValue((int) DxfCode.Operator, "<OR"),
+                new TypedValue((int) DxfCode.LayerName, Options_LayerNames.LayerName_Slope_Right_Cut),
+                new TypedValue((int) DxfCode.LayerName, Options_LayerNames.LayerName_Slope_Right_Fill),
+                new TypedValue((int) DxfCode.Operator, "OR>")});
+
+
         /// <summary> 从 AutoCAD 界面中过滤出边坡对象的过滤规则 </summary>
         public static SelectionFilter Filter
         {
@@ -50,7 +71,21 @@ namespace eZcad.SubgradeQuantity.Entities
                 return _filter;
             }
         }
-
+        /// <summary> 从 AutoCAD 界面中过滤出边坡对象的过滤规则 </summary>
+        public static SelectionFilter FilterLeft
+        {
+            get
+            {
+                return _filterLeft;
+            }
+        }
+        public static SelectionFilter FilterRight
+        {
+            get
+            {
+                return _filterRight;
+            }
+        }
         /// <summary> 判断指定的图层名是否表示边坡对象 </summary>
         /// <param name="layerName"></param>
         /// <param name="left">true 表示匹配左侧边坡，false 表示匹配右侧边坡，null 表示匹配两侧边坡 </param>
@@ -61,21 +96,21 @@ namespace eZcad.SubgradeQuantity.Entities
             {
                 if (left.Value)
                 {
-                    return (layerName == ProtectionOptions.LayerName_Slope_Left_Cut
-                     || layerName == ProtectionOptions.LayerName_Slope_Left_Fill);
+                    return (layerName == Options_LayerNames.LayerName_Slope_Left_Cut
+                     || layerName == Options_LayerNames.LayerName_Slope_Left_Fill);
                 }
                 else
                 {
-                    return (layerName == ProtectionOptions.LayerName_Slope_Right_Cut
-                     || layerName == ProtectionOptions.LayerName_Slope_Right_Fill);
+                    return (layerName == Options_LayerNames.LayerName_Slope_Right_Cut
+                     || layerName == Options_LayerNames.LayerName_Slope_Right_Fill);
                 }
             }
             else
             {
-                return (layerName == ProtectionOptions.LayerName_Slope_Left_Cut
-                        || layerName == ProtectionOptions.LayerName_Slope_Right_Cut
-                        || layerName == ProtectionOptions.LayerName_Slope_Left_Fill
-                        || layerName == ProtectionOptions.LayerName_Slope_Right_Fill);
+                return (layerName == Options_LayerNames.LayerName_Slope_Left_Cut
+                        || layerName == Options_LayerNames.LayerName_Slope_Right_Cut
+                        || layerName == Options_LayerNames.LayerName_Slope_Left_Fill
+                        || layerName == Options_LayerNames.LayerName_Slope_Right_Fill);
             }
         }
 
@@ -166,7 +201,7 @@ namespace eZcad.SubgradeQuantity.Entities
                 _retainingWallCurve = _retainingWall.GetGeCurve() as CompositeCurve3d;
             }
             // 构造边坡系统
-            _slopes = ConstructSlopeSys(pline);
+            ConstructSlopeSys(pline, out _slopes, out _platforms);
         }
 
         /// <summary> 找到边坡线附近所属的中心轴线 </summary>
@@ -174,19 +209,12 @@ namespace eZcad.SubgradeQuantity.Entities
         /// <remarks>未找到则返回 null </remarks>
         private static SubgradeSection FindCenterAxisOnScreen(DocumentModifier docMdf, Polyline pl)
         {
-            var filterCenterAxis = new[]
-            {
-                new TypedValue((int) DxfCode.Start, "LINE"),
-                new TypedValue((int) DxfCode.LayerName, ProtectionOptions.LayerName_CenterAxis)
-            };
             var pline = pl;
-            var bdbl = pline.Bounds.Value.MinPoint;
-            var bdtr = pline.Bounds.Value.MaxPoint;
-            var res =
-                docMdf.acEditor.SelectCrossingWindow(
-                    new Point3d(bdbl.X - ProtectionOptions.RoadWidth / 2, bdbl.Y - 0, bdbl.Z),
-                    new Point3d(bdtr.X + ProtectionOptions.RoadWidth / 2, bdtr.Y + 0, bdtr.Z),
-                    new SelectionFilter(filterCenterAxis));
+            var bdbl = pline.Bounds.Value.MinPoint; // 左下角点
+            bdbl = new Point3d(bdbl.X - Options_General.RoadWidth / 2, bdbl.Y - 0, bdbl.Z);
+            var bdtr = pline.Bounds.Value.MaxPoint; // 右上角点
+            bdtr = new Point3d(bdtr.X + Options_General.RoadWidth / 2, bdtr.Y + 0, bdtr.Z);
+            var res = docMdf.acEditor.SelectCrossingWindow(bdbl, bdtr, SubgradeSection.Filter);
 
             if (res.Status == PromptStatus.OK)
             {
@@ -204,8 +232,8 @@ namespace eZcad.SubgradeQuantity.Entities
                         // 根据距离最近的原则来从众多的轴线中寻找匹配项
                         var centMid = l.StartPoint.Add((l.EndPoint - l.StartPoint).DivideBy(2)); // 轴线的中点
 
-                        var d1 = centMid.DistanceTo(bdtr);
-                        var d2 = centMid.DistanceTo(bdbl);
+                        var d1 = centMid.DistanceTo(pl.StartPoint);
+                        var d2 = centMid.DistanceTo(pl.StartPoint);
                         var minD = Math.Min(d1, d2);
                         if (minD < minDis)
                         {
@@ -230,7 +258,7 @@ namespace eZcad.SubgradeQuantity.Entities
                 }
                 return centerLine;
             }
-            docMdf.WriteLineIntoDebuger("在边坡线周围没有找到中心轴线" + "\r\n" + bdbl + "\r\n" + bdtr);
+            docMdf.WriteLineIntoDebuger("在边坡线周围没有找到中心轴线。请检查边坡线数据中是否保存有道路中线句柄值，或者将视图缩小以在屏幕中显示出对应的轴线。轴线搜索范围：" + "\r\n" + bdbl + " ~ " + bdtr);
             return null;
         }
 
@@ -261,20 +289,30 @@ namespace eZcad.SubgradeQuantity.Entities
 
         #region --- 边坡系统的构造
 
+        /// <summary> 挡墙与自然地面交点相对于边坡线内侧点的高差。对于填方边坡，其值一般为负，且只考虑路肩墙，不考虑路堤墙或护脚墙；
+        /// 对于挖方边坡，其值一般为正。如果其值为0，一般即表示此边坡中没有挡墙。 </summary>
+        private double _retainingWallHeight;
+
         /// <summary>
-        ///     边坡所对应的几何线段，每一个线段都代表了某一级边坡（包括马道平台）。
+        ///     边坡所对应的几何线段，每一个线段都代表了某一级边坡（不包括马道平台）。
         ///     同时，位于集合中靠前位置的对象，表示此对象更接近路面
         /// </summary>
-        private List<ISlopeSeg> _slopes;
+        private List<Slope> _slopes;
+        /// <summary>
+        ///     边坡所对应的几何线段，每一个线段都代表了某一级马道平台。
+        ///     同时，位于集合中靠前位置的对象，表示此对象更接近路面
+        /// </summary>
+        private List<Platform> _platforms;
 
         /// <summary>
         ///     构造边坡系统
         /// </summary>
         /// <param name="pl"></param>
         /// <returns>返回的集合中，包含了边坡与平台，并排除了与挡墙重合的部分 </returns>
-        private List<ISlopeSeg> ConstructSlopeSys(Polyline pl)
+        private void ConstructSlopeSys(Polyline pl, out List<Slope> slopes, out List<Platform> platforms)
         {
-            var slopes = new List<ISlopeSeg>();
+            slopes = new List<Slope>();
+            platforms = new List<Platform>();
             var segs = new List<LineSegment3d>();
             var curve = pl.GetGeCurve() as CompositeCurve3d;
 
@@ -285,16 +323,22 @@ namespace eZcad.SubgradeQuantity.Entities
                     segs.Add(c);
                 }
             }
-            if (segs.Count == 0) return slopes;
+            if (segs.Count == 0) return;
             //
             var slopeIndex = 0;
-            foreach (var seg in segs)
+            var retainingWallSegIndex = 0;
+            bool lastIsPlatform = false;
+            for (int i = 0; i < segs.Count; i++)
             {
+                var seg = segs[i];
                 if (_retainingWallCurve != null
                     && _retainingWallCurve.IsOn(new Point3d(seg.StartPoint.X, seg.StartPoint.Y, 0))
                     && _retainingWallCurve.IsOn(new Point3d(seg.EndPoint.X, seg.EndPoint.Y, 0)))
                 {
+                    retainingWallSegIndex = i;
                     // 说明这一段线是与挡墙重合的，不计入边坡
+                    _retainingWallHeight = seg.EndPoint.Y - pl.StartPoint.Y;
+                    lastIsPlatform = false;
                 }
                 else
                 {
@@ -305,8 +349,18 @@ namespace eZcad.SubgradeQuantity.Entities
                         // 说明可能是平台，但如果其长度大于设置的平台最宽值，则认为其为一个平坡
                         if (seg.Length <= ProtectionConstants.MaxPlatformLength)
                         {
-                            var plf = new Platform(slopeIndex, seg.StartPoint, seg.EndPoint);
-                            slopes.Add(plf);
+                            // 说明是一个平台
+                            if (lastIsPlatform)
+                            {
+                                // 有可能会出现在一条边坡多段线中，连续相邻两个段都是平台的情况，此时将二者合并为一个平台
+                                platforms[platforms.Count - 1] = new Platform(platforms[platforms.Count - 1].Index, platforms[platforms.Count - 1].InnerPoint, seg.EndPoint);
+                            }
+                            else
+                            {
+                                var plf = new Platform(slopeIndex, seg.StartPoint, seg.EndPoint);
+                                platforms.Add(plf);
+                            }
+                            lastIsPlatform = true;
                         }
                         else
                         {
@@ -318,6 +372,7 @@ namespace eZcad.SubgradeQuantity.Entities
                             slopeIndex += 1;
                             var slp = new Slope(slopeIndex, innerPt: seg.StartPoint, outerPt: seg.EndPoint);
                             slopes.Add(slp);
+                            lastIsPlatform = false;
                             //
                         }
                     }
@@ -330,11 +385,16 @@ namespace eZcad.SubgradeQuantity.Entities
                         slopeIndex += 1;
                         var slp = new Slope(slopeIndex, innerPt: seg.StartPoint, outerPt: seg.EndPoint);
                         slopes.Add(slp);
+                        lastIsPlatform = false;
                         //
                     }
                 }
             }
-            return slopes;
+            // 判断挡墙是否为护脚墙
+            if (_retainingWall != null && retainingWallSegIndex == segs.Count - 1 && (slopes.Count + platforms.Count) > 0)
+            {
+                _retainingWallHeight = 0;
+            }
         }
 
         #endregion
@@ -348,7 +408,7 @@ namespace eZcad.SubgradeQuantity.Entities
         {
             var yw = Section.GetYFromElev(elev); // 水位标高所对应的几何Y坐标
             var l = 0.0;
-            foreach (var s in _slopes.OfType<Slope>())
+            foreach (var s in _slopes)
             {
                 l += LineLengthBelowY(s, yw);
             }
@@ -380,7 +440,11 @@ namespace eZcad.SubgradeQuantity.Entities
 
         private double GetTopElevation()
         {
-            if (_slopes.Count == 0)
+            var maxY = Math.Max(Pline.StartPoint.Y, Pline.EndPoint.Y);
+            return Section.GetEleFromY(maxY);
+            //
+            var segms = SlopeData.Combine(_slopes, _platforms, sort: false);
+            if (segms.Count == 0)
             {
                 var topPt = _isFill
                     ? Pline.GetLineSegment2dAt(0).EndPoint
@@ -389,7 +453,7 @@ namespace eZcad.SubgradeQuantity.Entities
             }
             else
             {
-                var topS = _isFill ? _slopes[0] : _slopes[_slopes.Count - 1];
+                var topS = _isFill ? segms[0] : segms[segms.Count - 1];
                 if (topS is Slope)
                 {
                     return Section.GetEleFromY((topS as Slope).TopPoint.Y);
@@ -403,7 +467,11 @@ namespace eZcad.SubgradeQuantity.Entities
 
         private double GetBottomElevation()
         {
-            if (_slopes.Count == 0)
+            var maxY = Math.Min(Pline.StartPoint.Y, Pline.EndPoint.Y);
+            return Section.GetEleFromY(maxY);
+            //
+            var segms = SlopeData.Combine(_slopes, _platforms, sort: false);
+            if (segms.Count == 0)
             {
                 var bottomPt = _isFill
                     ? Pline.GetLineSegment2dAt(Pline.NumberOfVertices - 2).EndPoint
@@ -412,7 +480,7 @@ namespace eZcad.SubgradeQuantity.Entities
             }
             else
             {
-                var bottomS = _isFill ? _slopes[_slopes.Count - 1] : _slopes[0];
+                var bottomS = _isFill ? segms[segms.Count - 1] : segms[0];
                 if (bottomS is Slope)
                 {
                     return Section.GetEleFromY((bottomS as Slope).BottomPoint.Y);
@@ -428,21 +496,23 @@ namespace eZcad.SubgradeQuantity.Entities
 
         #region --- 将边坡防护形式显示在边坡图形的附近
 
+        #region --- 写入界面
+
         /// <summary> 将边坡防护形式显示在边坡图形的附近 </summary>
-        public void PrintProtectionMethod(BlockTableRecord btr, ObjectId layerId_Slope, ObjectId layerId_Platform)
+        public void PrintProtectionMethod(BlockTableRecord btr, Dictionary<string, ObjectId> protLayers)
         {
             var xdata = XData;
             foreach (var ss in xdata.Slopes)
             {
-                WriteProtectionMethod(ss, btr, layerId_Slope);
+                WriteProtectionMethod(ss, btr, protLayers);
             }
             foreach (var ss in xdata.Platforms)
             {
-                WriteProtectionMethod(ss, btr, layerId_Platform);
+                WriteProtectionMethod(ss, btr, protLayers);
             }
         }
 
-        private void WriteProtectionMethod(ISlopeSeg ss, BlockTableRecord btr, ObjectId layerId)
+        private void WriteProtectionMethod(ISlopeSeg ss, BlockTableRecord btr, Dictionary<string, ObjectId> protLayers)
         {
             DBText originalText = null;
             try
@@ -459,9 +529,18 @@ namespace eZcad.SubgradeQuantity.Entities
                 {
                     // 创建
                     var newText = CreateProtectionMethodText(ss);
-                    newText.LayerId = layerId;
+                    newText.LayerId = protLayers[newText.TextString];
+
+                    // 相关数据
+                    var protTd = new ProtTextData(Station, _onLeft, (ss is Slope), ss.Index);
+                    ResultBuffer xdata = protTd.ToResultBuffer();
+                    newText.XData = xdata;
+
+                    //
                     btr.AppendEntity(newText);
                     _docMdf.acTransaction.AddNewlyCreatedDBObject(newText, true);
+                    // 在Draw()方法执行之前，必须确保此对象已经添加到数据库中（但是可以在 acTransaction.AddNewlyCreatedDBObject 之前），否则执行Draw()时，会造成 AutoCAD 的崩溃！
+                    newText.Draw();
                     //
                     ss.ProtectionMethodText = newText.Handle;
                 }
@@ -470,6 +549,8 @@ namespace eZcad.SubgradeQuantity.Entities
                     // 修改
                     originalText.UpgradeOpen();
                     originalText.TextString = ss.ProtectionMethod;
+                    originalText.LayerId = protLayers[originalText.TextString];
+                    originalText.Draw();
                     originalText.DowngradeOpen();
                 }
             }
@@ -478,6 +559,7 @@ namespace eZcad.SubgradeQuantity.Entities
                 // 不作任何操作或者将已有的删除
                 if (originalText != null)
                 {
+                    // 原文本对象存在，但是其防护为空
                     // 删除
                     originalText.UpgradeOpen();
                     originalText.Erase(true);
@@ -486,6 +568,7 @@ namespace eZcad.SubgradeQuantity.Entities
                 }
                 else
                 {
+                    // 原文本对象不存在，而且其防护为空
                     // 不作任何操作
                 }
             }
@@ -510,26 +593,60 @@ namespace eZcad.SubgradeQuantity.Entities
             return txt;
         }
 
+        #endregion
+
+        #region --- 从界面提取
+
+        /// <summary> 从AutoCAD界面中的防护文字中提取对应的防护数据 </summary>
+        /// <param name="seg"></param>
+        /// <param name="db"></param>
+        public static void ExtractProtectionFromText(ISlopeSeg seg, Database db)
+        {
+            DBText text = null;
+            try
+            {
+                text = seg.ProtectionMethodText.GetDBObject<DBText>(db);
+            }
+            catch (Exception)
+            {
+            }
+            if (text != null && !string.IsNullOrEmpty(text.TextString))
+            {
+                seg.ProtectionMethod = text.TextString;
+            }
+            else
+            {
+                seg.ProtectionMethod = null;
+            }
+        }
+
+        #endregion
+
+        #region --- 从界面删除
+
         /// <summary> 强行将边坡的防护方式的显示字符删除 </summary>
         public void ClearProtectionMethodText()
         {
             var xdata = XData;
             foreach (var ss in xdata.Slopes)
             {
-                EraseText(ss);
+                EraseText(ss, _docMdf.acDataBase);
             }
             foreach (var ss in xdata.Platforms)
             {
-                EraseText(ss);
+                EraseText(ss, _docMdf.acDataBase);
             }
         }
 
-        private void EraseText(ISlopeSeg ss)
+        /// <summary> 删除子边坡所绑定的防护文字 </summary>
+        /// <param name="seg"></param>
+        /// <param name="db"></param>
+        public static void EraseText(ISlopeSeg seg, Database db)
         {
             DBText originalText = null;
             try
             {
-                originalText = ss.ProtectionMethodText.GetDBObject<DBText>(_docMdf.acDataBase);
+                originalText = seg.ProtectionMethodText.GetDBObject<DBText>(db);
             }
             catch (Exception)
             {
@@ -539,10 +656,37 @@ namespace eZcad.SubgradeQuantity.Entities
                 originalText.UpgradeOpen();
                 originalText.Erase(true);
                 originalText.DowngradeOpen();
-                ss.ProtectionMethodText = default(Handle);
+                seg.ProtectionMethodText = default(Handle);
             }
         }
+
         #endregion
+
+        #endregion
+
+        /// <summary> 强行将边坡的绑定的水位线删除 </summary>
+        public void ClearAllWaterlines(Database db)
+        {
+            var xdata = XData;
+            foreach (var wl in xdata.Waterlines)
+            {
+                Line line = null;
+                try
+                {
+                    line = wl.GetDBObject<Line>(db);
+                }
+                catch (Exception)
+                {
+                }
+                if (line != null)
+                {
+                    line.UpgradeOpen();
+                    line.Erase(true);
+                    line.DowngradeOpen();
+                }
+            }
+            xdata.Waterlines = new List<Handle>();
+        }
 
         #region --- XData
 
@@ -570,7 +714,7 @@ namespace eZcad.SubgradeQuantity.Entities
                     //Pline.XData = bf;
                     //Pline.DowngradeOpen();
                 }
-                return _xData ?? new SlopeData(Station) { FullyCalculated = false };
+                return _xData ?? new SlopeData(Station, _onLeft) { FullyCalculated = false };
             }
             private set { _xData = value; }
         }
@@ -589,15 +733,11 @@ namespace eZcad.SubgradeQuantity.Entities
             //
             xdata.TopElevation = GetTopElevation();
             xdata.BottomElevation = GetBottomElevation();
-            //
-            var a = ProtectionOptions.WaterLevel;
-            var b = ProtectionOptions.FillUpperEdge;
-            //xdata.SlopeLengthBelowWaterLevel = GetSlopeLengthBelowElevation(ProtectionOptions.WaterLevel);
-            //xdata.SlopeLengthBelowFillTop = GetSlopeLengthBelowElevation(ProtectionOptions.FillUpperEdge);
+            xdata.RetainingWallHeight = _retainingWallHeight;
 
             // 每一级的边坡与平台信息
-            xdata.Slopes = _slopes.OfType<Slope>().ToList();
-            xdata.Platforms = _slopes.OfType<Platform>().ToList();
+            xdata.Slopes = _slopes;
+            xdata.Platforms = _platforms;
             //
             xdata.FullyCalculated = true;
         }
@@ -610,43 +750,48 @@ namespace eZcad.SubgradeQuantity.Entities
                 XData = newData;
 
                 // 对可以被用户通过界面进行修改的项进行赋值（主要是对用户自行设置的防护方式与防护长度进行赋值）
-                if (newData.Slopes.Count + newData.Platforms.Count == _slopes.Count)
-                {
-                    _slopes = SlopeData.Combine(newData.Slopes, newData.Platforms, true);
-                }
+                _slopes = newData.Slopes;
+                _platforms = newData.Platforms;
             }
         }
 
+        /// <summary> 将数据保存到多段线的 ExtensionDictionary 中 </summary>
+        /// <remarks> 本函数可能会导致 AutoCAD中 撤消 时的数据丢失 </remarks>
         public void FlushXData()
         {
-            var xdata = XData;
-            if (xdata != null)
+            var slopeXdata = XData;
+
+            if (Pline.ExtensionDictionary.IsNull)
             {
-                if (Pline.ExtensionDictionary.IsNull)
-                {
-                    // Pline.UpgradeOpen();
-                    Pline.CreateExtensionDictionary();
-                    // Pline.DowngradeOpen();
-                }
-                // 总的字典
-                var extensionDict = Pline.ExtensionDictionary.GetObject(OpenMode.ForWrite) as DBDictionary;
-
-                // 一般性的数据
-                var gen = xdata.ToXrecord_General();
-                extensionDict.SetAt(SlopeData.DictKey_General, gen);
-                _docMdf.acTransaction.AddNewlyCreatedDBObject(gen, true);
-
-                // 边坡数据
-                xdata.ToDict_Slopes(_docMdf.acTransaction, extensionDict);
-
-                extensionDict.DowngradeOpen();
+                // Pline.UpgradeOpen();
+                Pline.CreateExtensionDictionary();
+                // Pline.DowngradeOpen();
             }
+            // 总的字典
+            var extensionDict = Pline.ExtensionDictionary.GetObject(OpenMode.ForWrite) as DBDictionary;
+            var trans = _docMdf.acTransaction;
+
+            // 一般性的数据 保存到 Dictionary
+            var genBuff = slopeXdata.ToResBuff_General();
+            var rec = new Xrecord() { Data = genBuff };
+            Utils.OverlayDictValue(trans, extensionDict, SlopeData.DictKey_General, rec);
+
+            // 边坡数据 保存到 Dictionary
+            slopeXdata.ToDict_Slopes(_docMdf.acTransaction, extensionDict);
+
+            // 水位线数据 保存到 Dictionary
+            var waterlines = slopeXdata.ToResBuff_Waterlines();
+            rec = new Xrecord() { Data = waterlines };
+            Utils.OverlayDictValue(trans, extensionDict, SlopeData.DictKey_Waterlines, rec);
+            //
+            extensionDict.DowngradeOpen();
         }
 
         public void ClearXData()
         {
             //
             ClearProtectionMethodText();
+            ClearAllWaterlines(_docMdf.acDataBase);
             //
             if (!Pline.ExtensionDictionary.IsNull)
             {
@@ -659,9 +804,9 @@ namespace eZcad.SubgradeQuantity.Entities
                 {
                     extensionDict.Remove(SlopeData.DictKey_Slopes);
                 }
-                if (extensionDict.Contains(SlopeData.DictKey_Platforms))
+                if (extensionDict.Contains(SlopeData.DictKey_Waterlines))
                 {
-                    extensionDict.Remove(SlopeData.DictKey_Platforms);
+                    extensionDict.Remove(SlopeData.DictKey_Waterlines);
                 }
             }
         }
@@ -688,34 +833,153 @@ namespace eZcad.SubgradeQuantity.Entities
 
         #region --- 边坡防护形式的确定
 
+        #region --- 根据自动防护规则进行防护
+
         /// <summary> 自动确定每一级边坡的防护形式 </summary>
         /// <param name="criterion">自动防护的规则</param>
         public void AutoSetProtectionMethods(AutoProtectionCriterions criterion)
         {
+            var data = XData;
+            var firstProt = GetFirstSlopeProtection(criterion, data);
+            foreach (var s in data.Slopes)
+            {
+                s.ProtectionMethod = firstProt;
+            }
+            foreach (var s in data.Platforms)
+            {
+                s.ProtectionMethod = firstProt;
+            }
+        }
+
+        /// <summary>
+        /// 将边坡从第一条规则开始过滤，如果任何一整条规则都不符合，则返回 null
+        /// </summary>
+        /// <param name="criterions"></param>
+        /// <returns></returns>
+        private string GetFirstSlopeProtection(AutoProtectionCriterions criterions, SlopeData data)
+        {
+            // 将边坡从第一条规则开始过滤，如果任何一整条规则都不符合，则返回 null
+            foreach (var cr in criterions.SlopeCriterions)
+            {
+                // 填挖方
+                if ((cr.Fill == Operator_Bool.是 && !_isFill) || (cr.Fill == Operator_Bool.否 && _isFill))
+                {
+                    continue;
+                }
+                // 首级边坡坡比
+                if (data.Slopes.Count == 0)
+                {
+                    continue;
+                }
+                var firstSlopeRatio = Math.Abs(data.Slopes[0].SlopeRatio);
+                if (!InRangeCollection(cr.FirstSlopeRatio.AndRange, firstSlopeRatio))
+                {
+                    continue;
+                }
+
+                // 边坡高度
+                var slopeHeight = Math.Abs(Pline.StartPoint.Y - Pline.EndPoint.Y);
+                if (!InRangeCollection(cr.SlopeHeight.AndRange, slopeHeight))
+                {
+                    continue;
+                }
+
+                // 边坡总坡级
+                var slopeLevelCount = data.Slopes.Count;
+                if (!InRangeCollection(cr.SlopeLevel.AndRange, slopeLevelCount))
+                {
+                    continue;
+                }
+
+                // 所有条件都满足，确定防护方式
+                return cr.ProtectionMethod;
+            }
+            return null;
+        }
+
+        private bool InRangeCollection(XmlList<CriterionRange> criterions, double value)
+        {
+            foreach (var rg in criterions)
+            {
+                if (!rg.InRange(value))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        #endregion
+
+        #region --- 根据手动防护规则进行防护
+
+        public void ForceProtect(ForceProtection criterion)
+        {
+            var data = XData;
+            if (criterion.SlopeLevels == null)
+            {
+                foreach (var s in data.Slopes)
+                {
+                    s.ProtectionMethod = criterion.ProtMethod;
+                }
+            }
+            else
+            {
+                foreach (var s in data.Slopes)
+                {
+                    if (criterion.SlopeLevels.Contains(s.GetMainLevel()))
+                    {
+                        s.ProtectionMethod = criterion.ProtMethod;
+                    }
+                }
+            }
+        }
+
+        #endregion
+
+        #region --- 强制手动防护
+
+        /// <summary> 自动确定每一级边坡的防护形式 </summary>
+        /// <param name="criterion">自动防护的规则</param>
+        public void AutoSetProtectionMethods()
+        {
+
             // 每一级的边坡与平台信息
-            var slopes = _slopes.OfType<Slope>().ToList();
-            if (slopes.Count == 1)
+            var slopes = XData.Slopes;
+            if (slopes.Count > 0)
             {
                 slopes[0].ProtectionMethod = SetProtectionMethods_Slope(slopes[0], _isFill);
             }
-            if (slopes.Count > 1)
+            for (var i = 1; i < slopes.Count; i++)
             {
-                for (var i = 1; i < slopes.Count; i++)
-                {
-                    slopes[i].ProtectionMethod = slopes[0].ProtectionMethod;
-                }
-            }
-            //
-            foreach (var slp in slopes)
-            {
-                slp.ProtectionMethod = SetProtectionMethods_Slope(slp, _isFill);
+                slopes[i].ProtectionMethod = slopes[0].ProtectionMethod;
             }
 
+            ////
+            //foreach (var slp in slopes)
+            //{
+            //    slp.ProtectionMethod = SetProtectionMethods_Slope(slp, _isFill);
+            //}
+
             // 平台防护
-            var platforms = _slopes.OfType<Platform>().ToList();
+            var platforms = XData.Platforms;
             foreach (var plf in platforms)
             {
-                plf.ProtectionMethod = SetProtectionMethods_Platform(plf, _isFill);
+                bool foundInnerSlope = false;
+                for (int i = slopes.Count - 1; i >= 0; i--)
+                {
+                    if (slopes[i].Index <= plf.Index)
+                    {
+                        foundInnerSlope = true;
+                        plf.ProtectionMethod = slopes[i].ProtectionMethod;
+                        break;
+                    }
+                }
+                if (!foundInnerSlope)
+                {
+                    plf.ProtectionMethod = SetProtectionMethods_Platform(plf, _isFill);
+                }
+                // plf.ProtectionMethod = SetProtectionMethods_Platform(plf, _isFill);
             }
 
             // 将数据进行刷新保存
@@ -732,22 +996,23 @@ namespace eZcad.SubgradeQuantity.Entities
                 {
                     return "挂网喷锚";
                 }
-                if (dir > 0.6)
+                else
                 {
                     return "锚杆网格梁";
                 }
             }
             else
             {
-                return "浆砌片石";
+                return "干砌片石";
             }
             return $"{dir.ToString("0.00")} 坡比防护";
         }
 
         private static string SetProtectionMethods_Platform(Platform plf, bool fill)
         {
-            return "平台防护";
+            return "";
         }
+        #endregion
 
         #endregion
     }

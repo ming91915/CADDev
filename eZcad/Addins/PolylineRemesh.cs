@@ -29,7 +29,7 @@ namespace eZcad.Addins
         }
 
         /// <summary> 对多段线的疏密进行重新设置 </summary>
-        public void RemeshPolyline(DocumentModifier docMdf, SelectionSet impliedSelection)
+        public ExternalCmdResult RemeshPolyline(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
             var app = Application.AcadApplication as AcadApplication;
             // 获得当前文档和数据库   Get the current document and database
@@ -38,7 +38,7 @@ namespace eZcad.Addins
             var tran = docMdf.acTransaction;
 
             var pls = SelectPolylines(docMdf);
-            if (pls == null || pls.Length == 0) return;
+            if (pls == null || pls.Length == 0) return ExternalCmdResult.Cancel;
             //
             var blkTb =
                 docMdf.acTransaction.GetObject(docMdf.acDataBase.BlockTableId, OpenMode.ForRead) as BlockTable;
@@ -109,6 +109,7 @@ namespace eZcad.Addins
                     }
                 }
             }
+            return ExternalCmdResult.Commit;
         }
 
         #region ---   命令行交互

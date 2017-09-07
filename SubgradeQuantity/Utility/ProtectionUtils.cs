@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Windows;
+using System.Windows.Forms;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.Geometry;
 using eZcad.SubgradeQuantity.Cmds;
 using eZcad.SubgradeQuantity.DataExport;
 using eZcad.SubgradeQuantity.Entities;
+using eZcad.SubgradeQuantity.Options;
 using eZcad.Utility;
 using Microsoft.Office.Interop.Excel;
 using Application = Microsoft.Office.Interop.Excel.Application;
@@ -21,7 +21,6 @@ namespace eZcad.SubgradeQuantity.Utility
     /// <summary> 与边坡防护相关的一些通用性的操作 </summary>
     public static class ProtectionUtils
     {
-
         /// <summary> 路基工程量计算系统 环境配置 </summary>
         /// <param name="docMdf"></param>
         public static void SubgradeEnvironmentConfiguration(DocumentModifier docMdf)
@@ -32,11 +31,11 @@ namespace eZcad.SubgradeQuantity.Utility
             // var app = Utils.GetOrCreateAppName(docMdf.acDataBase, docMdf.acTransaction, SlopeDataBackup.AppName);
         }
 
-        #region --- 从界面中提取路基或者边坡等对象
+        #region --- 从界面中提取路基横断面对象
 
         /// <summary> 从界面中提取路基对象 </summary>
         /// <returns></returns>
-        public static List<Line> GetSections(Editor ed)
+        public static List<Line> SelecteSections(Editor ed)
         {
             // Create our options object
             var pso = new PromptSelectionOptions();
@@ -48,17 +47,7 @@ namespace eZcad.SubgradeQuantity.Utility
             // 当用户在命令行中输入Re（或Remove）时，命令行出现的提示字符。
             // pso.SingleOnly = true;
 
-            // 创建一个 TypedValue 数组，用于定义过滤条件
-            var filterType = new[]
-            {
-                new TypedValue((int) DxfCode.Start, "LINE"),
-                new TypedValue((int) DxfCode.LayerName, ProtectionOptions.LayerName_CenterAxis),
-            };
-
-            // 将过滤条件赋值给SelectionFilter对象
-            var acSelFtr = new SelectionFilter(filterType);
-
-            var psr = ed.GetSelection(pso, acSelFtr);
+            var psr = ed.GetSelection(pso, SubgradeSection.Filter);
 
             if (psr.Status == PromptStatus.OK)
             {
@@ -94,22 +83,56 @@ namespace eZcad.SubgradeQuantity.Utility
                     {
                         MessageBox.Show($"某些道路中心线对象所对应的横断面未进行构造，" +
                                         $"\r\n请先调用“{SectionsConstructor.CommandName}”命令，以构造整个项目的横断面系统。",
-                            "提示", MessageBoxButton.OK, MessageBoxImage.Error);
+                            "提示", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return null;
                     }
                 }
             }
             if (sort)
             {
-                stations.Sort(ProtectionUtils.CompareStation);
+                stations.Sort(CompareStation);
             }
             return stations.ToArray();
         }
-        
+
+        #endregion
+
+        #region --- 从界面中提取边坡等对象
+
+        /// <summary> 从 AutoCAD 界面中选择横断面轴线 </summary>
+        public static SubgradeSection GetSection(DocumentModifier docMdf)
+        {
+            SubgradeSection sec = null;
+            var op = new PromptEntityOptions("\n选择要提取的横断面轴线");
+            op.AddAllowedClass(typeof(Line), true);
+
+            var res = docMdf.acEditor.GetEntity(op);
+            if (res.Status == PromptStatus.OK)
+            {
+                var line = res.ObjectId.GetObject(OpenMode.ForRead) as Line;
+                if (line != null && line.Layer == Options_LayerNames.LayerName_CenterAxis)
+                {
+                    var si = SectionInfo.FromCenterLine(line);
+                    if (si != null && si.FullyCalculated)
+                    {
+                        sec = new SubgradeSection(docMdf, line, si);
+                    }
+                    else
+                    {
+                        MessageBox.Show($"选择的道路中心线对象所对应的横断面未进行构造，" +
+                                        $"\r\n请先调用“{SectionsConstructor.CommandName}”命令，以构造整个项目的横断面系统。",
+                            "提示", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+            return sec;
+        }
+
         /// <summary> 从界面中搜索边坡线 </summary>
         /// <param name="ed"></param>
+        /// <param name="left">true 表示只选择左边的边坡，false 表示只选择右边的边坡，null 表示选择左右两侧的边坡</param>
         /// <returns></returns>
-        public static List<Polyline> GetSlopeLines(Editor ed)
+        public static List<Polyline> SelecteSlopeLines(Editor ed, bool? left)
         {
             // Create our options object
             var pso = new PromptSelectionOptions();
@@ -121,7 +144,21 @@ namespace eZcad.SubgradeQuantity.Utility
             // 当用户在命令行中输入Re（或Remove）时，命令行出现的提示字符。
             // pso.SingleOnly = true;
 
-            var psr = ed.GetSelection(pso, SlopeLine.Filter);
+            SelectionFilter filter = null;
+            if (!left.HasValue)
+            {
+                filter = SlopeLine.Filter;
+            }
+            else if (left.Value)
+            {
+                filter = SlopeLine.FilterLeft;
+            }
+            else
+            {
+                filter = SlopeLine.FilterRight;
+            }
+
+            var psr = ed.GetSelection(pso, filter);
 
             if (psr.Status == PromptStatus.OK)
             {
@@ -132,14 +169,42 @@ namespace eZcad.SubgradeQuantity.Utility
 
         /// <summary> 从界面中选择已经构造好的边坡对象。对于已经计算过的边坡，不再进行重新计算，而保留其原有的数据 </summary>
         /// <param name="docMdf"></param>
+        /// <param name="left">true 表示只选择左边的边坡，false 表示只选择右边的边坡，null 表示选择左右两侧的边坡</param>
         /// <returns></returns>
-        public static List<SlopeLine> GetExistingSlopeLines(DocumentModifier docMdf)
+        public static List<SlopeLine> SelecteExistingSlopeLines(DocumentModifier docMdf, bool? left, bool sort)
         {
             // var allSections = ProtectionUtils.GetAllSections(docMdf);
-            var slopeLines = ProtectionUtils.GetSlopeLines(docMdf.acEditor);
+            var slopeLines = SelecteSlopeLines(docMdf.acEditor, left: left);
+            return ConstructSlopeLinesFromPlines(docMdf, slopeLines, sort: sort);
+        }
+
+        /// <summary> 从界面中选择已经构造好的边坡对象。对于已经计算过的边坡，不再进行重新计算，而保留其原有的数据 </summary>
+        /// <param name="docMdf"></param>
+        /// <returns></returns>
+        public static List<SlopeLine> GetAllExistingSlopeLines(DocumentModifier docMdf, bool sort)
+        {
+            var psr = docMdf.acEditor.SelectAll(SlopeLine.Filter);
+            var slpLines = new List<Polyline>();
+            if (psr.Status == PromptStatus.OK)
+            {
+                slpLines = psr.Value.GetObjectIds().Select(id => id.GetObject(OpenMode.ForRead) as Polyline).ToList();
+            }
+            if (slpLines.Count > 0)
+            {
+                return ConstructSlopeLinesFromPlines(docMdf, slpLines, sort: sort);
+            }
+            else
+            {
+                return new List<SlopeLine>();
+            }
+        }
+
+        private static List<SlopeLine> ConstructSlopeLinesFromPlines(DocumentModifier docMdf, List<Polyline> plines,
+            bool sort)
+        {
             var slpLines = new List<SlopeLine>();
             string errMsg;
-            foreach (var sl in slopeLines)
+            foreach (var sl in plines)
             {
                 var slpLine = SlopeLine.Create(docMdf, sl, out errMsg);
                 if (slpLine != null)
@@ -158,8 +223,13 @@ namespace eZcad.SubgradeQuantity.Utility
                     docMdf.WriteNow(errMsg);
                 }
             }
+            if (sort)
+            {
+                slpLines.Sort(CompareStation);
+            }
             return slpLines;
         }
+
         #endregion
 
         #region --- Excel 程序
@@ -237,6 +307,7 @@ namespace eZcad.SubgradeQuantity.Utility
                 if (sht != null && sht.Name.Equals(sheetName, StringComparison.CurrentCultureIgnoreCase))
                 {
                     matchedSheet = sht;
+                    sht.UsedRange.Clear();
                     break;
                 }
             }
@@ -272,29 +343,60 @@ namespace eZcad.SubgradeQuantity.Utility
             return null;
         }
 
+        /// <summary> 将桩号数值表示为 K23+456.789 ~ K23+456.789 的形式 </summary>
+        /// <param name="startStation">要进行转换的起始桩号的数值 </param>
+        /// <param name="endStation"> 要进行转换的结尾桩号的数值 </param>
+        /// <param name="maxDigits">最大的小数位数</param>
+        public static string GetStationString(double startStation, double endStation, int maxDigits)
+        {
+            return GetStationString(startStation, maxDigits) + @"~" + GetStationString(endStation, maxDigits);
+        }
+
+        /// <summary> 将桩号数值表示为 K23+456.789 的形式 </summary>
+        /// <param name="station">要进行转换的桩号的数值</param>
+        /// <param name="maxDigits">最大的小数位数</param>
+        public static string GetStationString(double station, int maxDigits)
+        {
+            string res = null;
+            var k = (int)Math.Floor(station / 1000);
+            var meters = station % 1000;
+            var miniMeters = meters % 1;
+            if (miniMeters != 0)
+            {
+                var digits = new string('0', maxDigits);
+                res += $"K{k}+{meters.ToString("000." + digits)}";
+            }
+            else
+            {
+                // 整米数桩号
+                res = $"K{k}+{meters.ToString("000")}";
+            }
+            return res;
+        }
+
         #endregion
 
         #region --- 各种比较排序
-
 
         /// <summary> 桩号小的在前面 </summary>
         public static int CompareStation<T>(StationInfo<T> x, StationInfo<T> y)
         {
             return x.Station.CompareTo(y.Station);
         }
-    
+
         /// <summary> 桩号小的在前面 </summary>
         public static int CompareStation(SubgradeSection slopeData1, SubgradeSection slopeData2)
         {
             return slopeData1.XData.Station.CompareTo(slopeData2.XData.Station);
         }
+
         /// <summary> 桩号小的在前面 </summary>
-        public static int CompareStation(SlopeLine slopeData1, SlopeLine slopeData2)
+        public static int CompareStation(SlopeLine slopeline1, SlopeLine slopeline2)
         {
-            return slopeData1.Station.CompareTo(slopeData2.Station);
+            return slopeline1.Station.CompareTo(slopeline2.Station);
         }
 
         #endregion
-
+     
     }
 }

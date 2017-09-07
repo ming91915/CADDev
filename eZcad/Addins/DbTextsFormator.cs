@@ -27,7 +27,7 @@ namespace eZcad.Addins
         }
 
         /// <summary> 将多个单行文字按其定位进行组合 </summary>
-        public void FormatDbTexts(DocumentModifier docMdf, SelectionSet impliedSelection)
+        public ExternalCmdResult FormatDbTexts(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
             bool cont = true;
             ObjectId[] texts = null;
@@ -48,6 +48,7 @@ namespace eZcad.Addins
                     CombineDbTexts(docMdf, txts);
                 }
             }
+            return ExternalCmdResult.Commit;
         }
 
         #endregion

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
-using System.Windows;
+using System.Windows.Forms;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
@@ -9,12 +9,22 @@ using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 
 namespace eZcad
 {
+
+    public enum ExternalCmdResult
+    {
+        Commit,
+        Cancel,
+    }
+
+    /// <param name="docMdf"></param>
+    /// <param name="impliedSelection"></param>
+    /// <returns>如果要取消操作（即将事务 Abort 掉），则返回 false，如果要提交事务，则返回 true </returns>
+    public delegate ExternalCmdResult ExternalCommand(DocumentModifier docMdf, SelectionSet impliedSelection);
+
     /// <summary> 对文档进行配置，以启动文档的改写模式 </summary>
     public class DocumentModifier : IDisposable
     {
         #region ---   执行外部命令
-        
-        public delegate void ExternalCommand(DocumentModifier docMdf, SelectionSet impliedSelection);
 
         /// <summary> 执行外部命令，并且在执行命令之前，自动将 事务打开</summary>
         /// <param name="cmd">要执行的命令</param>
@@ -25,15 +35,26 @@ namespace eZcad
                 try
                 {
                     var impliedSelection = docMdf.acEditor.SelectImplied().Value;
-                    cmd(docMdf, impliedSelection);
+                    var res = cmd(docMdf, impliedSelection);
                     //
-                    docMdf.acTransaction.Commit();
+                    switch (res)
+                    {
+                        case ExternalCmdResult.Commit:
+                            docMdf.acTransaction.Commit();
+                            break;
+                        case ExternalCmdResult.Cancel:
+                            docMdf.acTransaction.Abort();
+                            break;
+                        default:
+                            docMdf.acTransaction.Abort();
+                            break;
+                    }
                 }
                 catch (System.Exception ex)
                 {
                     docMdf.acTransaction.Abort(); // Abort the transaction and rollback to the previous state
                     string errorMessage = ex.Message + "\r\n\r\n" + ex.StackTrace;
-                    MessageBox.Show(errorMessage, "出错", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(errorMessage, @"出错", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }

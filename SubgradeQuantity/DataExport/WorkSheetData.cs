@@ -15,7 +15,21 @@ namespace eZcad.SubgradeQuantity.DataExport
         SlopeProtection,
 
         /// <summary> 高填深挖工程量表 </summary>
-        ThickFillCut,
+        HighFillDeepCut,
+        
+        /// <summary> 低填浅挖工程量表 </summary>
+        ThinFillShallowCut,
+
+        /// <summary> 陡坡路堤工程量表 </summary>
+        SteepSlope,
+
+        /// <summary> 横向挖台阶工程量表 </summary>
+        StairsExcavCross,
+
+        /// <summary> 纵向挖台阶工程量表 </summary>
+        StairsExcavLong,
+
+
     }
 
     /// <summary>

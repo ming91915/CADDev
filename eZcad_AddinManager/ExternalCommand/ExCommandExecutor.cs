@@ -78,7 +78,7 @@ namespace eZcad.AddinManager
                     // AutoCAD 2016 中注释掉： ICADExCommand newExCommand = assembly.CreateInstance(addinItem.GetType().FullName) as ICADExCommand;
                     var instanceName = addinItem.GetType().FullName;
                     var newExCommand = assembly.CreateInstance(instanceName);
-                  
+
                     if (newExCommand == null)
                     {
                         errorMsg = $"在新加载的程序集中未能找到匹配名称“{instanceName}”的外部命令对象!!";
@@ -113,6 +113,9 @@ namespace eZcad.AddinManager
                 var mtd = ExCommandFinder.FindExCommandMethod(exCommandIns.GetType());
                 if (mtd != null)
                 {
+                    // 先将焦点交给 AutoCAD 主界面
+                    Application.MainWindow.Focus();
+                    // ---------------------------- 执行命令 ----------------------------------------
                     object[] paras = new object[] { impliedSelection, errorMessage, errorSet };
                     res = (ExternalCommandResult)mtd.Invoke(exCommandIns, paras);
                     // 将 ref 参数的值提取出来

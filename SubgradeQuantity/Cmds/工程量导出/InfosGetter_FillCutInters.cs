@@ -1,56 +1,69 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Windows.Forms;
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
+using eZcad.AddinManager;
 using eZcad.SubgradeQuantity.Cmds;
 using eZcad.SubgradeQuantity.DataExport;
+using eZcad.SubgradeQuantity.ParameterForm;
 using eZcad.SubgradeQuantity.Utility;
 using eZcad.Utility;
 
-[assembly: CommandClass(typeof (InfosGetter_FillCutInters))]
+[assembly: CommandClass(typeof(InfosGetter_FillCutInters))]
 
 namespace eZcad.SubgradeQuantity.Cmds
 {
     /// <summary> 将所有的填挖交界信息提取出来并制成相应表格 </summary>
-    public class InfosGetter_FillCutInters
+    [EcDescription(CommandDescription)]
+    public class InfosGetter_FillCutInters : ICADExCommand
     {
-        private DocumentModifier _docMdf;
 
         #region --- 命令设计
 
         /// <summary> 命令行命令名称，同时亦作为命令语句所对应的C#代码中的函数的名称 </summary>
         public const string CommandName = "ExportFillCutIntersections";
+        private const string CommandText = @"填挖交界";
+        private const string CommandDescription = @"将所有的填挖交界信息提取出来并制成相应表格";
 
         /// <summary> 将所有的填挖交界信息提取出来并制成相应表格 </summary>
-        [CommandMethod(ProtectionConstants.eZGroupCommnad, CommandName, CommandFlags.Modal | CommandFlags.UsePickSet)
-        , DisplayName(@"填挖交界"), Description("将所有的填挖交界信息提取出来并制成相应表格")
-        , RibbonItem(@"填挖交界", "将所有的填挖交界信息提取出来并制成相应表格", ProtectionConstants.ImageDirectory + "ExportFillCutIntersections_32.png")]
+        [CommandMethod(ProtectionConstants.eZGroupCommnad, CommandName, ProtectionConstants.ModelState | CommandFlags.UsePickSet)
+        , DisplayName(CommandText), Description(CommandDescription)
+        , RibbonItem(CommandText, CommandDescription, ProtectionConstants.ImageDirectory + "ExportFillCutIntersections_32.png")]
         public void ExportFillCutIntersections()
         {
             DocumentModifier.ExecuteCommand(ExportFillCutIntersections);
         }
 
+        public ExternalCommandResult Execute(SelectionSet impliedSelection, ref string errorMessage,
+            ref IList<ObjectId> elementSet)
+        {
+            var sp = new InfosGetter_FillCutInters();
+            return AddinManagerDebuger.DebugInAddinManager(sp.ExportFillCutIntersections,
+                impliedSelection, ref errorMessage, ref elementSet);
+        }
+
         #endregion
 
+        private DocumentModifier _docMdf;
         /// <summary> 将所有的填挖交界信息提取出来并制成相应表格 </summary>
-        public void ExportFillCutIntersections(DocumentModifier docMdf, SelectionSet impliedSelection)
+        public ExternalCmdResult ExportFillCutIntersections(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
-            throw new NotImplementedException();
             _docMdf = docMdf;
-            ProtectionUtils.SubgradeEnvironmentConfiguration(docMdf);
-
-            // 所有的断面
-            var allSections = ProtectionUtils.GetAllSections(docMdf, sort: true);
-            var slopeLines = ProtectionUtils.GetExistingSlopeLines(docMdf);
-
-            // 过滤掉没有实际边坡或者平台的对象（比如边坡与挡墙重合的）
-            slopeLines = slopeLines.Where(r => r.XData.Slopes.Count + r.XData.Platforms.Count > 0).ToList();
-            if (slopeLines.Count == 0) return;
-
-            // 将边坡防护数据导出
-            var exporter = new Exporter_SlopeProtection(docMdf, allSections, slopeLines);
-            exporter.ExportData();
+            _docMdf = docMdf;
+            var fm = PF_ExportFillCutInters.GetUniqueInstance(docMdf, impliedSelection);
+            var res = fm.ShowDialog();
+            if (res == DialogResult.OK)
+            {
+                return ExternalCmdResult.Commit;
+            }
+            else
+            {
+                return ExternalCmdResult.Cancel;
+            }
         }
     }
 }

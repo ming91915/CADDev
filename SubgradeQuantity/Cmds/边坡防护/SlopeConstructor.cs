@@ -9,7 +9,7 @@ using eZcad.SubgradeQuantity.SlopeProtection;
 using eZcad.SubgradeQuantity.Utility;
 using eZcad.Utility;
 
-[assembly: CommandClass(typeof (SlopeConstructor))]
+[assembly: CommandClass(typeof(SlopeConstructor))]
 
 namespace eZcad.SubgradeQuantity.Cmds
 {
@@ -35,16 +35,17 @@ namespace eZcad.SubgradeQuantity.Cmds
         }
 
         /// <summary> 创建边坡并设置每一个边坡的数据 </summary>
-        public void ConstructSlopes(DocumentModifier docMdf, SelectionSet impliedSelection)
+        public ExternalCmdResult ConstructSlopes(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
             _docMdf = docMdf;
             ProtectionUtils.SubgradeEnvironmentConfiguration(docMdf);
             var justModifyCalculatedSlopes = ModifyOrAdd(docMdf.acEditor);
-            var slopeLines = ProtectionUtils.GetSlopeLines(docMdf.acEditor);
+            var slopeLines = ProtectionUtils.SelecteSlopeLines(docMdf.acEditor, left: null);
             if (slopeLines != null && slopeLines.Count > 0)
             {
                 ConfigerSlopes(slopeLines, justModifyCalculatedSlopes);
             }
+            return ExternalCmdResult.Commit;
         }
 
         #endregion
@@ -55,7 +56,7 @@ namespace eZcad.SubgradeQuantity.Cmds
             var op = new PromptKeywordOptions(
                 messageAndKeywords: "\n构造边坡数据<添加>[修改(M) / 添加(A)]:",
                 globalKeywords: "修改 添加");
-            //           
+            // 
             op.AllowNone = true;
             op.AllowArbitraryInput = false;
             //
@@ -64,10 +65,10 @@ namespace eZcad.SubgradeQuantity.Cmds
             {
                 if (res.StringResult == "修改")
                 {
-                    return true;
+                    return false;
                 }
             }
-            return false;
+            return true;
         }
 
 
@@ -88,8 +89,7 @@ namespace eZcad.SubgradeQuantity.Cmds
                     // 将存储的数据导入边坡对象
                     slpLine.ImportSlopeData(slpLine.XData);
                     //
-                    if (!slpLine.XData.FullyCalculated
-                        || !justModifyCalculated)
+                    if (!slpLine.XData.FullyCalculated || !justModifyCalculated)
                     {
                         slpLine.CalculateXData();
                     }
@@ -118,20 +118,21 @@ namespace eZcad.SubgradeQuantity.Cmds
             //
             var es = EditStateIdentifier.GetCurrentEditState(_docMdf);
             es.CurrentBTR.UpgradeOpen();
-            var layer_Slope = Utils.GetOrCreateLayer(_docMdf, ProtectionConstants.LayerName_ProtectionMethod_Slope);
-            var layer_Platform = Utils.GetOrCreateLayer(_docMdf, ProtectionConstants.LayerName_ProtectionMethod_Platform);
-            _docMdf.acDataBase.Clayer = layer_Slope.ObjectId;
+            //var layer_Slope = Utils.GetOrCreateLayer(_docMdf, ProtectionConstants.LayerName_ProtectionMethod_Slope);
+            //var layer_Platform = Utils.GetOrCreateLayer(_docMdf, ProtectionConstants.LayerName_ProtectionMethod_Platform);
+            // _docMdf.acDataBase.Clayer = layer_Slope.ObjectId;
             //
             // 1. 对有子边坡的边坡对象进行操作：显示界面，以进行填挖方与防护设置
             var listerForm = new SlopeSegLister(slopesWithSlopesegs);
             listerForm.ShowDialog(null);
             if (listerForm.ValueChanged)
             {
+                var protLayers = ProtectionTags.MapProtectionLayers(_docMdf, slopesWithSlopesegs);
                 foreach (var slp in slopesWithSlopesegs)
                 {
                     slp.Pline.UpgradeOpen();
                     SetSlopeUI(slp);
-                    slp.PrintProtectionMethod(es.CurrentBTR, layer_Slope.Id, layer_Platform.Id);
+                    slp.PrintProtectionMethod(es.CurrentBTR, protLayers);
                     //
                     slp.FlushXData();
                     slp.Pline.DowngradeOpen();
@@ -158,6 +159,7 @@ namespace eZcad.SubgradeQuantity.Cmds
         /// <param name="slp"></param>
         public static void SetSlopeUI(SlopeLine slp)
         {
+            return;
             if (slp.XData.FillCut)
             {
                 // 填方边坡

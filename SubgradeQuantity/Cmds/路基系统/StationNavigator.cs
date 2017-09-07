@@ -34,7 +34,7 @@ namespace eZcad.SubgradeQuantity.Cmds
         }
 
         /// <summary> 在 AutoCAD 界面中快速导航到指定的桩号 </summary>
-        public void NavigateStation(DocumentModifier docMdf, SelectionSet impliedSelection)
+        public ExternalCmdResult NavigateStation(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
             _docMdf = docMdf;
 
@@ -80,6 +80,8 @@ namespace eZcad.SubgradeQuantity.Cmds
                     Utils.ShowExtentsInView(docMdf.acEditor, ext);
                 }
             }
+            return ExternalCmdResult.Commit;
+
         }
 
         #endregion

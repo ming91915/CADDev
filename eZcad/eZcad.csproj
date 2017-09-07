@@ -132,6 +132,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Addins\DbTextsFormator.cs" />
+    <Compile Include="Addins\AreaSumup.cs" />
     <Compile Include="Addins\PolylineRemesh.cs" />
     <Compile Include="Addins\ReverseCurve.cs" />
     <Compile Include="Addins\PolyfaceToSubdmesh.cs" />
@@ -143,92 +144,6 @@
     <Compile Include="Examples\UISetup1.cs" />
     <Compile Include="Examples\UISetup2.cs" />
     <Compile Include="Examples\SplineHandler.cs" />
-    <Compile Include="SubgradeQuantitiesBackup\Cmds\Ec_SubgradeQuantity.cs" />
-    <Compile Include="SubgradeQuantitiesBackup\Cmds\StationNavigator.cs" />
-    <Compile Include="SubgradeQuantitiesBackup\Cmds\AddinSetup.cs" />
-    <Compile Include="SubgradeQuantitiesBackup\Cmds\工程量导出\InfosGetter_ThinFill.cs" />
-    <Compile Include="SubgradeQuantitiesBackup\Cmds\边坡防护\ProtectionMethodGetter.cs" />
-    <Compile Include="SubgradeQuantitiesBackup\Cmds\OptionsSetter.cs" />
-    <Compile Include="SubgradeQuantitiesBackup\Cmds\SectionsConstructor.cs" />
-    <Compile Include="SubgradeQuantitiesBackup\Cmds\LongitudinalSection.cs" />
-    <Compile Include="SubgradeQuantitiesBackup\Cmds\边坡防护\TextPlacer.cs" />
-    <Compile Include="SubgradeQuantitiesBackup\Cmds\边坡防护\SlopeWalker.cs" />
-    <Compile Include="SubgradeQuantitiesBackup\Cmds\MileagesFinder.cs" />
-    <Compile Include="SubgradeQuantitiesBackup\DataExport\SlopeProtectionExporter\ProtMtdInfo.cs" />
-    <Compile Include="SubgradeQuantitiesBackup\DataExport\SlopeProtectionExporter\SlopeExpands.cs" />
-    <Compile Include="SubgradeQuantitiesBackup\DataExport\SlopeProtectionExporter\SlopeSegsGeom.cs" />
-    <Compile Include="SubgradeQuantitiesBackup\Entities\AllStations.cs" />
-    <Compile Include="SubgradeQuantitiesBackup\Entities\RetainingWall.cs" />
-    <Compile Include="SubgradeQuantitiesBackup\Redundant\SlpInfosGetterBackup.cs" />
-    <Compile Include="SubgradeQuantitiesBackup\Cmds\工程量导出\InfosGetter_Slope.cs" />
-    <Compile Include="SubgradeQuantitiesBackup\Cmds\边坡防护\SlopeConstructor.cs" />
-    <Compile Include="SubgradeQuantitiesBackup\Redundant\SlpInfosSetter.cs" />
-    <Compile Include="SubgradeQuantitiesBackup\DataExport\CriterionEditor.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SubgradeQuantitiesBackup\DataExport\CriterionEditor.Designer.cs">
-      <DependentUpon>CriterionEditor.cs</DependentUpon>
-    </Compile>
-    <Compile Include="SubgradeQuantitiesBackup\DataExport\Exporter_ThinFillShallowCut.cs" />
-    <Compile Include="SubgradeQuantitiesBackup\DataExport\SlopeProtectionExporter\Exporter_SlopeProtection.cs" />
-    <Compile Include="SubgradeQuantitiesBackup\DataExport\DataExporter.cs" />
-    <Compile Include="SubgradeQuantitiesBackup\SlopeProtection\AutoProtectionForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SubgradeQuantitiesBackup\SlopeProtection\AutoProtectionForm.Designer.cs">
-      <DependentUpon>AutoProtectionForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="SubgradeQuantitiesBackup\SlopeProtection\PlatformCriterionController.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SubgradeQuantitiesBackup\SlopeProtection\SlopeCriterionController.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SubgradeQuantitiesBackup\SlopeProtection\AutoProtectionCriterions.cs" />
-    <Compile Include="SubgradeQuantitiesBackup\Utility\ProtectionConstants.cs" />
-    <Compile Include="SubgradeQuantitiesBackup\Entities\SectionInfo.cs" />
-    <Compile Include="SubgradeQuantitiesBackup\SlopeProtection\ISlopeSeg.cs" />
-    <Compile Include="SubgradeQuantitiesBackup\Entities\SlopeData.cs" />
-    <Compile Include="SubgradeQuantitiesBackup\Redundant\SlopeLineBackup.cs" />
-    <Compile Include="SubgradeQuantitiesBackup\Redundant\SlopeSegment.cs" />
-    <Compile Include="SubgradeQuantitiesBackup\SlopeProtection\SlopeSegLister.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SubgradeQuantitiesBackup\SlopeProtection\SlopeSegLister.Designer.cs">
-      <DependentUpon>SlopeSegLister.cs</DependentUpon>
-    </Compile>
-    <Compile Include="SubgradeQuantitiesBackup\PropertyEditor.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SubgradeQuantitiesBackup\PropertyEditor.designer.cs">
-      <DependentUpon>PropertyEditor.cs</DependentUpon>
-    </Compile>
-    <Compile Include="SubgradeQuantitiesBackup\Entities\SubgradeSection.cs" />
-    <Compile Include="SubgradeQuantitiesBackup\Utility\ProtectionOptions.cs" />
-    <Compile Include="SubgradeQuantitiesBackup\Redundant\ProtectionStyle.cs" />
-    <Compile Include="SubgradeQuantitiesBackup\Utility\ProtectionUtils.cs" />
-    <Compile Include="SubgradeQuantitiesBackup\Entities\SlopeLine.cs" />
-    <Compile Include="SubgradeQuantitiesBackup\MatchOptionsForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SubgradeQuantitiesBackup\MatchOptionsForm.Designer.cs">
-      <DependentUpon>MatchOptionsForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="SubgradeQuantitiesBackup\SubgradeOptions.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SubgradeQuantitiesBackup\SubgradeOptions.Designer.cs">
-      <DependentUpon>SubgradeOptions.cs</DependentUpon>
-    </Compile>
-    <Compile Include="SubgradeQuantitiesBackup\Redundant\ProtectionStyleLister.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SubgradeQuantitiesBackup\Redundant\ProtectionStyleLister.Designer.cs">
-      <DependentUpon>ProtectionStyleLister.cs</DependentUpon>
-    </Compile>
-    <Compile Include="SubgradeQuantitiesBackup\DataExport\MileageInfo.cs" />
-    <Compile Include="SubgradeQuantitiesBackup\Redundant\SlopeDataBackup.cs" />
-    <Compile Include="SubgradeQuantitiesBackup\DataExport\WorkSheetData.cs" />
     <Compile Include="Addins\TextScaler.cs" />
     <Compile Include="Addins\IntersectSelSet.cs" />
     <Compile Include="Debug\AddinManagerDebuger.cs" />
@@ -283,7 +198,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="SubgradeQuantitiesBackup\Utility\StaticCriterion.cs" />
+    <Compile Include="RibbonButtonAttribute.cs" />
     <Compile Include="Utility\EntityArray2D.cs" />
     <Compile Include="Utility\ExtensionMethods.cs" />
     <Compile Include="Utility\eZConstants.cs" />
@@ -296,27 +211,6 @@
     <Compile Include="Utility\Utils.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="SubgradeQuantitiesBackup\DataExport\CriterionEditor.resx">
-      <DependentUpon>CriterionEditor.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SubgradeQuantitiesBackup\SlopeProtection\AutoProtectionForm.resx">
-      <DependentUpon>AutoProtectionForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SubgradeQuantitiesBackup\SlopeProtection\SlopeSegLister.resx">
-      <DependentUpon>SlopeSegLister.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SubgradeQuantitiesBackup\PropertyEditor.resx">
-      <DependentUpon>PropertyEditor.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SubgradeQuantitiesBackup\MatchOptionsForm.resx">
-      <DependentUpon>MatchOptionsForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SubgradeQuantitiesBackup\SubgradeOptions.resx">
-      <DependentUpon>SubgradeOptions.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SubgradeQuantitiesBackup\Redundant\ProtectionStyleLister.resx">
-      <DependentUpon>ProtectionStyleLister.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="myCommands.resx">
       <DependentUpon>myCommands.cs</DependentUpon>
       <Generator>ResXFileCodeGenerator</Generator>

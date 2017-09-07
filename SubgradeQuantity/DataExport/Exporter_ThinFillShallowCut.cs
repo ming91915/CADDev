@@ -5,6 +5,7 @@ using System.Windows;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using eZcad.SubgradeQuantity.Entities;
+using eZcad.SubgradeQuantity.Options;
 using eZcad.SubgradeQuantity.Utility;
 using eZcad.Utility;
 using eZstd.Enumerable;
@@ -15,7 +16,6 @@ namespace eZcad.SubgradeQuantity.DataExport
     /// <summary> 低填浅挖工程量 </summary>
     public class Exporter_ThinFillShallowCut : DataExporter
     {
-
         #region --- Types
 
         private enum FillCutType
@@ -47,35 +47,38 @@ namespace eZcad.SubgradeQuantity.DataExport
             FillLarger31 = 8
         }
 
-        private class ThinFillShallowCut : IInterpolatableSection
+        private class ThinFillShallowCut : HalfValue
         {
+            /// <summary> 平均处理宽度 </summary>
+            public double AverageWidth { get; set; }
+            /// <summary> 平均处理高度 </summary>
+            public double AverageHeight { get; set; }
+            /// <summary> 低填还是浅挖，或者都不是 </summary>
+            public FillCutType Type { get; set; }
             //
-            public ThinFillShallowCut(double station, FillCutType type, double width, double height)
+
+            public override void Merge(IMergeable connectedHalf)
             {
-                Station = station;
-                Type = type;
-                Width = width;
-                Height = height;
+                var conn = connectedHalf as ThinFillShallowCut;
+                var dist1 = Math.Abs(ParentStation - EdgeStation);
+                var dist2 = Math.Abs(conn.EdgeStation - conn.ParentStation);
+
+                AverageWidth = (conn.AverageWidth * dist2 + AverageWidth * dist1) / (dist1 + dist2);
+                AverageHeight = (conn.AverageHeight * dist2 + AverageHeight * dist1) / (dist1 + dist2);
             }
 
-            public FillCutType Type { get; }
-            public double Width { get; }
-            public double Height { get; }
-            //
-            public double Station { get; }
-
-            /// <summary> 在两个断面之间进行插值，以生成一个新的用来计算的断面 </summary>
-            /// <param name="section2"></param>
-            /// <returns></returns>
-            public IInterpolatableSection InterpolateWith(IInterpolatableSection section2)
+            /// <summary> 两个相邻区间是否可以合并到同一行 </summary>
+            /// <param name="next">与本区间紧密相连的下一个区间</param>
+            public override bool IsMergeable(IMergeable next)
             {
-                var s2 = section2 as ThinFillShallowCut;
-                var m = (Station + s2.Station) / 2;
-                if (Type != FillCutType.Others)
-                {
-                    return new ThinFillShallowCut(m, Type, Width, Height);
-                }
-                return new ThinFillShallowCut(m, s2.Type, s2.Width, s2.Height);
+                var nextSec = next as ThinFillShallowCut;
+                return nextSec.Type == Type;
+            }
+
+            public override void CutByBlock(double blockStation)
+            {
+
+                // 啥也不用做
             }
 
             public string GetDescription()
@@ -101,121 +104,102 @@ namespace eZcad.SubgradeQuantity.DataExport
         /// <summary> 整个项目中的所有横断面 </summary>
         private readonly IList<SubgradeSection> _sectionsToHandle;
 
+        /// <summary> 整个道路中所有断面所占的几何区间， 以及对应的初始化的工程量数据 </summary>
+        private readonly SortedDictionary<double, CrossSectionRange<ThinFillShallowCut>> _sortedRanges;
+
         #endregion
 
         /// <summary> 构造函数 </summary>
         /// <param name="docMdf"></param>
         /// <param name="sectionsToHandle">要进行处理的断面</param>
         /// <param name="allSections"></param>
-        public Exporter_ThinFillShallowCut(DocumentModifier docMdf, IList<SubgradeSection> sectionsToHandle,
-            IList<SubgradeSection> allSections) : base(docMdf, allSections)
+        public Exporter_ThinFillShallowCut(DocumentModifier docMdf, List<SubgradeSection> sectionsToHandle,
+            IList<SubgradeSection> allSections) : base(docMdf, allSections.Select(r => r.XData.Station).ToArray())
         {
+            sectionsToHandle.Sort(ProtectionUtils.CompareStation);
             _sectionsToHandle = sectionsToHandle;
+            //
+            _sortedRanges = InitializeGeometricRange<ThinFillShallowCut>(AllStations);
         }
 
         /// <summary> 低填浅挖 </summary>
         public void ExportThinFillShallowCut()
         {
-            var cutFillSections = new SortedDictionary<double, ThinFillShallowCut>();
+            var cutFillSections = new List<CrossSectionRange<ThinFillShallowCut>>();
 
             // 断面的判断与计算
             double width;
             double height;
-            foreach (var cl in _sectionsToHandle)
+            foreach (var sec in _sectionsToHandle)
             {
-                var xdata = cl.XData;
-                if (IsThinFill(_docMdf.acDataBase, cl, out width, out height))
+                var xdata = sec.XData;
+                if (IsThinFill(_docMdf.acDataBase, sec, out width, out height))
                 {
-                    cutFillSections.Add(xdata.Station,
-                        new ThinFillShallowCut(xdata.Station, FillCutType.ThinFill, width, height));
-
-                    // MessageBox.Show($"是低填，宽度{width}，高度{height}");
-                    _docMdf.WriteNow(xdata.Station, FillCutType.ThinFill, width, height);
+                    var thsc = _sortedRanges[xdata.Station];
+                    //
+                    thsc.BackValue.Type = FillCutType.ThinFill;
+                    thsc.BackValue.AverageHeight = height;
+                    thsc.BackValue.AverageWidth = width;
+                    //
+                    thsc.FrontValue.Type = FillCutType.ThinFill;
+                    thsc.FrontValue.AverageHeight = height;
+                    thsc.FrontValue.AverageWidth = width;
+                    //
+                    cutFillSections.Add(thsc);
                 }
-                else if (IsShallowCut(_docMdf.acDataBase, cl, out width, out height))
+                else if (IsShallowCut(_docMdf.acDataBase, sec, out width, out height))
                 {
-                    cutFillSections.Add(xdata.Station,
-                        new ThinFillShallowCut(xdata.Station, FillCutType.ShallowCut, width, height));
-
-                    // MessageBox.Show($"是浅挖");
-                    _docMdf.WriteNow(xdata.Station, FillCutType.ShallowCut, width, height);
+                    var thsc = _sortedRanges[xdata.Station];
+                    //
+                    thsc.BackValue.Type = FillCutType.ShallowCut;
+                    thsc.BackValue.AverageHeight = height;
+                    thsc.BackValue.AverageWidth = width;
+                    //
+                    thsc.FrontValue.Type = FillCutType.ShallowCut;
+                    thsc.FrontValue.AverageHeight = height;
+                    thsc.FrontValue.AverageWidth = width;
+                    //
+                    cutFillSections.Add(thsc);
                 }
             }
-            if (cutFillSections.Count == 0) return;
+            var countAll = cutFillSections.Count;
+            _docMdf.WriteNow($"低填浅挖断面数量：{countAll}");
+            if (countAll == 0) return;
 
-            // 断面的排序与分区
-            var selectedSection =
-                cutFillSections.Select(
-                    r => new StationInfo<ThinFillShallowCut>(r.Key, StationInfoType.Measured, r.Value))
-                    .ToList();
-            var allSections = AllSections.Select(r => new StationInfo<ThinFillShallowCut>(
-                r.XData.Station, StationInfoType.Located,
-                new ThinFillShallowCut(r.XData.Station, FillCutType.Others, 0, 0))).ToList();
+            // 对桥梁隧道结构进行处理：截断对应的区间
+            CutWithBlocks(cutFillSections, Options_Collections.Structures);
 
-            // ！！！关键计算
-            var cfData = Sort_Interpolate(selectedSection, allSections); // 排序与插值
-            var segs = Category_Sumup1(cfData); // 分段并计算对应的面积
-            if (segs == null || segs.Count == 0) return;
+            // 对于区间进行合并
+            cutFillSections = MergeLinkedSections(cutFillSections);
 
-            // 将数据构造为数组，用来进行导出
-            var sheetArr = ConstructSheetData(segs);
+            // 将结果整理为二维数组，用来进行表格输出
+            var sheetArr = new object[countAll + 2, 7];
+
+            var baseRow = 0;
+            for (int i = 0; i < cutFillSections.Count; i++)
+            {
+                var thsc = cutFillSections[i];
+                thsc.UnionBackFront();
+                //
+                sheetArr[baseRow + i, 0] = thsc.BackValue.EdgeStation;
+                sheetArr[baseRow + i, 1] = thsc.FrontValue.EdgeStation;
+                sheetArr[baseRow + i, 2] = ProtectionUtils.GetStationString(thsc.BackValue.EdgeStation, thsc.FrontValue.EdgeStation, maxDigits: 0);
+                sheetArr[baseRow + i, 3] = thsc.FrontValue.EdgeStation - thsc.BackValue.EdgeStation;
+                sheetArr[baseRow + i, 4] = thsc.BackValue.GetDescription();
+                sheetArr[baseRow + i, 5] = thsc.BackValue.AverageWidth;
+                sheetArr[baseRow + i, 6] = thsc.BackValue.AverageHeight;
+            }
+            // 插入表头
+            var headerFill = new string[] { "起始桩号", "结束桩号", "桩号区间", "长度", "处理措施", "平均处理宽度", "平均处理高度" };
+            sheetArr = sheetArr.InsertVector<object, string, object>(true, new[] { headerFill }, new[] { -1.5f });
+
             var sheet_Infos = new List<WorkSheetData>
             {
-                new WorkSheetData(WorkSheetDataType.SlopeProtection, "低填浅挖", sheetArr)
+                new WorkSheetData(WorkSheetDataType.ThinFillShallowCut, "低填浅挖", sheetArr)
             };
 
-            // 数据导出到 Excel 
-            string errMsg;
-            var succ = ExportDataToExcel(sheet_Infos,out errMsg);
-
-            if (!succ)
-            {
-                var res = MessageBox.Show($"将数据导出到Excel中时出错：{errMsg}，\r\n是否将其以文本的形式导出？", "提示", MessageBoxButton.OKCancel,
-                    MessageBoxImage.Error);
-                if (res == MessageBoxResult.OK)
-                {
-                    // 数据导出到 Txt 
-                    ExportAllDataToDirectory(sheet_Infos);
-                }
-            }
+            ExportWorkSheetDatas(sheet_Infos);
         }
-
-        #region --- 构造一个工作表的数据
-
-        /// <summary> 构造Excel工作表中的表格数据：低填浅挖工程量表 </summary>
-        /// <param name="segs"></param>
-        /// <returns></returns>
-        private Array ConstructSheetData(List<SegmentData<double, object[]>> segs)
-        {
-            // var segs = Category_Sumup(spData); // 分段并计算对应的面积
-            //
-            // var sectionsArr = SegmentData<double, double[]>.ConvertToArr(segs);
-            var arr = new object[segs.Count, 5];
-            for (var i = 0; i < segs.Count; i++)
-            {
-                var s = segs[i];
-                var kilo =
-                    $"K{Math.Floor(s.Start / 1000)}+{(s.Start % 1000).ToString("000")}~K{Math.Floor(s.End / 1000)}+{(s.End % 1000).ToString("000")}";
-                // 桩号区段
-                var length = s.End - s.Start;
-                var desc = s.Data[0];
-                var avgWidth = (double)s.Data[1] / (s.End - s.Start);
-                var avgHeight = (double)s.Data[2] / (s.End - s.Start);
-                arr[i, 0] = kilo; // 桩号区段
-                arr[i, 1] = length;
-                arr[i, 2] = desc; // 分段的描述
-                arr[i, 3] = avgWidth; // 低填浅挖区段中，边坡宽度的平均值
-                arr[i, 4] = avgHeight; // 低填浅挖区段中，边坡处理高度的平均值
-            }
-
-            // 添加表头信息
-            var header = new[] { "区间", "长度", "方式", "边坡平均宽度", "中心平均加固高度" };
-            arr = arr.InsertVector<object, string, object>(true, new[] { header }, new[] { -1f });
-
-            return arr;
-        }
-
-        #endregion
 
         #region --- 判断低填
 
@@ -231,8 +215,7 @@ namespace eZcad.SubgradeQuantity.DataExport
             height = 0.0;
             // 1. 基本判断标准
             var depth = center.CenterElevation_Road - center.CenterElevation_Ground;
-            if (depth >= 0 && depth <= _criterion.ThinFill_MaxDepth &&
-                center.LeftSlopeFill && center.RightSlopeFill)
+            if (depth >= 0 && depth <= _criterion.低填最大高度 && (center.LeftSlopeFill || center.RightSlopeFill))
             {
                 // 2. 边坡的坡底点
                 var leftBottom = center.LeftSlopeExists
@@ -251,6 +234,9 @@ namespace eZcad.SubgradeQuantity.DataExport
                 var rightWithinLf = WithinThinFillRange(groundPt, 1 / _criterion.低填射线坡比,
                     1 / _criterion.低填射线坡比, rightBottom);
 
+                var leftRoadEdge = center.LeftRoadEdge;
+                var rightRoadEdge = center.RightRoadEdge;
+
                 // 对于不同的情况进行分别处理
                 if (leftWithinLf * rightWithinLf < 0)
                 {
@@ -264,14 +250,18 @@ namespace eZcad.SubgradeQuantity.DataExport
                 }
                 if (leftWithinLf + rightWithinLf == 2)
                 {
-                    // 说明两侧均过高，结果可认为是低填
+                    // 说明两侧均过高，结果可认为是低填，处理宽度取路基宽度
+
                     width = rightBottom.X - leftBottom.X;
                 }
                 // 剩下的至少有一侧为0，即位于低填区间
                 else if (leftWithinLf + rightWithinLf >= 0)
                 {
-                    // 另一侧要么为低填，要么过高，结果为全断面低填
-                    width = rightBottom.X - leftBottom.X;
+                    // 一侧为正常低填，另一侧要么为低填，要么过高
+                    // 低填则取中心到坡底宽度，过高则取中心到路基边缘宽度
+                    var leftWidth = leftWithinLf == 0 ? center.CenterX - leftBottom.X : center.CenterX - leftRoadEdge.X;
+                    var rightWidth = rightWithinLf == 0 ? rightBottom.X - center.CenterX : rightRoadEdge.X - center.CenterX;
+                    width = leftWidth + rightWidth;
                 }
                 else
                 {
@@ -290,11 +280,8 @@ namespace eZcad.SubgradeQuantity.DataExport
                 //
                 if (width > 0)
                 {
-                    var topEle = center.LeftRoadCushionExists
-                        ? center.CenterElevation_Cushion
-                        : center.CenterElevation_Road;
                     // 低填路堤的自然地面下部地基处理的高度
-                    height = _criterion.ThinFill_TreatedDepth - (topEle - center.CenterElevation_Ground);
+                    height = _criterion.低填处理高度 - (center.CenterElevation_Road - center.CenterElevation_Ground);
                     if (height < 0)
                     {
                         height = 0;
@@ -338,10 +325,12 @@ namespace eZcad.SubgradeQuantity.DataExport
         {
             var center = centerAxis.XData;
             width = 0.0;
-            height = center.CenterElevation_Ground - center.CenterElevation_Road;
-            // 1. 基本判断标准
+            // 浅挖路堑的路槽底部以下地基处理的高度
+            height = _criterion.浅挖处理高度; // center.CenterElevation_Ground - center.CenterElevation_Road;
+            var cutDepth = center.CenterElevation_Ground - center.CenterElevation_Road;
 
-            if (height >= 0 && height <= _criterion.ThinFill_MaxDepth)
+            // 1. 基本判断标准
+            if (cutDepth >= 0 && cutDepth <= _criterion.浅挖最大深度)
             {
                 // 计算左右半边道路的挖填情况
                 // 当边坡为填方时（且道路中线处为挖方），此时自然地面线一般会与路面线相交，返回相交后靠近道路中线侧的挖方宽度；
@@ -353,11 +342,11 @@ namespace eZcad.SubgradeQuantity.DataExport
                 var leftFillCut = HalfRoadShallowCut(center.LeftSlopeFill,
                     center.LeftGroundSurfaceHandle.GetDBObject<Polyline>(db),
                     center.LeftRoadSurfaceHandle.GetDBObject<Polyline>(db),
-                    1 / _criterion.ShallowCut_SlopeCriterion_upper, out leftRoadWidth, out leftCenterCutWidth);
+                    1 / _criterion.浅挖射线坡比, out leftRoadWidth, out leftCenterCutWidth);
                 var rightFillCut = HalfRoadShallowCut(center.RightSlopeFill,
                     center.RightGroundSurfaceHandle.GetDBObject<Polyline>(db),
                     center.RightRoadSurfaceHandle.GetDBObject<Polyline>(db),
-                    1 / _criterion.ShallowCut_SlopeCriterion_upper, out rightRoadWidth, out rightCenterCutWidth);
+                    1 / _criterion.浅挖射线坡比, out rightRoadWidth, out rightCenterCutWidth);
 
                 // 2. 对各种情况进行分别处理
 
@@ -400,15 +389,23 @@ namespace eZcad.SubgradeQuantity.DataExport
                     }
                     return true;
                 }
+                if ((leftFillCut | rightFillCut) == (HalfFillCut.FillLarger31 | HalfFillCut.ShallowCut))
+                {
+                    // 说明一侧浅挖，另一侧外缘填方大于三分之一道路宽度
+                    // 计量时取 浅挖侧路基宽度（包括硬路肩，不包括土路肩）
+                    if (leftFillCut == HalfFillCut.ShallowCut)
+                    {
+                        width = leftCenterCutWidth;
+                    }
+                    else
+                    {
+                        width = rightCenterCutWidth;
+                    }
+                    return true;
+                }
                 //
                 if (width > 0)
                 {
-                    // 低填路堤的自然地面下部地基处理的高度
-                    height = center.CenterElevation_Ground - center.CenterElevation_Road;
-                    if (height < 0)
-                    {
-                        height = 0;
-                    }
                     return true;
                 }
             }
@@ -430,35 +427,32 @@ namespace eZcad.SubgradeQuantity.DataExport
             out double halfRoadWidth, out double centerCutWidth)
         {
             halfRoadWidth = road.Length; // 路面+路肩
-            var pt = road.GetLineSegment2dAt(road.NumberOfVertices - 2).StartPoint; // 路面线最外侧向中间走，第二个顶点，即最后一段的起点
+            var pt = road.GetLineSegment2dAt(road.NumberOfVertices - 2).StartPoint; // 路面线最外侧向中间走，第二个顶点，即最后一段的起点，即路面边缘点
             var halfCushionWidth = Math.Abs(road.StartPoint.X - pt.X); // 路基某一侧路面的宽度（不包括路肩）
             centerCutWidth = halfCushionWidth;
-            var ground2d = ground.Get2dCurve();
+            var ground2d = ground.Get2dLinearCurve();
             var groundTop = ground.StartPoint; // 道路中线 与 自然地面 的交点
             if (!slopeFill)
             {
+                // 此边坡为挖方边坡
                 var l = new Ray2d(pt, new Vector2d(0, 1));
-                var inters = new CurveCurveIntersector2d(l, ground2d);
+                var inters = new CurveCurveIntersector2d(l, ground2d); // 路面边缘点向上的射线与地面线的交点
                 if (inters.NumberOfIntersectionPoints > 0) // 正常情况下，肯定会有交点
                 {
                     var ints = inters.GetIntersectionPoint(0);
                     var dir = (ints.Y - groundTop.Y) / (ints.X - groundTop.X);
-                    if (dir <= upperDir)
+                    if (Math.Abs(dir) <= Math.Abs(upperDir))
                     {
                         return HalfFillCut.ShallowCut;
                     }
                 }
-                else
-                {
-                    return HalfFillCut.NoneShallowCut;
-                }
-                return HalfFillCut.ShallowCut;
+                return HalfFillCut.NoneShallowCut;
             }
             else
             {
                 // 填方路堤，在保证道路中心处为挖方的情况下，此时自然地面线一般会与路面线相交，返回相交后靠近道路中线侧的挖方宽度；
                 // 如果自然地面线与路面线不相交（），则将此侧道路按全挖方考虑，且为全浅挖
-                var road2d = road.Get2dCurve();
+                var road2d = road.Get2dLinearCurve();
                 var inters = new CurveCurveIntersector2d(road2d, ground2d);
                 if (inters.NumberOfIntersectionPoints > 0) // 正常情况下，肯定会有交点
                 {
@@ -482,151 +476,5 @@ namespace eZcad.SubgradeQuantity.DataExport
 
         #endregion
 
-        #region --- 分区并计算每一区段的结果
-
-        /// <summary>
-        ///     根据整个项目的所有断面（包括测量、标识和插值类型）上的数据，将整个项目进行分区，并计算每个分区的相关工程量
-        /// </summary>
-        /// <param name="sortedSections">整个项目的所有断面（包括测量、标识和插值类型），所以集合中的元素的数量大于等于整个项目中所有横断面数量</param>
-        /// <returns>以工程量从0到非0时，非0值所对应的桩号作为区段的起点，并不考虑从0到非0段的三角形面积</returns>
-        private List<SegmentData<double, object[]>> Category_Sumup1(
-            IList<StationInfo<ThinFillShallowCut>> sortedSections)
-        {
-            if (sortedSections != null && sortedSections.Count > 0)
-            {
-                if (sortedSections.Count < 2)
-                {
-                    MessageBox.Show("必须指定至少两个桩号才能计算分段面积");
-                    return null;
-                }
-                var res = new List<SegmentData<double, object[]>>();
-                var lastMl = sortedSections[0]; // 上一个桩号
-                var startMile = lastMl.Station;
-                // var lastIsZero = lastMl.Value.Type == FillCutType.Others;
-
-                var areaWidth = 0.0; // 低填浅挖断面的处理宽度 所对应的面积
-                var areaHeight = 0.0; // 低填浅挖断面的处理高度 所对应的面积
-                for (var i = 1; i < sortedSections.Count; i++)
-                {
-                    var ml = sortedSections[i];
-                    var m = ml.Station; // 桩号
-                    var w = ml.Value.Width; // 处理宽度
-                    var h = ml.Value.Height; // 处理高度
-
-                    //
-                    // var thisIsZero = ml.Value.Type == FillCutType.Others;
-                    var withinRange = ml.Value.Type == lastMl.Value.Type; //  说明位于0区段或者非0区段中间，而不是到了区段的起点或终点
-                    if (withinRange) // 
-                    {
-                        // 说明位于0区段或者非0区段中间，而不是到了区段的起点或终点
-                        if (ml.Value.Type != FillCutType.Others)
-                        {
-                            // 说明现在正位于非0区段
-
-                            // 求梯形面积（当前一个桩号的工程量为0时，即为三角形面积）
-                            areaWidth += (lastMl.Value.Width + w) * (m - lastMl.Station) / 2;
-                            areaHeight += (lastMl.Value.Height + h) * (m - lastMl.Station) / 2;
-                        }
-                    }
-                    else
-                    {
-                        if (lastMl.Value.Type == FillCutType.Others) // 说明到了分段的起点
-                        {
-                            startMile = m; // lastMl.Station;
-                            areaWidth = 0;
-                            areaHeight = 0;
-                        }
-                        else if (ml.Value.Type == FillCutType.Others) // 说明到了分段的终点
-                        {
-                            res.Add(new SegmentData<double, object[]>(startMile, lastMl.Station,
-                                new object[] { lastMl.Value.GetDescription(), areaWidth, areaHeight }));
-                            areaWidth = 0;
-                            areaHeight = 0;
-                        }
-                        else // 说明到了分段的终点，同时也是另一种形式的起点，比如从低填过渡到浅挖
-                        {
-                            res.Add(new SegmentData<double, object[]>(startMile, lastMl.Station,
-                                new object[] { lastMl.Value.GetDescription(), areaWidth, areaHeight }));
-                            //
-                            startMile = m; // lastMl.Station;
-                            areaWidth = 0;
-                            areaHeight = 0;
-                        }
-                    }
-                    lastMl = ml;
-                }
-                // 对最后一个桩号进行操作，即最后一个桩号非零的情况下，其面积还没有闭合
-                if (lastMl.Value.Type != FillCutType.Others)
-                {
-                    res.Add(new SegmentData<double, object[]>(startMile, lastMl.Station,
-                        new object[] { lastMl.Value.GetDescription(), areaWidth, areaHeight }));
-                }
-                return res;
-            }
-            return null;
-        }
-
-        /// <summary>
-        ///     根据整个项目的所有断面（包括测量、标识和插值类型）上的数据，将整个项目进行分区，并计算每个分区的相关工程量
-        /// </summary>
-        /// <param name="sortedSections">整个项目的所有断面（包括测量、标识和插值类型），所以集合中的元素的数量大于等于整个项目中所有横断面数量</param>
-        /// <returns>以工程量从0到非0时，0所对应的桩号作为区段的起点，并考虑从0到非0段的三角形面积</returns>
-        private List<SegmentData<double, double[]>> Category_Sumup2(
-            IList<StationInfo<ThinFillShallowCut>> sortedSections)
-        {
-            if (sortedSections != null && sortedSections.Count > 0)
-            {
-                if (sortedSections.Count < 2)
-                {
-                    MessageBox.Show("必须指定至少两个桩号才能计算分段面积");
-                    return null;
-                }
-                var res = new List<SegmentData<double, double[]>>();
-                var lastMl = sortedSections[0]; // 上一个桩号
-                var startMile = lastMl.Station;
-                var lastIsZero = lastMl.Value.Type == FillCutType.Others;
-
-                var areaWidth = 0.0; // 低填浅挖断面的处理宽度 所对应的面积
-                var areaHeight = 0.0; // 低填浅挖断面的处理高度 所对应的面积
-                for (var i = 1; i < sortedSections.Count; i++)
-                {
-                    var ml = sortedSections[i];
-                    var m = ml.Station; // 桩号
-                    var w = ml.Value.Width; // 处理宽度
-                    var h = ml.Value.Height; // 处理高度
-
-                    // 求梯形面积（当前一个桩号的工程量为0时，即为三角形面积）
-                    areaWidth += (lastMl.Value.Width + w) * (m - lastMl.Station) / 2;
-                    areaHeight += (lastMl.Value.Height + h) * (m - lastMl.Station) / 2;
-                    //
-                    var thisIsZero = ml.Value.Type == FillCutType.Others;
-                    if (lastIsZero ^ thisIsZero) // 
-                    {
-                        if (thisIsZero) // 说明到了分段的终点
-                        {
-                            res.Add(new SegmentData<double, double[]>(startMile, m, new[] { areaWidth, areaHeight }));
-                            areaWidth = 0;
-                            areaHeight = 0;
-                        }
-                        else // 说明到了分段的起点
-                        {
-                            startMile = lastMl.Station;
-                        }
-                    }
-                    lastIsZero = thisIsZero;
-                    lastMl = ml;
-                }
-                // 对最后一个桩号进行操作，即最后一个桩号非零的情况下，其面积还没有闭合
-                if (!lastIsZero)
-                {
-                    res.Add(new SegmentData<double, double[]>(startMile, lastMl.Station,
-                        new[] { areaWidth, areaHeight }));
-                }
-                return res;
-            }
-            return null;
-        }
-
-        #endregion
     }
 }
