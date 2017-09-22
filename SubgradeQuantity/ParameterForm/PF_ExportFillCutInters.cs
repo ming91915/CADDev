@@ -21,7 +21,6 @@ namespace eZcad.SubgradeQuantity.ParameterForm
 
         private Curve _roadCenter;
         private Curve _ground;
-        private readonly BindingList<StationRangeEntity> _excludeRanges = new BindingList<StationRangeEntity>();
 
         /// <summary> 将某点左乘此矩阵时，表示此点原来位于地理坐标系，其左乘结果为转换为AutoCAD几何坐标系中的坐标值 </summary>
         private Matrix3d _matGC = Matrix3d.Identity;
@@ -48,7 +47,6 @@ namespace eZcad.SubgradeQuantity.ParameterForm
         {
             InitializeComponent();
             //
-            ConstructDatagridview(dataGridView_Excludes);
         }
 
         #endregion
@@ -69,14 +67,12 @@ namespace eZcad.SubgradeQuantity.ParameterForm
                     new Point2d(_roadCenter.StartPoint.X, _roadCenter.StartPoint.Y), _xScale, _yScale);
                 //
                 panel_Transform.Enabled = true;
-                button_ExtractFromCurve.Enabled = true;
             }
             else
             {
                 label_roadCenter.Text = @"***";
                 //
                 panel_Transform.Enabled = false;
-                button_ExtractFromCurve.Enabled = false;
             }
         }
 
@@ -89,91 +85,6 @@ namespace eZcad.SubgradeQuantity.ParameterForm
 
         #endregion
 
-        #region ---   Datagridview
-
-        private void ConstructDatagridview(DataGridView dgv)
-        {
-            _excludeRanges.AddingNew += ExcludeRangesOnAddingNew;
-            dgv.AllowUserToAddRows = true;
-            dgv.DataSource = _excludeRanges;
-            dgv.AutoGenerateColumns = true;
-            dgv.EditMode = DataGridViewEditMode.EditOnEnter;
-            //
-
-            // 为DataGridView控件中添加一列，此列与DataSource没有任何绑定关系
-            // 注意，添加此列后，DataGridView.DataSource的值并不会发生改变。
-            var buttonColumn = new DataGridViewButtonColumn()
-            {
-                Name = "ChooseInAcad",
-                HeaderText = @"选择",
-                Text = "***",
-                Width = 50,
-                // Use the Text property for the button text for all cells rather
-                // than using each cell's value as the text for its own button.
-                UseColumnTextForButtonValue = true,
-            };
-            dgv.Columns.Add(buttonColumn);
-            dgv.CellContentClick += DgvOnCellContentClick;
-        }
-
-        private void DgvOnCellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-            if (e.RowIndex >= 0 && e.RowIndex < dataGridView_Excludes.RowCount - 1 && e.ColumnIndex >= 0)
-            {
-                if (dataGridView_Excludes.Columns[e.ColumnIndex].Name == "ChooseInAcad")
-                {
-                    var c = GetPolyline(_docMdf.acEditor, "选择不进行填挖交界计算的区段");
-                    if (c != null)
-                    {
-                        var row = dataGridView_Excludes.Rows[e.RowIndex];
-                        var changedItem = row.DataBoundItem as StationRangeEntity;
-
-                        var ends = GetStationsFromCurve(c);
-                        changedItem.StartStation = ends[0];
-                        changedItem.EndStation = ends[1];
-                        //
-                        var cell = row.Cells[e.ColumnIndex] as DataGridViewButtonCell;
-                        cell.ToolTipText = c.Handle.ToString();
-                    }
-                }
-            }
-        }
-
-        private void ExcludeRangesOnAddingNew(object sender, AddingNewEventArgs e)
-        {
-            e.NewObject = new StationRangeEntity(0, 0);
-        }
-
-        private void button_ExtractFromCurve_Click(object sender, EventArgs e)
-        {
-            if (_roadCenter == null)
-            {
-                MessageBox.Show(@"请先选择道路中桩设计线，以作为定位基准");
-                return;
-            }
-
-            // var c = GetPolyline(_docMdf.acEditor, "选择不进行填挖交界计算的区段");
-            var curves = SelectPolylines(_docMdf.acEditor, "选择不进行填挖交界计算的区段");
-            if (curves == null || curves.Length == 0) return;
-            ;
-            double[][] ends = curves.Select(r => GetStationsFromCurve(r)).ToArray();
-            var mergedRanges = MergeRanges(ends);
-            foreach (var mr in mergedRanges)
-            {
-                var ex = new StationRangeEntity(mr[0], mr[1]);
-                _excludeRanges.Add(ex);
-            }
-        }
-
-        private void button_DeleteRange_Click(object sender, EventArgs e)
-        {
-            foreach (DataGridViewRow r in dataGridView_Excludes.SelectedRows)
-            {
-                dataGridView_Excludes.Rows.Remove(r);
-            }
-        }
-
-        #endregion
 
         private static Curve GetPolyline(Editor ed, string message)
         {

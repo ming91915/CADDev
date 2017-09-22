@@ -28,6 +28,7 @@ namespace eZcad.SubgradeQuantity.DataExport
             /// <summary> 需要挖台阶处理的位置 </summary>
             public SectionSide StairCutSide { get; set; }
 
+            /// <summary> 挖台阶平均处理宽度，每一个断面的宽度表示挖台阶的左边缘到右边缘的水平距离  </summary>
             public double AverageTreatedWidth { get; set; }
             //
 
@@ -110,7 +111,7 @@ namespace eZcad.SubgradeQuantity.DataExport
             if (countAll == 0) return;
 
             // 对桥梁隧道结构进行处理：截断对应的区间
-            CutWithBlocks(stairsCut, Options_Collections.Structures);
+            CutWithBlocks(stairsCut, Options_Collections.RangeBlocks);
 
             // 对于区间进行合并
             // steepSlopes = MergeLinkedSections(steepSlopes);
@@ -132,17 +133,17 @@ namespace eZcad.SubgradeQuantity.DataExport
 
                 sheetArr[baseRow + i, 0] = rg.BackValue.EdgeStation;
                 sheetArr[baseRow + i, 1] = rg.FrontValue.EdgeStation;
-                sheetArr[baseRow + i, 2] = ProtectionUtils.GetStationString(rg.BackValue.EdgeStation,rg.FrontValue.EdgeStation, 0);
+                sheetArr[baseRow + i, 2] = ProtectionUtils.GetStationString(rg.BackValue.EdgeStation, rg.FrontValue.EdgeStation, 0);
                 sheetArr[baseRow + i, 3] = rg.FrontValue.EdgeStation - rg.BackValue.EdgeStation;
                 //
-                sheetArr[baseRow + i, 4] = (int) (rg.BackValue.StairCutSide & SectionSide.左) > 0 ? "√" : null;
-                sheetArr[baseRow + i, 5] = (int) (rg.BackValue.StairCutSide & SectionSide.右) > 0 ? "√" : null;
+                sheetArr[baseRow + i, 4] = (int)(rg.BackValue.StairCutSide & SectionSide.左) > 0 ? ProtectionConstants.CheckMark : null;
+                sheetArr[baseRow + i, 5] = (int)(rg.BackValue.StairCutSide & SectionSide.右) > 0 ? ProtectionConstants.CheckMark : null;
                 sheetArr[baseRow + i, 6] = rg.BackValue.AverageTreatedWidth;
                 // 
             }
 
             // 插入表头
-            var header = new string[] { "起始桩号", "结束桩号", "桩号区间", "段落长度", "左","右", "挖台阶平均处理宽度" };
+            var header = new string[] { "起始桩号", "结束桩号", "桩号区间", "段落长度", "左", "右", "挖台阶平均处理宽度" };
             sheetArr = sheetArr.InsertVector<object, string, object>(true, new[] { header }, new[] { -1.5f, });
             // 输出到表格
             var sheet_Infos = new List<WorkSheetData>
@@ -208,15 +209,16 @@ namespace eZcad.SubgradeQuantity.DataExport
             if (!succ) return FillSlopeType.Other;
 
             // 必须是填方边坡
-            if ((left && !sec.RightSlopeFill) || (!left && !sec.LeftSlopeFill)) return FillSlopeType.Other;
-
-            // 有挡墙，但不一定是路肩墙
-            var hasRetainingWall = left ? sec.LeftRetainingWallExists : sec.RightRetainingWallExists;
-            if (hasRetainingWall && (slp != null && slp.XData.Slopes.Count == 0))
+            if ((left && (sec.LeftSlopeFill == null || !sec.LeftSlopeFill.Value))
+                || (!left && (sec.RightSlopeFill == null || !sec.RightSlopeFill.Value)))
             {
-                // 说明有路肩墙
                 return FillSlopeType.Other;
-                ;
+            }
+
+            // 有路肩墙
+            if ((left && sec.LeftRetainingWallType == RetainingWallType.路肩墙) || (!left && sec.RightRetainingWallType == RetainingWallType.路肩墙))
+            {
+                return FillSlopeType.Other;
             }
 
             //

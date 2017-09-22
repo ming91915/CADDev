@@ -75,8 +75,7 @@ namespace eZcad.SubgradeQuantity.Entities
                 {
                     MessageBox.Show(@"读取图元中的信息失败，现将其设置为默认值");
                     CenterLine.UpgradeOpen();
-                    var bf = SectionInfo.ClearValue(clearAll: true);
-                    CenterLine.XData = bf;
+                    SectionInfo.ClearValue(CenterLine, clearAll: true);
                     CenterLine.DowngradeOpen();
                     _xData = null;
                 }
@@ -105,7 +104,7 @@ namespace eZcad.SubgradeQuantity.Entities
         /// <param name="type"></param>
         public void ClearXData(bool clearAll, SectionInfo.InfoType type = SectionInfo.InfoType.General)
         {
-            CenterLine.XData = SectionInfo.ClearValue(clearAll, type);
+            SectionInfo.ClearValue(CenterLine, clearAll, type);
             XData = null;
         }
 
@@ -203,7 +202,7 @@ namespace eZcad.SubgradeQuantity.Entities
         #region --- CalculateSectionInfoToXData
 
         /// <summary> !!! 对横断面中的关键对象进行搜索与计算 </summary>
-        public void CalculateSectionInfoToXData()
+        public bool CalculateSectionInfoToXData()
         {
             Extents3d extSection; // 整个横断面的搜索范围
             // 道路中轴线的搜索范围
@@ -217,7 +216,7 @@ namespace eZcad.SubgradeQuantity.Entities
             Polyline rightGroundSurf;
             double centerGroundY;  // 道路中线所对应的自然地面标高
             var succ = FindGroundSurf(extCenterAxis, out leftGroundSurf, out rightGroundSurf, out extSection, out centerGroundY);
-            if (!succ) return;
+            if (!succ) return false;
             //
             var xdata = XData;
 
@@ -239,7 +238,7 @@ namespace eZcad.SubgradeQuantity.Entities
             Polyline leftRoadSurf;
             Polyline rightRoadSurf;
             succ = FindRoadSurf(extCenterAxis, out leftRoadSurf, out rightRoadSurf);
-            if (!succ) return;  // 必须有路面对象
+            if (!succ) return false;  // 必须有路面对象
             xdata.LeftRoadSurfaceExists = true;
             xdata.LeftRoadSurfaceHandle = leftRoadSurf.Handle;
             xdata.LeftRoadEdge = leftRoadSurf.EndPoint;
@@ -327,12 +326,12 @@ namespace eZcad.SubgradeQuantity.Entities
             {
                 if (leftRetainingWall != null)
                 {
-                    xdata.LeftRetainingWallExists = true;
+                    xdata.LeftRetainingWallType = GetRetainingWallType(leftRetainingWall, leftSlope, xdata.LeftSlopeFill);
                     xdata.LeftRetainingWallHandle = leftRetainingWall.Handle;
                 }
                 if (rightRetainingWall != null)
                 {
-                    xdata.RightRetainingWallExists = true;
+                    xdata.RightRetainingWallType = GetRetainingWallType(rightRetainingWall, rightSlope, xdata.RightSlopeFill);
                     xdata.RightRetainingWallHandle = rightRetainingWall.Handle;
                 }
             }
@@ -377,6 +376,7 @@ namespace eZcad.SubgradeQuantity.Entities
             }
             //
             xdata.FullyCalculated = true;
+            return true;
         }
 
         #region --- 在界面中搜索并过滤相关对象
@@ -785,47 +785,6 @@ namespace eZcad.SubgradeQuantity.Entities
             return true;
         }
 
-        /// <summary> 搜索挡土墙对象 </summary>
-        private bool FindRetainingWall(Extents3d extSection, out Polyline leftRetainingWall, out Polyline rightRetainingWall)
-        {
-            leftRetainingWall = null;
-            rightRetainingWall = null;
-            // 创建一个 TypedValue 数组，用于定义过滤条件
-            var filterType = new[]
-            {
-                new TypedValue((int) DxfCode.Start, "LWPOLYLINE"),
-                new TypedValue((int) DxfCode.Operator, "<OR"),
-                new TypedValue((int) DxfCode.LayerName, Options_LayerNames.LayerName_RetainingWall_Left),
-                new TypedValue((int) DxfCode.LayerName, Options_LayerNames.LayerName_RetainingWall_Right),
-                new TypedValue((int) DxfCode.Operator, "OR>")
-            };
-
-            // 请求在图形区域选择对象
-            var res = DocMdf.acEditor.SelectCrossingWindow(pt1: extSection.MinPoint, pt2: extSection.MaxPoint,
-                filter: new SelectionFilter(filterType));
-            if (res.Status == PromptStatus.OK)
-            {
-                var lines =
-                    res.Value.GetObjectIds().Select(id => id.GetObject(OpenMode.ForRead)).OfType<Polyline>().Where(r => r.Closed).ToList();
-
-                // 从多个挡墙线中搜索某个端点距离中轴线中心最近的那一条
-                var lefts = lines.Where(r => r.Layer == Options_LayerNames.LayerName_RetainingWall_Left);
-                var slp = GetClosestPolyLine(lefts, _MiddlePt);
-                if (slp != null)
-                {
-                    leftRetainingWall = slp as Polyline;
-                }
-                //
-                var rights = lines.Where(r => r.Layer == Options_LayerNames.LayerName_RetainingWall_Right);
-                slp = GetClosestPolyLine(rights, _MiddlePt);
-                if (slp != null)
-                {
-                    rightRetainingWall = slp as Polyline;
-                }
-            }
-            return true;
-        }
-
         /// <summary> 搜索边坡线 </summary>
         /// <param name="leftFill">左边边坡为填方还是挖方</param>
         /// <param name="rightFill">右边边坡为填方还是挖方</param>
@@ -848,9 +807,13 @@ namespace eZcad.SubgradeQuantity.Entities
                     lines.Where(l => SlopeLine.IsSlopeLineLayer(l.Layer, left: true)).ToArray();
                 if (lefts.Length > 0)
                 {
+
                     // 从多个边坡线中搜索某个端点距离中轴线中心最近的那一条
                     var slp = GetClosestPolyLine(lefts, _MiddlePt);
-                    if (slp != null)
+
+                    // 当界面图形缩得太小时，有可以会把其他断面中的挡墙误加进来，
+                    // 此时通过挡墙多段线中的某点是否位于此断面的Extends范围之内来确定它是否真是本断面的挡墙
+                    if (slp != null && extSection.Contains(slp.StartPoint))
                     {
                         leftSlope = slp as Polyline;
                         leftFill = slp.Layer == Options_LayerNames.LayerName_Slope_Left_Fill;
@@ -862,7 +825,7 @@ namespace eZcad.SubgradeQuantity.Entities
                 {
                     // 从多个边坡线中搜索某个端点距离中轴线中心最近的那一条
                     var slp = GetClosestPolyLine(rights, _MiddlePt);
-                    if (slp != null)
+                    if (slp != null && extSection.Contains(slp.StartPoint))
                     {
                         rightSlope = slp as Polyline;
                         rightFill = slp.Layer == Options_LayerNames.LayerName_Slope_Right_Fill;
@@ -871,6 +834,76 @@ namespace eZcad.SubgradeQuantity.Entities
             }
             // 对于一个横断面而言，可以没有边坡线，即不进行挖填
             return true;
+        }
+
+        /// <summary> 搜索挡土墙对象 </summary>
+        private bool FindRetainingWall(Extents3d extSection, out Polyline leftRetainingWall, out Polyline rightRetainingWall)
+        {
+
+            leftRetainingWall = null;
+            rightRetainingWall = null;
+            var hasRetainingWall = false;
+            // 请求在图形区域选择对象
+            var res = DocMdf.acEditor.SelectCrossingWindow(pt1: extSection.MinPoint, pt2: extSection.MaxPoint,
+                filter: RetainingWall.Filter);
+            if (res.Status == PromptStatus.OK)
+            {
+                var lines =
+                    res.Value.GetObjectIds().Select(id => id.GetObject(OpenMode.ForRead)).OfType<Polyline>().Where(r => r.Closed).ToList();
+
+                // 从多个挡墙线中搜索某个端点距离中轴线中心最近的那一条
+                var lefts = lines.Where(r => r.Layer == Options_LayerNames.LayerName_RetainingWall_Left);
+                var slp = GetClosestPolyLine(lefts, _MiddlePt) as Polyline;
+
+                // 当界面图形缩得太小时，有可以会把其他断面中的挡墙误加进来，
+                // 此时通过挡墙多段线中的某点是否位于此断面的Extends范围之内来确定它是否真是本断面的挡墙
+                if (slp != null && extSection.Contains(slp.StartPoint))
+                {
+                    leftRetainingWall = slp;
+                    hasRetainingWall = true;
+                }
+                //
+                var rights = lines.Where(r => r.Layer == Options_LayerNames.LayerName_RetainingWall_Right);
+                slp = GetClosestPolyLine(rights, _MiddlePt) as Polyline;
+                if (slp != null && extSection.Contains(slp.StartPoint))
+                {
+                    rightRetainingWall = slp;
+                    hasRetainingWall = true;
+                }
+            }
+            return hasRetainingWall;
+        }
+
+        /// <summary> 某挡墙对象的具体类型 </summary>
+        /// <param name="retainingWall"></param>
+        /// <param name="slopeLine">其值可以为null，表明此侧没有边坡对象</param>
+        /// <param name="fillCut">边坡的填挖信息，其值可以为null，表明此侧没有边坡对象</param>
+        /// <returns></returns>
+        public RetainingWallType GetRetainingWallType(Polyline retainingWall, Polyline slopeLine, bool? fillCut)
+        {
+            // 说明 有挡墙，但不一定是路肩墙
+            if (fillCut == null)
+            {
+                // 挡墙必定与路面相连，不可能是路堤墙或者护脚墙
+                return RetainingWallType.其他;
+            }
+            else if (fillCut.Value)
+            {
+                // 首先肯定有边坡线，而且是填方坡
+                var rw = new RetainingWall(retainingWall);
+                if (slopeLine != null && rw.WallCurve.IsOn(slopeLine.StartPoint))
+                {
+                    // 说明是路肩墙
+                    return RetainingWallType.路肩墙;
+                }
+                else { return RetainingWallType.路堤墙;}
+            }
+            else
+            {
+                // 首先肯定有边坡线，而且是挖方坡
+                return RetainingWallType.路堑墙;
+            }
+            return RetainingWallType.其他;
         }
 
         /// <summary>
@@ -1024,10 +1057,11 @@ namespace eZcad.SubgradeQuantity.Entities
                 if (xdata.LeftSlopeExists)
                 {
                     var pl = xdata.LeftSlopeHandle.GetDBObject<Polyline>(db);
-                    var retainingWall = xdata.LeftRetainingWallExists
+                    var retainingWall = xdata.LeftRetainingWallType != RetainingWallType.无
                         ? xdata.LeftRetainingWallHandle.GetDBObject<Polyline>(db)
                         : null;
-                    var slp = new SlopeLine(DocMdf, pl, this, onLeft: true, isFill: xdata.LeftSlopeFill, retainingWall: retainingWall);
+                    var slp = new SlopeLine(DocMdf, pl, this, onLeft: true, isFill: xdata.LeftSlopeFill.Value,
+                        retainingWallType: xdata.LeftRetainingWallType, retainingWall: retainingWall);
                     return slp;
                 }
             }
@@ -1036,10 +1070,11 @@ namespace eZcad.SubgradeQuantity.Entities
                 if (xdata.RightSlopeExists)
                 {
                     var pl = xdata.RightSlopeHandle.GetDBObject<Polyline>(db);
-                    var retainingWall = xdata.RightRetainingWallExists
+                    var retainingWall = xdata.RightRetainingWallType != RetainingWallType.无
                         ? xdata.RightRetainingWallHandle.GetDBObject<Polyline>(db)
                         : null;
-                    var slp = new SlopeLine(DocMdf, pl, this, onLeft: false, isFill: xdata.RightSlopeFill, retainingWall: retainingWall);
+                    var slp = new SlopeLine(DocMdf, pl, this, onLeft: false, isFill: xdata.RightSlopeFill.Value,
+                        retainingWallType: xdata.RightRetainingWallType, retainingWall: retainingWall);
                     return slp;
                 }
             }

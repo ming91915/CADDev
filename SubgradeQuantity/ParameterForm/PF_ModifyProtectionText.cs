@@ -6,6 +6,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using eZcad.SubgradeQuantity.Entities;
 using eZcad.SubgradeQuantity.SlopeProtection;
+using eZcad.SubgradeQuantity.SQControls;
 
 namespace eZcad.SubgradeQuantity.ParameterForm
 {
@@ -37,32 +38,43 @@ namespace eZcad.SubgradeQuantity.ParameterForm
         {
             InitializeComponent();
             //
+            //
+            protLayerLister1.ItemRaised += ProtectionLister1OnProtectionMethodRaised;
+            protLayerLister1.ItemDetermined += ProtectionLister1OnProtectionMethodDetermined;
         }
 
 
         private void PF_ModifyProtText_Load(object sender, EventArgs e)
         {
+            // 列出所有的防护图层
             _protLayers = ProtectionTags.GetProtLayersInDatabase(_docMdf.acDataBase);
             _protLayers.Add(@"所有", "");
             //
-            SetProtectionLister(protLayerLister1);
+            protLayerLister1.ImportItems(_protLayers.Keys.ToArray(), _protLayers.Values.ToArray());
         }
 
         #endregion
 
         #region ---   界面操作
 
+        private void radioButton_Delete_CheckedChanged(object sender, EventArgs e)
+        {
+            panel1.Visible = radioButton_Delete.Checked;
+        }
+
+        private void checkBox_AllSlopeLevels_CheckedChanged(object sender, EventArgs e)
+        {
+            textBox_SlopeLevels.Enabled = !checkBox_AllSlopeLevels.Checked;
+        }
+
+        private void button_Execute_Click(object sender, EventArgs e)
+        {
+            GetParameterAndRun();
+        }
         #endregion
 
         #region ---   ProtectionLister 设置
 
-        private void SetProtectionLister(ItemLister plister)
-        {
-            plister.ItemRaised += ProtectionLister1OnProtectionMethodRaised;
-            plister.ItemDetermined += ProtectionLister1OnProtectionMethodDetermined;
-            //
-            plister.ImportItems(_protLayers.Keys.ToArray(), _protLayers.Values.ToArray());
-        }
 
         private void ProtectionLister1OnProtectionMethodDetermined(Control label, string s)
         {
@@ -106,17 +118,42 @@ namespace eZcad.SubgradeQuantity.ParameterForm
             else if (radioButton_Delete.Checked)
             {
                 // 删除选择文字中满足条件的文字
+                if (!checkBox_preserveHighlighted.Checked)
+                {
+                    //    // 将已经选择的高亮
+                    //    var selectedIds = new ObjectId[0];
+                    //    var res = _docMdf.acEditor.SelectImplied();
+                    //    if (res.Status == PromptStatus.OK)
+                    //    {
+                    //        selectedIds = res.Value.GetObjectIds();
+                    //    }
+
+                    // 先删除选择集
+                    _docMdf.acEditor.SetImpliedSelection(new ObjectId[0]);
+
+                    //    // 再将以前选择的高亮
+                    //    foreach (var id in selectedIds)
+                    //    {
+                    //        var ent = id.GetObject(OpenMode.ForRead) as Entity;
+                    //        ent.Highlight();
+                    //}
+                }
+
                 var txts = SelectProtTexts();
                 txts = FilterProtTexts(txts);
-                _docMdf.WriteNow($"选择的防护文字数量：{txts.Count}");
-                if (txts.Count == 0) return;
-                //
-                foreach (var txt in txts)
+                txts = FilterDeletedTexts(txts);
+                if (txts != null)
                 {
-                    txt.UpgradeOpen();
-                    txt.Erase();
-                    txt.Draw();
-                    txt.DowngradeOpen();
+                    _docMdf.WriteNow($"选择的防护文字数量：{txts.Count}");
+                    if (txts.Count == 0) return;
+                    //
+                    foreach (var txt in txts)
+                    {
+                        txt.UpgradeOpen();
+                        txt.Erase();
+                        txt.Draw();
+                        txt.DowngradeOpen();
+                    }
                 }
             }
             //
@@ -157,10 +194,8 @@ namespace eZcad.SubgradeQuantity.ParameterForm
             return selected;
         }
 
-        //
-        private List<DBText> FilterProtTexts(List<DBText> SelectedTexts)
+        private bool? IsSlopeOrPlatform()
         {
-            // 边坡还是平台
             bool? slopePlatform = null;
             if (radioButton_Slope.Checked)
             {
@@ -170,6 +205,14 @@ namespace eZcad.SubgradeQuantity.ParameterForm
             {
                 slopePlatform = false;
             }
+            return slopePlatform;
+
+        }
+
+        private List<DBText> FilterProtTexts(List<DBText> selectedTexts)
+        {
+            // 边坡还是平台
+            bool? slopePlatform = IsSlopeOrPlatform();
 
             // 左右侧
             bool? left = null;
@@ -184,7 +227,7 @@ namespace eZcad.SubgradeQuantity.ParameterForm
 
             var filtered = new List<DBText>();
             // 过滤
-            foreach (var txt in SelectedTexts)
+            foreach (var txt in selectedTexts)
             {
                 var buff = txt.GetXDataForApplication(ProtTextData.RegAppName_SlopeText);
                 if (buff != null)
@@ -210,7 +253,57 @@ namespace eZcad.SubgradeQuantity.ParameterForm
 
             return filtered;
         }
+
+        private List<DBText> FilterDeletedTexts(List<DBText> selectedTexts)
+        {
+            // 子边坡等级
+            int[] slopeLevels = null;
+            if (checkBox_AllSlopeLevels.Checked)
+            {
+                slopeLevels = null;
+            }
+            else
+            {
+                try
+                {
+                    var levelStr = textBox_SlopeLevels.Text.Split(',');
+                    slopeLevels = levelStr.Select(r => Convert.ToInt32(r)).ToArray();
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show($"不同坡级之间请通过“,”进行分隔");
+                    return null;
+                }
+            }
+            // 边坡还是平台
+            var slopePlatform = IsSlopeOrPlatform();
+
+            var filterd2 = new List<DBText>();
+            foreach (var txt in selectedTexts)
+            {
+                var buff = txt.GetXDataForApplication(ProtTextData.RegAppName_SlopeText);
+                if (buff != null)
+                {
+                    // 过滤
+                    var protData = ProtTextData.FromResultBuffer(buff);
+                    if (protData != null)
+                    {
+                        // 桩号区间
+                        // if (!anyStation && !(protData.Station >= startStation && protData.Station <= endStation)) { continue; }
+
+                        // 子边坡等级
+                        if (slopeLevels != null && !slopeLevels.Contains(Slope.GetMainLevel(protData.Index))) { continue; }
+                        // 满足所有过滤条件
+                        filterd2.Add(txt);
+                    }
+                }
+            }
+
+            return filterd2;
+        }
         #endregion
+
+        #region ---   文字高亮
 
         private List<ObjectId> _highlightedTexts = new List<ObjectId>();
 
@@ -232,6 +325,14 @@ namespace eZcad.SubgradeQuantity.ParameterForm
             }
             //
             _docMdf.acEditor.SetImpliedSelection(highlightedTexts.ToArray());
+            foreach (ObjectId id in highlightedTexts)
+            {
+                (id.GetObject(OpenMode.ForRead) as Entity).Draw();
+            }
         }
+
+        #endregion
+
+
     }
 }

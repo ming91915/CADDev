@@ -434,6 +434,8 @@ namespace eZcad.SubgradeQuantity.SlopeProtection
                     spl.AutoSetProtectionMethods(_autoSpCriterion);
                 }
                 dgv.Refresh();
+                //
+                MessageBox.Show($"成功对{listBox_slopes.SelectedItems.Count}个边坡进行了自动防护", @"恭喜", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
             {

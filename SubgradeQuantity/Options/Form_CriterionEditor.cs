@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -75,8 +75,7 @@ namespace eZcad.SubgradeQuantity.Options
 
         private void btnOk_Click(object sender, EventArgs e)
         {
-            //
-            //
+            //            
             DialogResult = DialogResult.OK;
             Close();
         }

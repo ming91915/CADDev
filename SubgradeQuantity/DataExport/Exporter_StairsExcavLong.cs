@@ -123,7 +123,7 @@ namespace eZcad.SubgradeQuantity.DataExport
             }
 
             // 排除桥梁等区间阻隔：删除所有与桥隧相交的台阶
-            var structs = Options_Collections.Structures;
+            var structs = Options_Collections.RangeBlocks;
             stairs = stairs.Where(st => !st.IntersectStructureBlocks(structs)).ToList();
 
             // 区间合并

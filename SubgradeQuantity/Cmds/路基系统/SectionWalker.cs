@@ -18,7 +18,6 @@ namespace eZcad.SubgradeQuantity.Cmds
     [EcDescription(CommandDescription)]
     public class SectionWalker : ICADExCommand
     {
-        private DocumentModifier _docMdf;
 
         #region --- 命令设计
 
@@ -47,6 +46,7 @@ namespace eZcad.SubgradeQuantity.Cmds
 
         #endregion
 
+        private DocumentModifier _docMdf;
         /// <summary> 查看指定的横断面的相关信息 </summary>
         public ExternalCmdResult SectionWalk(DocumentModifier docMdf, SelectionSet impliedSelection)
         {

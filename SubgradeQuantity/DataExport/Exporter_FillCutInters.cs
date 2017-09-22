@@ -75,8 +75,8 @@ namespace eZcad.SubgradeQuantity.DataExport
         /// <summary> 纵向填挖交界 </summary>
         public void ExportFillCutInters()
         {
-            //var sortedRanges = ConstructIntersectRange(_longitudinalSection);
-            //return;
+            var sortedRanges = ConstructIntersectRange(_longitudinalSection);
+            return;
 
             var inters = _longitudinalSection.Intersects;
             if (inters.NumberOfIntersectionPoints == 0)
@@ -147,18 +147,17 @@ namespace eZcad.SubgradeQuantity.DataExport
         }
 
         /// <summary> 初始化每一个填挖交界点所占据的几何区间 </summary>
-        /// <param name="allIntersects"></param>
+        /// <param name="longitudinalSection"></param>
         /// <returns></returns>
-        private SortedDictionary<double, CrossSectionRange<FillCutIntersects>> ConstructIntersectRange(LongitudinalSection longitudinalSection)
+        private SortedDictionary<double, CrossSectionRange<FillCutIntersects>>
+            ConstructIntersectRange(LongitudinalSection longitudinalSection)
         {
-
-
             var allIntersectsSections = new SortedDictionary<double, CrossSectionRange<FillCutIntersects>>();
             FillCutIntersects backValue;
             FillCutIntersects frontValue;
             //
 
-            var inters = _longitudinalSection.Intersects;
+            var inters = longitudinalSection.Intersects;
             if (inters.NumberOfIntersectionPoints == 0)
             {
                 // 整个路段都是填方或者挖方
@@ -168,36 +167,37 @@ namespace eZcad.SubgradeQuantity.DataExport
             //
             // 对填挖交界点进行处理
             _docMdf.WriteLineIntoDebuger("填挖交界点的坐标：");
+            _docMdf.WriteLineIntoDebuger("交界点坐标", "交界方式", "10m填方段最大高度", "10m挖方段最大高度", "处理方式");
 
             int interval = 2;
             var fillLargerThan = 5.0;
             int fillCheckLength = 10;
             var arrCutToFill = ArrayConstructor.FromRangeAri(0, fillCheckLength, interval);
             var arrFillToCut = ArrayConstructor.FromRangeAri(0, -fillCheckLength, -interval);
-
+            var blocks = Options_Collections.RangeBlocks;
             for (int i = 0; i < inters.NumberOfIntersectionPoints; i++)
             {
                 var ptRoad = inters.GetPointOnCurve1(i);
                 var ptGround = inters.GetPointOnCurve2(i);
 
                 // 排除桥梁等结构区域
-                var withInStructure = false;
-                if (withInStructure)
+                if (blocks.Any(r => r.ContainsStation(ptRoad.Point.X)))
                 {
-                    break;
+                    continue;
                 }
                 //
-                var fillToCut = _longitudinalSection.FilltoCut(ptRoad, ptGround);
+                var fillToCut = longitudinalSection.FilltoCut(ptRoad, ptGround);
                 var arrDx = fillToCut ? arrFillToCut : arrCutToFill;
                 var intersX = ptRoad.Point.X;
-                var maxVerticalDiff = 0.0;
+
                 // 填挖交界处的路基，在填方段10m范围内高度H＜5m时，按断面A实施，H＞5m时，按断面B实施。
+                var maxVerticalDiff_Fill = 0.0;
                 foreach (var dx in arrDx)
                 {
                     var x = intersX + dx;
-                    var intersVerticalRoad = new CurveCurveIntersector2d(_longitudinalSection.RoadCurve2d,
+                    var intersVerticalRoad = new CurveCurveIntersector2d(longitudinalSection.RoadCurve2d,
                         new Line2d(new Point2d(x, 0), new Vector2d(0, 1)));
-                    var intersVerticalGround = new CurveCurveIntersector2d(_longitudinalSection.GroundCurve2d,
+                    var intersVerticalGround = new CurveCurveIntersector2d(longitudinalSection.GroundCurve2d,
                         new Line2d(new Point2d(x, 0), new Vector2d(0, 1)));
                     if (intersVerticalRoad.NumberOfIntersectionPoints == 0 ||
                         intersVerticalGround.NumberOfIntersectionPoints == 0)
@@ -206,18 +206,43 @@ namespace eZcad.SubgradeQuantity.DataExport
                     }
                     else
                     {
-                        var verticalDiff =
-                            Math.Abs(intersVerticalGround.GetIntersectionPoint(0).Y -
-                                     intersVerticalRoad.GetIntersectionPoint(0).Y);
-                        if (verticalDiff > maxVerticalDiff)
+                        var verticalDiff = intersVerticalRoad.GetIntersectionPoint(0).Y -
+                                           intersVerticalGround.GetIntersectionPoint(0).Y;
+                        if (verticalDiff > maxVerticalDiff_Fill)
                         {
-                            maxVerticalDiff = verticalDiff;
+                            maxVerticalDiff_Fill = verticalDiff;
                         }
                     }
                 }
+
+                var maxVerticalDiff_Cut = 0.0;
+                foreach (var dx in arrDx)
+                {
+                    var x = intersX - dx;
+                    var intersVerticalRoad = new CurveCurveIntersector2d(longitudinalSection.RoadCurve2d,
+                        new Line2d(new Point2d(x, 0), new Vector2d(0, 1)));
+                    var intersVerticalGround = new CurveCurveIntersector2d(longitudinalSection.GroundCurve2d,
+                        new Line2d(new Point2d(x, 0), new Vector2d(0, 1)));
+                    if (intersVerticalRoad.NumberOfIntersectionPoints == 0 ||
+                        intersVerticalGround.NumberOfIntersectionPoints == 0)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        var verticalDiff = intersVerticalGround.GetIntersectionPoint(0).Y - 
+                                            intersVerticalRoad.GetIntersectionPoint(0).Y;
+
+                        if (verticalDiff > maxVerticalDiff_Cut)
+                        {
+                            maxVerticalDiff_Cut = verticalDiff;
+                        }
+                    }
+                }
+
                 string fill = fillToCut ? "填 - 挖" : "挖 - 填";
-                var reinforce = (maxVerticalDiff > fillLargerThan) ? "超挖换填 + 土工格栅" : "超挖换填";
-                _docMdf.WriteLineIntoDebuger(ptRoad.Point.X, fill, reinforce);
+                var reinforce = (maxVerticalDiff_Fill > fillLargerThan) ? "超挖换填 + 土工格栅" : "超挖换填";
+                _docMdf.WriteLineIntoDebuger(ptRoad.Point.X, fill, maxVerticalDiff_Fill, maxVerticalDiff_Cut, reinforce);
                 //
             }
 
@@ -225,7 +250,7 @@ namespace eZcad.SubgradeQuantity.DataExport
             _docMdf.WriteNow($"填挖交界交点数量：{inters.NumberOfIntersectionPoints}");
             _docMdf.WriteNow("交界点桩号", "交点形式", "处理措施");
 
-            var allIntersects = _longitudinalSection.IntersPoints.Keys.ToArray();
+            var allIntersects = longitudinalSection.IntersPoints.Keys.ToArray();
             var count = allIntersects.Length;
             double lastStation = allIntersects[0];
             for (int i = 0; i < count - 1; i++)

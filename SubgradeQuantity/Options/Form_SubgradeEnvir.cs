@@ -18,7 +18,7 @@ namespace eZcad.SubgradeQuantity.Options
         DocumentModifier _docMdf;
 
         private BindingList<SoilRockRange> _soilRockRanges = new BindingList<SoilRockRange>(Options_Collections.SoilRockRanges);
-        private BindingList<Structure> _structures = new BindingList<Structure>(Options_Collections.Structures);
+        private BindingList<RangeBlock> _structures = new BindingList<RangeBlock>(Options_Collections.RangeBlocks);
 
         #endregion
 
@@ -103,7 +103,7 @@ namespace eZcad.SubgradeQuantity.Options
 
         #region ---   eZDataGridView_Structures
 
-        private void DgvSetup_Structure(eZDataGridView eZdgv, IList<Structure> datasource)
+        private void DgvSetup_Structure(eZDataGridView eZdgv, IList<RangeBlock> datasource)
         {
             eZdgv.AutoGenerateColumns = false;
             eZdgv.EditMode = DataGridViewEditMode.EditOnEnter;
@@ -125,7 +125,7 @@ namespace eZcad.SubgradeQuantity.Options
 
             // -------------------------
             var combo = new DataGridViewComboBoxColumn();
-            combo.DataSource = Enum.GetValues(typeof(StructureType));
+            combo.DataSource = Enum.GetValues(typeof(BlockType));
             combo.DataPropertyName = "Type";
             combo.Name = "类型";
             combo.Width = 100;
@@ -142,11 +142,11 @@ namespace eZcad.SubgradeQuantity.Options
             var ss = _structures.LastOrDefault();
             if (ss == null)
             {
-                ss = new Structure(StructureType.桥梁, 0, 0);
+                ss = new RangeBlock(BlockType.桥梁, 0, 0);
             }
             else
             {
-                ss = (Structure)ss.Clone();
+                ss = (RangeBlock)ss.Clone();
                 ss.StartStation = ss.EndStation;
             }
             e.NewObject = ss;
@@ -180,9 +180,17 @@ namespace eZcad.SubgradeQuantity.Options
                 MessageBox.Show(errMsg, @"数据不符合规范", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            //
+
+            // 设置边坡的岩土性质
             var allSlopes = ProtectionUtils.GetAllExistingSlopeLines(_docMdf, sort: true);
             SetSlopeSoilRock(allSlopes);
+
+            // 设置Block的连接桩号
+            var allSortedStations = Options_Collections.AllSortedStations.ToArray();
+            foreach (var b in Options_Collections.RangeBlocks)
+            {
+                b.CalculateConnetedStations(allSortedStations);
+            }
             //
             DialogResult = DialogResult.OK;
             Close();
@@ -202,7 +210,7 @@ namespace eZcad.SubgradeQuantity.Options
                 }
             }
             index = 0;
-            foreach (var s in Options_Collections.Structures)
+            foreach (var s in Options_Collections.RangeBlocks)
             {
                 index += 1;
                 if (s.StartStation >= s.EndStation)

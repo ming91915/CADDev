@@ -85,10 +85,17 @@ namespace eZcad.SubgradeQuantity.SlopeProtection
             var protLayers = new Dictionary<string, ObjectId>();
             foreach (var protName in categorizedProtMtd.Keys)
             {
-                var layer = Utils.GetOrCreateLayer(docMdf, GetLayerNameFromProtection(protName)).Id;
+                var layer = Utils.GetOrCreateLayer(docMdf, GetLayerNameFromProtection(protName));
+                // 设置图层线宽
+                if (layer.LineWeight != LineWeight.LineWeight050)
+                {
+                    layer.UpgradeOpen();
+                    layer.LineWeight = LineWeight.LineWeight050;
+                    layer.DowngradeOpen();
+                }
                 foreach (var prot in categorizedProtMtd[protName])
                 {
-                    protLayers.Add(prot, layer);
+                    protLayers.Add(prot, layer.Id);
                 }
             }
             return protLayers;

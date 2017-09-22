@@ -5,6 +5,8 @@ using System.Windows.Forms;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
+using eZcad.SubgradeQuantity.Options;
+using eZcad.Utility;
 using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 
 namespace eZcad
@@ -34,6 +36,9 @@ namespace eZcad
             {
                 try
                 {
+                    // 刷新所有的全局选项到内存中
+                    DbXdata.LoadAllOptionsFromDbToMemory(docMdf);
+                    //
                     var impliedSelection = docMdf.acEditor.SelectImplied().Value;
                     var res = cmd(docMdf, impliedSelection);
                     //
@@ -53,8 +58,7 @@ namespace eZcad
                 catch (System.Exception ex)
                 {
                     docMdf.acTransaction.Abort(); // Abort the transaction and rollback to the previous state
-                    string errorMessage = ex.Message + "\r\n\r\n" + ex.StackTrace;
-                    MessageBox.Show(errorMessage, @"出错", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(ex.AppendMessage(), @"出错", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }

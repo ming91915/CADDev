@@ -70,8 +70,8 @@ namespace eZcad.SubgradeQuantity.DataExport
         {
             handledSections.Sort(ProtectionUtils.CompareStation);
             _handledSections = handledSections;
-            _handledLeftSlopes = allSections.Select(r => r.GetSlopeLine(true)).ToArray();
-            _handledRightSlopes = allSections.Select(r => r.GetSlopeLine(false)).ToArray();
+            _handledLeftSlopes = handledSections.Select(r => r.GetSlopeLine(true)).ToArray();
+            _handledRightSlopes = handledSections.Select(r => r.GetSlopeLine(false)).ToArray();
             //
             _sortedRanges = InitializeGeometricRange<HighFillDeepCut>(AllStations);
         }
@@ -142,10 +142,10 @@ namespace eZcad.SubgradeQuantity.DataExport
             if (countAll == 0) return;
 
             // 对桥梁隧道结构进行处理：截断对应的区间
-            CutWithBlocks(highFillSections_Left, Options_Collections.Structures);
-            CutWithBlocks(deepCutSections_Left, Options_Collections.Structures);
-            CutWithBlocks(highFillSections_Right, Options_Collections.Structures);
-            CutWithBlocks(deepCutSections_Right, Options_Collections.Structures);
+            CutWithBlocks(highFillSections_Left, Options_Collections.RangeBlocks);
+            CutWithBlocks(deepCutSections_Left, Options_Collections.RangeBlocks);
+            CutWithBlocks(highFillSections_Right, Options_Collections.RangeBlocks);
+            CutWithBlocks(deepCutSections_Right, Options_Collections.RangeBlocks);
 
             // 对于区间进行合并
             highFillSections_Left = MergeLinkedSections(highFillSections_Left);
@@ -275,28 +275,28 @@ namespace eZcad.SubgradeQuantity.DataExport
 
         #endregion
 
-        /// <summary> 将多个断面区间进行合并 </summary>
-        /// <param name="selectedSlopes">路基某一侧的高填或深挖边坡对象</param>
-        /// <returns></returns>
-        private List<CrossSectionRange<HighFillDeepCut>> MergeLinkedSections(
-            List<CrossSectionRange<HighFillDeepCut>> selectedSlopes)
-        {
-            if (selectedSlopes.Count == 0) return selectedSlopes;
+        ///// <summary> 将多个断面区间进行合并 </summary>
+        ///// <param name="selectedSlopes">路基某一侧的高填或深挖边坡对象</param>
+        ///// <returns></returns>
+        //private List<CrossSectionRange<HighFillDeepCut>> MergeLinkedSections(
+        //    List<CrossSectionRange<HighFillDeepCut>> selectedSlopes)
+        //{
+        //    if (selectedSlopes.Count == 0) return selectedSlopes;
 
-            var res = new List<CrossSectionRange<HighFillDeepCut>>();
-            var lastRange = selectedSlopes[0];
-            res.Add(lastRange);
-            for (int i = 1; i < selectedSlopes.Count; i++)
-            {
-                var rg = selectedSlopes[i];
-                var succ = lastRange.TryMerge(rg);
-                if (!succ)
-                {
-                    res.Add(rg);
-                    lastRange = rg;
-                }
-            }
-            return res;
-        }
+        //    var res = new List<CrossSectionRange<HighFillDeepCut>>();
+        //    var lastRange = selectedSlopes[0];
+        //    res.Add(lastRange);
+        //    for (int i = 1; i < selectedSlopes.Count; i++)
+        //    {
+        //        var rg = selectedSlopes[i];
+        //        var succ = lastRange.TryMerge(rg);
+        //        if (!succ)
+        //        {
+        //            res.Add(rg);
+        //            lastRange = rg;
+        //        }
+        //    }
+        //    return res;
+        //}
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace eZcad.SubgradeQuantity.SlopeProtection
+﻿namespace eZcad.SubgradeQuantity.SQControls
 {
     partial class ItemLister
     {

@@ -107,6 +107,7 @@ namespace eZcad.SubgradeQuantity.DataExport
                     fs.Station, fs.XData,
                     ref backSlopeInfo, ref backPlatformInfo, ref frontSlopeInfo, ref frontPlatformInfo);
             }
+            CutByBlocks(_allLeftSlopeExpands);
             ExpandEdge(_allLeftSlopeExpands);
 
             // 整个道路的所有右边边坡
@@ -127,35 +128,37 @@ namespace eZcad.SubgradeQuantity.DataExport
                 ExpandSlope(bs.Station, bs.XData, fs.Station, fs.XData,
                     ref backSlopeInfo, ref backPlatformInfo, ref frontSlopeInfo, ref frontPlatformInfo);
             }
+            CutByBlocks(_allRightSlopeExpands);
             ExpandEdge(_allRightSlopeExpands);
         }
 
         /// <summary> 根据两个断面的边坡对象，来计算其各自所占的边坡区域（几何计算，无关于防护方式） </summary>
         /// <param name="backStation"></param>
-        /// <param name="backSlope"></param>
+        /// <param name="backSlopeData"></param>
         /// <param name="frontStation"></param>
-        /// <param name="frontSlope"></param>
+        /// <param name="frontSlopeData"></param>
         /// <param name="backSlopeInfo"></param>
         /// <param name="backPlatformInfo"></param>
         /// <param name="frontSlopeInfo"></param>
         /// <param name="frontPlatformInfo"></param>
-        private static void ExpandSlope(double backStation, SlopeData backSlope,
-            double frontStation, SlopeData frontSlope,
+        private static void ExpandSlope(double backStation, SlopeData backSlopeData,
+            double frontStation, SlopeData frontSlopeData,
             ref Dictionary<double, SlopeSegInfo> backSlopeInfo, ref Dictionary<double, SlopeSegInfo> backPlatformInfo,
             ref Dictionary<double, SlopeSegInfo> frontSlopeInfo, ref Dictionary<double, SlopeSegInfo> frontPlatformInfo)
         {
             double length;
             double area;
+
             // 1. 从后往前算
-            var ssg = new SlopeSegsGeom(backStation, backSlope, frontStation, frontSlope);
-            foreach (var bSlope in backSlope.Slopes)
+            var ssg = new SlopeSegsGeom(backStation, backSlopeData, frontStation, frontSlopeData);
+            foreach (var bSlope in backSlopeData.Slopes)
             {
                 ssg.GetBackSlopeLengthAndArea(bSlope, out length, out area);
                 var ssi = backSlopeInfo[bSlope.Index];
                 ssi.FrontStation = backStation + length;
                 ssi.FrontArea = area;
             }
-            foreach (var bPltfm in backSlope.Platforms)
+            foreach (var bPltfm in backSlopeData.Platforms)
             {
                 ssg.GetBackPlatformLengthAndArea(bPltfm, out length, out area);
                 var ssi = backPlatformInfo[bPltfm.Index];
@@ -163,15 +166,15 @@ namespace eZcad.SubgradeQuantity.DataExport
                 ssi.FrontArea = area;
             }
             // 2. 从前往后算
-            ssg = new SlopeSegsGeom(frontStation, frontSlope, backStation, backSlope);
-            foreach (var fSlope in frontSlope.Slopes)
+            ssg = new SlopeSegsGeom(frontStation, frontSlopeData, backStation, backSlopeData);
+            foreach (var fSlope in frontSlopeData.Slopes)
             {
                 ssg.GetBackSlopeLengthAndArea(fSlope, out length, out area);
                 var ssi = frontSlopeInfo[fSlope.Index];
                 ssi.BackStation = frontStation - length;
                 ssi.BackArea = area;
             }
-            foreach (var fPltfm in frontSlope.Platforms)
+            foreach (var fPltfm in frontSlopeData.Platforms)
             {
                 ssg.GetBackPlatformLengthAndArea(fPltfm, out length, out area);
                 var ssi = frontPlatformInfo[fPltfm.Index];
@@ -180,6 +183,8 @@ namespace eZcad.SubgradeQuantity.DataExport
             }
         }
 
+        /// <summary> 对于道路边界进行截断 </summary>
+        /// <param name="allSlopeExpands"></param>
         private static void ExpandEdge(SlopeExpands[] allSlopeExpands)
         {
             // 起始边界
@@ -209,7 +214,65 @@ namespace eZcad.SubgradeQuantity.DataExport
             }
         }
 
+
+        /// <summary> 对于桥梁隧道短链等区间进行截断 </summary>
+        private bool CutByBlocks(SlopeExpands[] allSlopeExpands)
+        {
+            var blocks = Options.Options_Collections.RangeBlocks;
+            SlopeData slopeData;
+            foreach (var block in blocks)
+            {
+                // 桥梁后面的横断面（断面桩号较小）
+                var bs = allSlopeExpands.FirstOrDefault(r => Math.Abs(r.Station - block.ConnectedBackStaion) < ProtectionConstants.RangeMergeTolerance);
+                if (bs != null)
+                {
+                    slopeData = bs.XData;
+                    // Block 与最近断面桩号间的距离
+                    var stationDist = block.StartStation - slopeData.Station;
+                    foreach (var fSlope in slopeData.Slopes)
+                    {
+                        var ssi = bs.SlopeInfo[fSlope.Index];
+                        ssi.FrontStation = block.StartStation;
+                        // 直接用（斜坡长度*桩号距离）作为面积
+                        ssi.FrontArea = fSlope.ProtectionLength * stationDist;
+                    }
+                    foreach (var fSlope in slopeData.Platforms)
+                    {
+                        var ssi = bs.PlatformInfo[fSlope.Index];
+                        ssi.FrontStation = block.StartStation;
+                        // 直接用（斜坡长度*桩号距离）作为面积
+                        ssi.FrontArea = fSlope.ProtectionLength * stationDist;
+                    }
+                }
+
+                // 桥梁前面的横断面（断面桩号较大）
+                var fs = allSlopeExpands.FirstOrDefault(r => Math.Abs(r.Station - block.ConnectedFrontStaion) < ProtectionConstants.RangeMergeTolerance);
+                if (fs != null)
+                {
+                    slopeData = fs.XData;
+                    // Block 与最近断面桩号间的距离
+                    var stationDist = slopeData.Station - block.EndStation;
+                    foreach (var fSlope in slopeData.Slopes)
+                    {
+                        var ssi = fs.SlopeInfo[fSlope.Index];
+                        ssi.BackStation = block.EndStation;
+                        // 直接用（斜坡长度*桩号距离）作为面积
+                        ssi.BackArea = fSlope.ProtectionLength * stationDist;
+                    }
+                    foreach (var fSlope in slopeData.Platforms)
+                    {
+                        var ssi = fs.PlatformInfo[fSlope.Index];
+                        ssi.BackStation = block.EndStation;
+                        // 直接用（斜坡长度*桩号距离）作为面积
+                        ssi.BackArea = fSlope.ProtectionLength * stationDist;
+                    }
+                }
+
+            }
+            return true;
+        }
         #endregion
+
 
         /// <summary> 导出数据 </summary>
         public bool ExportData()
@@ -226,12 +289,12 @@ namespace eZcad.SubgradeQuantity.DataExport
             var sheet_Infos = new List<WorkSheetData>();
 
             // ---------------------------------------------------------------------------------------------------------------
-            // 1. 先将所有的数据进行一次性导出
-            var header = SlopeData.InfoHeader.Split('\t');
-            var allData = SlopeData.GetAllInfo(slopeDatas);
-            allData = allData.InsertVector<object, string, object>(true, new[] { header, }, new[] { -1f });
+            //// 1. 先将所有的数据进行一次性导出
+            //var header = SlopeData.InfoHeader.Split('\t');
+            //var allData = SlopeData.GetAllInfo(slopeDatas);
+            //allData = allData.InsertVector<object, string, object>(true, new[] { header, }, new[] { -1f });
 
-            sheet_Infos.Add(new WorkSheetData(WorkSheetDataType.SourceData, "CAD原始数据", allData));
+            //sheet_Infos.Add(new WorkSheetData(WorkSheetDataType.SourceData, "CAD原始数据", allData));
 
             // ---------------------------------------------------------------------------------------------------------------
             // 道路左侧边坡防护

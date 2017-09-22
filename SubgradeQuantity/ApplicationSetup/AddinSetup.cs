@@ -53,10 +53,10 @@ namespace eZcad.SubgradeQuantity
             // as well as some of the existing AutoCAD managed apps.
 
             // Initialize your plug-in application here
+            InitializeComponent();
 
-            CreateRibbon();
-            // ComponentManager.ItemInitialized 事件在每一次添加对象（选项卡 RibbonTab、不包括：工具栏）时都会触发。
-            // ComponentManager.ItemInitialized += ComponentManager_ItemInitialized;
+            // 
+            Application.DocumentManager.MdiActiveDocument.Editor.WriteMessage($"{TabId_SubgradeQuantity}程序加载成功\n");
         }
 
         void IExtensionApplication.Terminate()
@@ -67,14 +67,28 @@ namespace eZcad.SubgradeQuantity
         private const string TabId_SubgradeQuantity = "MSDI_SubgradeQuantity";
         private const string TabName_SubgradeQuantity = "MSDI_SubgradeQuantity";
         private const string TabTitle_SubgradeQuantity = "路基工程量";
+        private static string IconDir = "";
 
+
+        private void InitializeComponent()
+        {
+            var assPath = Assembly.GetExecutingAssembly().ManifestModule.FullyQualifiedName;
+            IconDir = Directory.GetCurrentDirectory();
+            IconDir =new FileInfo(assPath).Directory.FullName;
+            // CreateRibbon();
+
+            // ComponentManager.ItemInitialized 事件在每一次添加对象（选项卡 RibbonTab、不包括：工具栏）时都会触发。
+            // ComponentManager.ItemInitialized += ComponentManager_ItemInitialized;
+        }
+
+        private const string CmdStartRibbon = @"SQRibbon";
         /// <summary> 添加自定义功能区选项卡 </summary>
-        [CommandMethod(ProtectionConstants.eZGroupCommnad, "SubgradeQuantityRibbon", ProtectionConstants.ModelState)]
+        [CommandMethod(ProtectionConstants.eZGroupCommnad, CmdStartRibbon, ProtectionConstants.ModelState)]
         public void CreateRibbon()
         {
             if (ComponentManager.Ribbon == null)
             {
-                MessageBox.Show(@"请先通过 RIBBON 命令打开选项卡，然后重复 SubgradeQuantityRibbon 命令。",
+                MessageBox.Show($"请先通过 RIBBON 命令打开选项卡，然后重复 {CmdStartRibbon} 命令。",
                     @"提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
@@ -127,7 +141,7 @@ namespace eZcad.SubgradeQuantity
             // ----------------------------- 项目信息 ----------------------------------------
             var pnl_Project = CreatePanel(ribTab, "项目信息");
             AddButton(pnl_Project, method: typeof(ProjectInfos).GetMethod(ProjectInfos.CommandName, new Type[0]), size: RibbonItemSize.Large);
-            
+
             // ----------------------------- 路基横断面系统 ----------------------------------------
             var pnl_SubgSystem = CreatePanel(ribTab, "路基系统");
             AddButton(pnl_SubgSystem, method: typeof(SectionsConstructor).GetMethod(SectionsConstructor.CommandName, new Type[0]), size: RibbonItemSize.Large);
@@ -137,7 +151,7 @@ namespace eZcad.SubgradeQuantity
             var spltBtn3 = CreateSplitButton(pnl_SubgSystem, "横断面信息");
             AddButton(spltBtn3, method: typeof(SectionWalker).GetMethod(SectionWalker.CommandName, new Type[0]), size: RibbonItemSize.Large);
             AddButton(spltBtn3, method: typeof(SectionInfosPlayer).GetMethod(SectionInfosPlayer.CommandName, new Type[0]), size: RibbonItemSize.Large);
-            
+
             // ----------------------------- 边坡防护的构造 ----------------------------------------
             var pnl_Slope = CreatePanel(ribTab, "边坡防护");
             AddButton(pnl_Slope, method: typeof(SlopeConstructor).GetMethod(SlopeConstructor.CommandName, new Type[0]), size: RibbonItemSize.Large);
@@ -163,7 +177,7 @@ namespace eZcad.SubgradeQuantity
             AddButton(spltBtn2, method: typeof(InfosGetter_HighFill).GetMethod(InfosGetter_HighFill.CommandName, new Type[0]), size: RibbonItemSize.Large);
             AddButton(spltBtn2, method: typeof(InfosGetter_SteepSlope).GetMethod(InfosGetter_SteepSlope.CommandName, new Type[0]), size: RibbonItemSize.Large);
             AddButton(spltBtn2, method: typeof(InfosGetter_StairExcav).GetMethod(InfosGetter_StairExcav.CommandName, new Type[0]), size: RibbonItemSize.Large);
-        
+
             AddButton(pnl_Quantity, method: typeof(InfosGetter_FillCutInters).GetMethod(InfosGetter_FillCutInters.CommandName, new Type[0]), size: RibbonItemSize.Large);
 
             // ----------------------------- 选项设置 ----------------------------------------
@@ -251,6 +265,8 @@ namespace eZcad.SubgradeQuantity
 
         #endregion
 
+
+
         private static RibbonSplitButton CreateSplitButton(RibbonPanel panel, string buttonText)
         {
             var sb = new RibbonSplitButton()
@@ -287,11 +303,10 @@ namespace eZcad.SubgradeQuantity
             {
                 buttonText = ri.Text;
                 description = ri.Description;
-
                 //
                 if (!string.IsNullOrEmpty(ri.LargeImagePath))
                 {
-                    var fp = Path.GetFullPath(ri.LargeImagePath);
+                    var fp = Path.Combine(IconDir, ri.LargeImagePath);
                     if (File.Exists(fp))
                     {
                         largeImage = new BitmapImage(new Uri(fp));
@@ -299,7 +314,8 @@ namespace eZcad.SubgradeQuantity
                 }
                 if (!string.IsNullOrEmpty(ri.SmallImagePath))
                 {
-                    var fp = Path.GetFullPath(ri.SmallImagePath);
+                    var fp = Path.Combine(IconDir, ri.LargeImagePath);
+                    // var fp = Path.GetFullPath(ri.SmallImagePath);
                     if (File.Exists(fp))
                     {
                         smallImage = new BitmapImage(new Uri(fp));

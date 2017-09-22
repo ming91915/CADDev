@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using eZcad.AddinManager;
+using eZcad.SubgradeQuantity.Options;
+using eZcad.Utility;
 
 namespace eZcad.SubgradeQuantity
 {
@@ -20,8 +22,10 @@ namespace eZcad.SubgradeQuantity
                 {
                     // 先换个行，显示效果更清爽
                     docMdf.WriteNow("\n");
-
-                    var canCommit = cmd(docMdf, impliedSelection);
+                    // 刷新所有的全局选项到内存中
+                    DbXdata.LoadAllOptionsFromDbToMemory(docMdf);
+                    // 运行具体的命令
+                   var canCommit = cmd(docMdf, impliedSelection);
                     //
                     switch (canCommit)
                     {
@@ -42,7 +46,7 @@ namespace eZcad.SubgradeQuantity
                 catch (Exception ex)
                 {
                     docMdf.acTransaction.Abort(); // Abort the transaction and rollback to the previous state
-                    errorMessage = ex.Message + "\r\n\r\n" + ex.StackTrace;
+                    errorMessage = ex.AppendMessage();
                     return ExternalCommandResult.Failed;
                 }
             }

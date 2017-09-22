@@ -55,7 +55,7 @@ namespace eZcad.SubgradeQuantity.ParameterForm
             this.label4 = new System.Windows.Forms.Label();
             this.checkBox_ChooseRangeOnUI = new System.Windows.Forms.CheckBox();
             this.button_PlaceProtections = new System.Windows.Forms.Button();
-            this.protectionLister1 = new eZcad.SubgradeQuantity.SlopeProtection.ItemLister();
+            this.protectionLister1 = new eZcad.SubgradeQuantity.SQControls.ItemLister();
             this.groupBox_fillcut.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -392,7 +392,7 @@ namespace eZcad.SubgradeQuantity.ParameterForm
         private System.Windows.Forms.RadioButton radioButton_bothsides;
         private System.Windows.Forms.RadioButton radioButton_right;
         private System.Windows.Forms.RadioButton radioButton_left;
-        private SlopeProtection.ItemLister protectionLister1;
+        private SQControls.ItemLister protectionLister1;
         private System.Windows.Forms.TextBox textBox_ProtMethod;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox textBox_Style;

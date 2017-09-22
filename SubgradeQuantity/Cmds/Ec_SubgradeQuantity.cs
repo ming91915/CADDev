@@ -10,17 +10,6 @@ namespace eZcad.SQcmds
 
     #region ---   横断面系统
 
-    [EcDescription("根据 AutoCAD 中的几何图形构造出完整的路基横断面信息系统")]
-    public class Ec_ConstructSections : ICADExCommand
-    {
-        public ExternalCommandResult Execute(SelectionSet impliedSelection, ref string errorMessage,
-            ref IList<ObjectId> elementSet)
-        {
-            var s = new SectionsConstructor();
-            return AddinManagerDebuger.DebugInAddinManager(s.ConstructSections,
-                impliedSelection, ref errorMessage, ref elementSet);
-        }
-    }
 
     [EcDescription("在 AutoCAD 界面中快速导航到指定的桩号")]
     public class Ec_NavigateStation : ICADExCommand

@@ -32,7 +32,6 @@
             this.label6 = new System.Windows.Forms.Label();
             this.label_roadCenter = new System.Windows.Forms.Label();
             this.label_ground = new System.Windows.Forms.Label();
-            this.label7 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.textBoxNum_StartStation = new eZstd.UserControls.TextBoxNum();
             this.label9 = new System.Windows.Forms.Label();
@@ -42,28 +41,24 @@
             this.panel_Transform = new System.Windows.Forms.Panel();
             this.textBoxNum_StartElevation = new eZstd.UserControls.TextBoxNum();
             this.label1 = new System.Windows.Forms.Label();
-            this.dataGridView_Excludes = new System.Windows.Forms.DataGridView();
-            this.button_DeleteRange = new System.Windows.Forms.Button();
-            this.button_ExtractFromCurve = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.radioButton_LongitudinalStairExcav = new System.Windows.Forms.RadioButton();
             this.radioButton_FillCutInters = new System.Windows.Forms.RadioButton();
             this.panel_Transform.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView_Excludes)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // btn_RunCmd
             // 
-            this.btn_RunCmd.Location = new System.Drawing.Point(330, 331);
+            this.btn_RunCmd.Location = new System.Drawing.Point(330, 192);
             // 
             // btn_CancelCmd
             // 
-            this.btn_CancelCmd.Location = new System.Drawing.Point(288, 331);
+            this.btn_CancelCmd.Location = new System.Drawing.Point(288, 192);
             // 
             // btn_ViewUI
             // 
-            this.btn_ViewUI.Location = new System.Drawing.Point(246, 331);
+            this.btn_ViewUI.Location = new System.Drawing.Point(246, 192);
             // 
             // label5
             // 
@@ -102,15 +97,6 @@
             this.label_ground.TabIndex = 11;
             this.label_ground.Text = "***";
             this.label_ground.Click += new System.EventHandler(this.label_ground_Click);
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(22, 121);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(53, 12);
-            this.label7.TabIndex = 11;
-            this.label7.Text = "排除区段";
             // 
             // label8
             // 
@@ -200,48 +186,13 @@
             this.label1.TabIndex = 11;
             this.label1.Text = "起点高程";
             // 
-            // dataGridView_Excludes
-            // 
-            this.dataGridView_Excludes.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.dataGridView_Excludes.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView_Excludes.Location = new System.Drawing.Point(19, 143);
-            this.dataGridView_Excludes.Name = "dataGridView_Excludes";
-            this.dataGridView_Excludes.RowTemplate.Height = 23;
-            this.dataGridView_Excludes.Size = new System.Drawing.Size(346, 134);
-            this.dataGridView_Excludes.TabIndex = 14;
-            // 
-            // button_DeleteRange
-            // 
-            this.button_DeleteRange.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.button_DeleteRange.Location = new System.Drawing.Point(63, 330);
-            this.button_DeleteRange.Name = "button_DeleteRange";
-            this.button_DeleteRange.Size = new System.Drawing.Size(38, 23);
-            this.button_DeleteRange.TabIndex = 15;
-            this.button_DeleteRange.Text = "删除";
-            this.button_DeleteRange.UseVisualStyleBackColor = true;
-            this.button_DeleteRange.Click += new System.EventHandler(this.button_DeleteRange_Click);
-            // 
-            // button_ExtractFromCurve
-            // 
-            this.button_ExtractFromCurve.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.button_ExtractFromCurve.Enabled = false;
-            this.button_ExtractFromCurve.Location = new System.Drawing.Point(19, 331);
-            this.button_ExtractFromCurve.Name = "button_ExtractFromCurve";
-            this.button_ExtractFromCurve.Size = new System.Drawing.Size(38, 23);
-            this.button_ExtractFromCurve.TabIndex = 16;
-            this.button_ExtractFromCurve.Text = "提取";
-            this.button_ExtractFromCurve.UseVisualStyleBackColor = true;
-            this.button_ExtractFromCurve.Click += new System.EventHandler(this.button_ExtractFromCurve_Click);
-            // 
             // groupBox1
             // 
             this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox1.Controls.Add(this.radioButton_LongitudinalStairExcav);
             this.groupBox1.Controls.Add(this.radioButton_FillCutInters);
-            this.groupBox1.Location = new System.Drawing.Point(19, 284);
+            this.groupBox1.Location = new System.Drawing.Point(19, 145);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(346, 40);
             this.groupBox1.TabIndex = 17;
@@ -274,37 +225,28 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(379, 364);
+            this.ClientSize = new System.Drawing.Size(379, 225);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.label5);
-            this.Controls.Add(this.button_ExtractFromCurve);
             this.Controls.Add(this.label_roadCenter);
-            this.Controls.Add(this.button_DeleteRange);
             this.Controls.Add(this.panel_Transform);
             this.Controls.Add(this.label6);
-            this.Controls.Add(this.label7);
             this.Controls.Add(this.label_ground);
-            this.Controls.Add(this.dataGridView_Excludes);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.Name = "PF_ExportFillCutInters";
             this.Text = "填挖交界";
-            this.Controls.SetChildIndex(this.dataGridView_Excludes, 0);
             this.Controls.SetChildIndex(this.label_ground, 0);
             this.Controls.SetChildIndex(this.btn_RunCmd, 0);
             this.Controls.SetChildIndex(this.btn_CancelCmd, 0);
             this.Controls.SetChildIndex(this.btn_ViewUI, 0);
-            this.Controls.SetChildIndex(this.label7, 0);
             this.Controls.SetChildIndex(this.label6, 0);
             this.Controls.SetChildIndex(this.panel_Transform, 0);
-            this.Controls.SetChildIndex(this.button_DeleteRange, 0);
             this.Controls.SetChildIndex(this.label_roadCenter, 0);
-            this.Controls.SetChildIndex(this.button_ExtractFromCurve, 0);
             this.Controls.SetChildIndex(this.label5, 0);
             this.Controls.SetChildIndex(this.groupBox1, 0);
             this.panel_Transform.ResumeLayout(false);
             this.panel_Transform.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView_Excludes)).EndInit();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.ResumeLayout(false);
@@ -318,7 +260,6 @@
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label_roadCenter;
         private System.Windows.Forms.Label label_ground;
-        private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label label8;
         private eZstd.UserControls.TextBoxNum textBoxNum_StartStation;
         private System.Windows.Forms.Label label9;
@@ -326,11 +267,8 @@
         private System.Windows.Forms.Label label10;
         private eZstd.UserControls.TextBoxNum textBoxNum_yScale;
         private System.Windows.Forms.Panel panel_Transform;
-        private System.Windows.Forms.DataGridView dataGridView_Excludes;
-        private System.Windows.Forms.Button button_DeleteRange;
         private eZstd.UserControls.TextBoxNum textBoxNum_StartElevation;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Button button_ExtractFromCurve;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.RadioButton radioButton_LongitudinalStairExcav;
         private System.Windows.Forms.RadioButton radioButton_FillCutInters;

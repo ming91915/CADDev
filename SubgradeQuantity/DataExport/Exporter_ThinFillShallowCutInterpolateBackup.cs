@@ -222,7 +222,7 @@ namespace eZcad.SubgradeQuantity.DataExport
             height = 0.0;
             // 1. 基本判断标准
             var depth = center.CenterElevation_Road - center.CenterElevation_Ground;
-            if (depth >= 0 && depth <= _criterion.低填最大高度 && (center.LeftSlopeFill || center.RightSlopeFill))
+            if (depth >= 0 && depth <= _criterion.低填最大高度 && (center.LeftSlopeFill.Value || center.RightSlopeFill.Value))
             {
                 // 2. 边坡的坡底点
                 var leftBottom = center.LeftSlopeExists
@@ -348,11 +348,11 @@ namespace eZcad.SubgradeQuantity.DataExport
                 double rightCenterCutWidth;
                 double leftRoadWidth;
                 double rightRoadWidth;
-                var leftFillCut = HalfRoadShallowCut(center.LeftSlopeFill,
+                var leftFillCut = HalfRoadShallowCut(center.LeftSlopeFill.Value,
                     center.LeftGroundSurfaceHandle.GetDBObject<Polyline>(db),
                     center.LeftRoadSurfaceHandle.GetDBObject<Polyline>(db),
                     1/_criterion.浅挖射线坡比, out leftRoadWidth, out leftCenterCutWidth);
-                var rightFillCut = HalfRoadShallowCut(center.RightSlopeFill,
+                var rightFillCut = HalfRoadShallowCut(center.RightSlopeFill.Value,
                     center.RightGroundSurfaceHandle.GetDBObject<Polyline>(db),
                     center.RightRoadSurfaceHandle.GetDBObject<Polyline>(db),
                     1/_criterion.浅挖射线坡比, out rightRoadWidth, out rightCenterCutWidth);
