@@ -11,6 +11,7 @@ namespace eZcad.SubgradeQuantity.DataExport
         {
             #region ---   Fields
 
+            /// <summary> 某一个横断面的桩号 </summary>
             public double Station { get; }
 
             /// <summary> 此属性不会为 null，如果某桩号某一侧没有边坡对象（是几何图形都没有，而不是因为挡墙覆盖而没有）时，则此属性的值为<seealso cref="SlopeData"/>的默认实例对象 </summary>
@@ -61,9 +62,9 @@ namespace eZcad.SubgradeQuantity.DataExport
         /// <summary> 每一个子边坡或子平台所占据的桩号区域，以及对应的几何面积 </summary>
         private class SlopeSegInfo
         {
-            /// <summary> 后方桩号，即小桩号 </summary>
+            /// <summary> 后方桩号，即小桩号（比此子边坡所在断面桩号要小） </summary>
             public double BackStation { get; set; }
-            /// <summary> 前方桩号，即大桩号 </summary>
+            /// <summary> 前方桩号，即大桩号（比此子边坡所在断面桩号要大） </summary>
             public double FrontStation { get; set; }
 
             public double BackArea { get; set; }

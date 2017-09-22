@@ -35,7 +35,7 @@ namespace eZcad.SubgradeQuantity.Utility
 
         /// <summary> 从界面中提取路基对象 </summary>
         /// <returns></returns>
-        public static List<Line> SelecteSections(Editor ed)
+        public static List<Line> SelecteSectionLines(Editor ed)
         {
             // Create our options object
             var pso = new PromptSelectionOptions();
@@ -48,6 +48,19 @@ namespace eZcad.SubgradeQuantity.Utility
             // pso.SingleOnly = true;
 
             var psr = ed.GetSelection(pso, SubgradeSection.Filter);
+
+            if (psr.Status == PromptStatus.OK)
+            {
+                return psr.Value.GetObjectIds().Select(id => id.GetObject(OpenMode.ForRead) as Line).ToList();
+            }
+            return null;
+        }
+
+        /// <summary> 从界面中提取路基对象 </summary>
+        /// <returns></returns>
+        public static List<Line> GetAllSectionLines(Editor ed)
+        {
+            var psr = ed.SelectAll(SubgradeSection.Filter);
 
             if (psr.Status == PromptStatus.OK)
             {
@@ -397,6 +410,6 @@ namespace eZcad.SubgradeQuantity.Utility
         }
 
         #endregion
-     
+
     }
 }

@@ -21,7 +21,9 @@ namespace eZcad.SubgradeQuantity.Entities
     /// <summary> 与桩号区间相关的数据 </summary>
     public class StationRangeEntity
     {
+        /// <summary> 区间的起始桩号（较小） </summary>
         public double StartStation { get; set; }
+        /// <summary> 区间的末尾桩号（较大） </summary>
         public double EndStation { get; set; }
 
         public StationRangeEntity(double startStation, double endStation)

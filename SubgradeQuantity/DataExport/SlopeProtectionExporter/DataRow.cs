@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using eZcad.SubgradeQuantity.Utility;
 
 namespace eZcad.SubgradeQuantity.DataExport
 {
@@ -157,13 +158,14 @@ namespace eZcad.SubgradeQuantity.DataExport
 
             public static string[] GetTableHeader()
             {
-                return new string[] { "起始桩号", "结尾桩号", "长度", "面积", "防护方式", "备注" };
+                return new string[] { "起始桩号", "结尾桩号", "桩号区间", "长度", "面积", "防护方式", "备注" };
             }
 
             private object[] GetRow()
             {
                 return new object[]
-                {StartStation, EndStation, EndStation - StartStation, Area, ProtectionName, GetDescription()};
+                {StartStation, EndStation,ProtectionUtils.GetStationString(StartStation, EndStation, maxDigits: 0),
+                    EndStation - StartStation, Area, ProtectionName, GetDescription()};
             }
 
             public static object[,] ConvertToArray(List<DataRow> protMthinfos)

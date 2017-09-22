@@ -1,12 +1,72 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Autodesk.AutoCAD.DatabaseServices;
 using eZcad.SubgradeQuantity.Entities;
+using eZcad.Utility;
 
 namespace eZcad.SubgradeQuantity.Options
 {
     public static class Options_Collections
     {
+
+        #region ---   AllSortedStations 整条道路中所有的横断面（桩号从小到大排列）
+
+
+        /// <summary>  整条道路中所有的横断面（桩号从小到大排列） </summary>
+        public static double[] AllSortedStations = new double[0];
+
+        /// <summary> 将静态类中的数据保存到<seealso cref="Xrecord"/>对象中 </summary>
+        /// <returns></returns>
+        public static ResultBuffer ToResultBuffer_SortedStations()
+        {
+            var generalBuff = new ResultBuffer();
+            var count = AllSortedStations.Length;
+            generalBuff.Add(new TypedValue((int)DxfCode.ExtendedDataInteger32, count));
+            foreach (var s in AllSortedStations)
+            {
+                generalBuff.Add(new TypedValue((int)DxfCode.ExtendedDataReal, s));
+            }
+            //
+            //var rec = new Xrecord();
+            //rec.Data = generalBuff;
+            return generalBuff;
+        }
+
+        /// <summary> 将<seealso cref="Xrecord"/>对象中的数据刷新到内存中的静态类中 </summary>
+        public static void FromXrecord_SortedStations(Xrecord xrec)
+        {
+            AllSortedStations = new double[0];
+            //
+            var buffs = xrec.Data.AsArray();
+            if (buffs == null || buffs.Length == 0)
+            {
+                return;
+            }
+            //
+            try
+            {
+                var itemsCount = (int)buffs[0].Value;
+                AllSortedStations = new double[itemsCount];
+                const int baseIndex = 1;
+                for (int i = 0; i < itemsCount; i++)
+                {
+                    var s = (double)buffs[i + baseIndex].Value;
+                    //
+                    AllSortedStations[i] = s;
+                    // AllSortedStations.Add(s);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.Print("提取整条道路中所有的横断面（桩号从小到大排列）信息出错" + ex.AppendMessage());
+                //MessageBox.Show($"刷新选项数据“{fields[index].Name}”出错。\r\n{ex.StackTrace}");
+            }
+        }
+
+        #endregion
+
+
         #region ---   SoilRockRanges
 
         /// <summary> 记录道路中岩质边坡与土质边坡的分类与所属区间（不在此区间内的边坡都认为是岩质边坡） </summary>
@@ -23,8 +83,8 @@ namespace eZcad.SubgradeQuantity.Options
             {
                 generalBuff.Add(new TypedValue((int)DxfCode.ExtendedDataReal, s.StartStation));
                 generalBuff.Add(new TypedValue((int)DxfCode.ExtendedDataReal, s.EndStation));
-                generalBuff.Add(new TypedValue((int)DxfCode.ExtendedDataInteger16, (short)s.SideDistribution));
-                generalBuff.Add(new TypedValue((int)DxfCode.ExtendedDataInteger16, (short)s.Type));
+                generalBuff.Add(Utils.SetExtendedDataEnum(s.SideDistribution));
+                generalBuff.Add(Utils.SetExtendedDataEnum(s.Type));
             }
             //
             //var rec = new Xrecord();
@@ -51,10 +111,10 @@ namespace eZcad.SubgradeQuantity.Options
                 for (int i = 0; i < itemsCount; i++)
                 {
                     var s = new SoilRockRange(
-                        startStation: (double)buffs[baseIndex + 1].Value,
-                        endStation: (double)buffs[baseIndex + 2].Value,
-                        distribution: (SoilRockRange.Distribution)Enum.ToObject(typeof(SoilRockRange.Distribution), (short)buffs[baseIndex + 3].Value),
-                        type: (SubgradeType)Enum.ToObject(typeof(SubgradeType), (short)buffs[baseIndex + 4].Value));
+                        startStation: (double) buffs[baseIndex + 1].Value,
+                        endStation: (double) buffs[baseIndex + 2].Value,
+                        distribution: Utils.GetExtendedDataEnum<SoilRockRange.Distribution>(buffs[baseIndex + 3]),
+                        type: Utils.GetExtendedDataEnum<SubgradeType>(buffs[baseIndex + 4]));
 
                     //
                     SoilRockRanges.Add(s);
@@ -63,29 +123,28 @@ namespace eZcad.SubgradeQuantity.Options
             }
             catch (Exception ex)
             {
-                //MessageBox.Show($"刷新选项数据“{fields[index].Name}”出错。\r\n{ex.StackTrace}");
+                Debug.Print("提取整条道路中岩土分区信息出错" + ex.AppendMessage());
             }
         }
 
 
         #endregion
 
-        #region ---   Structures
+        #region ---   Blocks
 
         /// <summary> 整个道路有所有的桥梁隧道等结构物 </summary>
-        public static List<Structure> Structures = new List<Structure>();
-
+        public static List<RangeBlock> RangeBlocks = new List<RangeBlock>();
 
         /// <summary> 将静态类中的数据保存到<seealso cref="Xrecord"/>对象中 </summary>
         /// <returns></returns>
-        public static ResultBuffer ToResultBuffer_Structures()
+        public static ResultBuffer ToResultBuffer_Blocks()
         {
             var generalBuff = new ResultBuffer();
-            var count = Structures.Count;
+            var count = RangeBlocks.Count;
             generalBuff.Add(new TypedValue((int)DxfCode.ExtendedDataInteger32, count));
-            foreach (var s in Structures)
+            foreach (var s in RangeBlocks)
             {
-                generalBuff.Add(new TypedValue((int)DxfCode.ExtendedDataInteger16, (short)s.Type));
+                generalBuff.Add(Utils.SetExtendedDataEnum(s.Type));
                 generalBuff.Add(new TypedValue((int)DxfCode.ExtendedDataReal, s.StartStation));
                 generalBuff.Add(new TypedValue((int)DxfCode.ExtendedDataReal, s.EndStation));
                 generalBuff.Add(new TypedValue((int)DxfCode.ExtendedDataReal, s.ConnectedBackStaion));
@@ -98,9 +157,9 @@ namespace eZcad.SubgradeQuantity.Options
         }
 
         /// <summary> 将<seealso cref="Xrecord"/>对象中的数据刷新到内存中的静态类中 </summary>
-        public static void FromXrecord_Structures(Xrecord xrec)
+        public static void FromXrecord_Blocks(Xrecord xrec)
         {
-            Structures = new List<Structure>();
+            RangeBlocks = new List<RangeBlock>();
             //
             var buffs = xrec.Data.AsArray();
             if (buffs == null || buffs.Length == 0)
@@ -116,8 +175,8 @@ namespace eZcad.SubgradeQuantity.Options
                 for (int i = 0; i < itemsCount; i++)
                 {
 
-                    var s = new Structure(
-                        type: (StructureType)Enum.ToObject(typeof(StructureType), (short)buffs[baseIndex].Value),
+                    var s = new RangeBlock(
+                        type: Utils.GetExtendedDataEnum<BlockType>(buffs[baseIndex]),
                         startStation: (double)buffs[baseIndex + 1].Value,
                         endStation: (double)buffs[baseIndex + 2].Value)
                     {
@@ -126,7 +185,7 @@ namespace eZcad.SubgradeQuantity.Options
                         ConnectedFrontStaion = (double)buffs[baseIndex + 4].Value,
                     };
                     //
-                    Structures.Add(s);
+                    RangeBlocks.Add(s);
                     baseIndex += fieldsCount;
                 }
             }

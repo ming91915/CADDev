@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace eZcad.SubgradeQuantity.SlopeProtection
+namespace eZcad.SubgradeQuantity.SQControls
 {
     public partial class ItemLister : UserControl
     {
@@ -22,7 +22,7 @@ namespace eZcad.SubgradeQuantity.SlopeProtection
         /// <summary> 导入所有的防护方式列表 </summary>
         public void ImportItems(IList<string> itemTexts, IList<object> itemValues)
         {
-
+            flowLayoutPanel1.Controls.Clear();
             for (int i = 0; i < itemTexts.Count; i++)
             {
                 var itemText = itemTexts[i];

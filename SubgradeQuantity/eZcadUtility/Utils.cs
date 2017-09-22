@@ -382,6 +382,53 @@ Windows Registry Editor Version 5.00
             return (Int16)buff.Value == 1;
         }
 
+        /// <summary> 将一个布尔值转换为对应的 ExtendedData </summary>
+        public static TypedValue SetExtendedDataBool3(bool? value)
+        {
+            if (value == null)
+            {
+                return new TypedValue((int)DxfCode.ExtendedDataInteger16, -1);
+            }
+            else if (value.Value)
+            {
+                return new TypedValue((int)DxfCode.ExtendedDataInteger16, 1);
+            }
+            else
+            {
+                return new TypedValue((int)DxfCode.ExtendedDataInteger16, 0);
+            }
+        }
+
+        /// <summary> 从 ExtendedData 值中提取出对应的 布尔值  </summary>
+        public static bool? GetExtendedDataBool3(TypedValue buff)
+        {
+            var v = (Int16)buff.Value;
+            if (v == -1)
+            {
+                return null;
+            }
+            else if (v == 1)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        /// <summary> 将一个枚举值转换为对应的 ExtendedData </summary>
+        public static TypedValue SetExtendedDataEnum(Enum enumValue)
+        {
+            return new TypedValue((int)DxfCode.ExtendedDataInteger16, Convert.ToInt16(enumValue));
+        }
+
+        /// <summary> 从 ExtendedData 值中提取出对应的 枚举值  </summary>
+        public static T GetExtendedDataEnum<T>(TypedValue buff)
+        {
+            return (T)Enum.ToObject(typeof(T), (short)buff.Value);
+        }
+
         #endregion
 
         /// <summary> 将焦点从操作的<seealso cref="System.Windows.Forms.Form"/>转移到 AutoCAD 主界面窗口。此操作在对 无模态窗口 操作时非常有用。 </summary>

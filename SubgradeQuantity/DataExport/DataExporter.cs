@@ -107,20 +107,22 @@ namespace eZcad.SubgradeQuantity.DataExport
         /// <typeparam name="T"></typeparam>
         /// <param name="sections">单独的断面集合</param>
         /// <param name="blockStructures"></param>
-        protected void CutWithBlocks<T>(List<CrossSectionRange<T>> sections, List<Structure> blockStructures) where T : HalfValue
+        protected void CutWithBlocks<T>(List<CrossSectionRange<T>> sections, List<RangeBlock> blockStructures) where T : HalfValue
         {
             foreach (var bs in blockStructures)
             {
-                var s = sections.FirstOrDefault(r => r.StationInbetween == bs.ConnectedBackStaion);
+                var s = sections.FirstOrDefault(r => Math.Abs(r.StationInbetween - bs.ConnectedBackStaion) < ProtectionConstants.RangeMergeTolerance);
                 if (s != null)
                 {
                     // 说明此断面刚好位于指定的结构后面（桩号比结构起始桩号小一点）
+                    s.FrontValue.EdgeStation = bs.StartStation;
                     s.FrontValue.CutByBlock(bs.StartStation);
                 }
-                s = sections.FirstOrDefault(r => r.StationInbetween == bs.ConnectedFrontStaion);
+                s = sections.FirstOrDefault(r => Math.Abs(r.StationInbetween - bs.ConnectedFrontStaion) < ProtectionConstants.RangeMergeTolerance);
                 if (s != null)
                 {
                     // 说明此断面刚好位于指定的结构前面（桩号比结构起始桩号大一点）
+                    s.BackValue.EdgeStation = bs.EndStation;
                     s.BackValue.CutByBlock(bs.EndStation);
                 }
             }

@@ -55,7 +55,7 @@ namespace eZcad.SubgradeQuantity.Cmds
             _docMdf = docMdf;
             //  ProtectionUtils.SubgradeEnvironmentConfiguration(docMdf);
 
-            var centerLines = ProtectionUtils.SelecteSections(docMdf.acEditor);
+            var centerLines = ProtectionUtils.SelecteSectionLines(docMdf.acEditor);
             if (centerLines == null || centerLines.Count == 0) return ExternalCmdResult.Cancel;
 
             // 

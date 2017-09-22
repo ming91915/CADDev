@@ -35,6 +35,7 @@ namespace eZcad.SubgradeQuantity.Entities
 
         private readonly bool _onLeft;
         private readonly bool _isFill;
+        private readonly RetainingWallType _retainingWallType;
 
         private static readonly SelectionFilter _filter = new SelectionFilter(new[]{
 
@@ -157,21 +158,21 @@ namespace eZcad.SubgradeQuantity.Entities
             var xdata = ca.XData;
             if (ca.XData.LeftSlopeHandle == pline.Handle)
             {
-                var retainingWall = xdata.LeftRetainingWallExists
+                var retainingWall = xdata.LeftRetainingWallType != RetainingWallType.无
                     ? docMdf.acDataBase.GetObjectId(false, xdata.LeftRetainingWallHandle, 0).GetObject(OpenMode.ForRead)
                         as Polyline
                     : null;
                 //
-                return new SlopeLine(docMdf, pline, ca, true, ca.XData.LeftSlopeFill, retainingWall);
+                return new SlopeLine(docMdf, pline, ca, true, ca.XData.LeftSlopeFill.Value, xdata.LeftRetainingWallType, retainingWall);
             }
             if (ca.XData.RightSlopeHandle == pline.Handle)
             {
-                var retainingWall = xdata.RightRetainingWallExists
+                var retainingWall = xdata.RightRetainingWallType != RetainingWallType.无
                     ? docMdf.acDataBase.GetObjectId(false, xdata.RightRetainingWallHandle, 0)
                         .GetObject(OpenMode.ForRead) as Polyline
                     : null;
                 //
-                return new SlopeLine(docMdf, pline, ca, false, ca.XData.RightSlopeFill, retainingWall);
+                return new SlopeLine(docMdf, pline, ca, false, ca.XData.RightSlopeFill.Value, xdata.RightRetainingWallType, retainingWall);
             }
 
             errMsg = $"提取边坡对象出现异常，请重新通过“{SectionsConstructor.CommandName}”命令对横断面系统进行构造";
@@ -185,8 +186,8 @@ namespace eZcad.SubgradeQuantity.Entities
         /// <param name="onLeft"></param>
         /// <param name="isFill"></param>
         /// <param name="retainingWall"></param>
-        public SlopeLine(DocumentModifier docMdf, Polyline pline, SubgradeSection axis, bool onLeft, bool isFill,
-            Polyline retainingWall)
+        public SlopeLine(DocumentModifier docMdf, Polyline pline, SubgradeSection axis, bool onLeft, bool isFill, RetainingWallType retainingWallType,
+            Polyline retainingWall = null)
         {
             _docMdf = docMdf;
             //
@@ -195,6 +196,7 @@ namespace eZcad.SubgradeQuantity.Entities
             Station = axis.XData.Station;
             _onLeft = onLeft;
             _isFill = isFill;
+            _retainingWallType = retainingWallType;
             _retainingWall = retainingWall;
             if (retainingWall != null)
             {
@@ -512,18 +514,12 @@ namespace eZcad.SubgradeQuantity.Entities
             }
         }
 
+
         private void WriteProtectionMethod(ISlopeSeg ss, BlockTableRecord btr, Dictionary<string, ObjectId> protLayers)
         {
-            DBText originalText = null;
-            try
-            {
-                originalText = ss.ProtectionMethodText.GetDBObject<DBText>(_docMdf.acDataBase);
-            }
-            catch (Exception)
-            {
-            }
             if (!string.IsNullOrEmpty(ss.ProtectionMethod))
             {
+                var originalText = ss.ProtectionMethodText.GetDBObject<DBText>(_docMdf.acDataBase);
                 // 创建或者修改
                 if (originalText == null)
                 {
@@ -539,8 +535,10 @@ namespace eZcad.SubgradeQuantity.Entities
                     //
                     btr.AppendEntity(newText);
                     _docMdf.acTransaction.AddNewlyCreatedDBObject(newText, true);
-                    // 在Draw()方法执行之前，必须确保此对象已经添加到数据库中（但是可以在 acTransaction.AddNewlyCreatedDBObject 之前），否则执行Draw()时，会造成 AutoCAD 的崩溃！
+                    // 在Draw()方法执行之前，必须确保此对象已经添加到数据库中，否则执行Draw()时，会造成 AutoCAD 的崩溃！
+                    // 同时，还应将 Draw() 方法放在 acTransaction.AddNewlyCreatedDBObject 之前，否则，对于新添加到数据库中的对象，它只能在事务提交后才能在界面上显示出来。
                     newText.Draw();
+
                     //
                     ss.ProtectionMethodText = newText.Handle;
                 }
@@ -556,6 +554,7 @@ namespace eZcad.SubgradeQuantity.Entities
             }
             else
             {
+                var originalText = ss.ProtectionMethodText.GetDBObject<DBText>(_docMdf.acDataBase);
                 // 不作任何操作或者将已有的删除
                 if (originalText != null)
                 {
@@ -845,10 +844,10 @@ namespace eZcad.SubgradeQuantity.Entities
             {
                 s.ProtectionMethod = firstProt;
             }
-            foreach (var s in data.Platforms)
-            {
-                s.ProtectionMethod = firstProt;
-            }
+            //foreach (var s in data.Platforms)
+            //{
+            //    s.ProtectionMethod = firstProt;
+            //}
         }
 
         /// <summary>

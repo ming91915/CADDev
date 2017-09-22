@@ -48,6 +48,7 @@ namespace eZcad.SubgradeQuantity.Cmds
         #endregion  /// <summary> 边坡防护的选项设置 </summary>
         public ExternalCmdResult SetProjectInfos(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
+            // 刷新所有的全局选项到内存中
             // var allXdataTypes = DbXdata.GetAllXdataTypes();
             var handledXdataTypes = DbXdata.DatabaseXdataType.General | DbXdata.DatabaseXdataType.LayerNames;
             DbXdata.RefreshOptionsFromDb(docMdf, handledXdataTypes);
@@ -60,6 +61,7 @@ namespace eZcad.SubgradeQuantity.Cmds
             }
             else if (res == DialogResult.Cancel)
             {
+                // 将内存中对全局选项的修改进行还原，还原的方法就是重新从数据库中加载修改前的数据。
                 DbXdata.RefreshOptionsFromDb(docMdf, handledXdataTypes);
             }
             return ExternalCmdResult.Cancel;

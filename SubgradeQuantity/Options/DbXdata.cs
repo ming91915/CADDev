@@ -18,8 +18,9 @@ namespace eZcad.SubgradeQuantity.Options
             None = 0,
             General = 1,
             LayerNames = 2,
-            Structures = 4,
+            RangeBlocks = 4,
             SoilRockRange = 8,
+            AllSortedStations = 16,
             //
         }
 
@@ -40,6 +41,14 @@ namespace eZcad.SubgradeQuantity.Options
 
         #region ---   数据的提取与保存
 
+        /// <summary> 刷新所有的全局选项到内存中 </summary> 
+        /// <param name="docMdf"></param>
+        public static void LoadAllOptionsFromDbToMemory(DocumentModifier docMdf)
+        {
+            var allXdataTypes = DbXdata.GetAllXdataTypes();
+            DbXdata.RefreshOptionsFromDb(docMdf, allXdataTypes);
+        }
+
         /// <summary> 将文档数据库中的数据刷新到静态的Option类中 </summary>
         /// <param name="xdataType"> 要刷新的数据类型 ，可以将多种类型进行叠加 </param>
         public static void RefreshOptionsFromDb(DocumentModifier docMdf, DatabaseXdataType xdataType)
@@ -54,13 +63,13 @@ namespace eZcad.SubgradeQuantity.Options
                     Options_LayerNames.FromXrecord(rec);
                 }
             }
-            if ((xdataType & DatabaseXdataType.Structures) > 0)
+            if ((xdataType & DatabaseXdataType.RangeBlocks) > 0)
             {
-                var dictKey = Enum.GetName(typeof(DatabaseXdataType), DatabaseXdataType.Structures);
+                var dictKey = Enum.GetName(typeof(DatabaseXdataType), DatabaseXdataType.RangeBlocks);
                 var rec = Utils.GetDictionaryValue<Xrecord>(baseDict, dictKey);
                 if (rec != null)
                 {
-                    Options_Collections.FromXrecord_Structures(rec);
+                    Options_Collections.FromXrecord_Blocks(rec);
                 }
             }
             if ((xdataType & DatabaseXdataType.SoilRockRange) > 0)
@@ -70,6 +79,15 @@ namespace eZcad.SubgradeQuantity.Options
                 if (rec != null)
                 {
                     Options_Collections.FromXrecord_SoilRockRanges(rec);
+                }
+            }
+            if ((xdataType & DatabaseXdataType.AllSortedStations) > 0)
+            {
+                var dictKey = Enum.GetName(typeof(DatabaseXdataType), DatabaseXdataType.AllSortedStations);
+                var rec = Utils.GetDictionaryValue<Xrecord>(baseDict, dictKey);
+                if (rec != null)
+                {
+                    Options_Collections.FromXrecord_SortedStations(rec);
                 }
             }
         }
@@ -87,10 +105,10 @@ namespace eZcad.SubgradeQuantity.Options
                 //baseDict.SetAt(dictKey, xBuff);
                 //docMdf.acTransaction.AddNewlyCreatedDBObject(xBuff, true);
             }
-            if ((xdataType & DatabaseXdataType.Structures) > 0)
+            if ((xdataType & DatabaseXdataType.RangeBlocks) > 0)
             {
-                var dictKey = Enum.GetName(typeof(DatabaseXdataType), DatabaseXdataType.Structures);
-                var xBuff = Options_Collections.ToResultBuffer_Structures();
+                var dictKey = Enum.GetName(typeof(DatabaseXdataType), DatabaseXdataType.RangeBlocks);
+                var xBuff = Options_Collections.ToResultBuffer_Blocks();
                 Utils.ModifyDictXrecord(docMdf.acTransaction, baseDict, dictKey, xBuff);
                 //baseDict.SetAt(dictKey, xrec);
                 //docMdf.acTransaction.AddNewlyCreatedDBObject(xrec, true);
@@ -103,6 +121,15 @@ namespace eZcad.SubgradeQuantity.Options
                 //baseDict.SetAt(dictKey, xrec);
                 //docMdf.acTransaction.AddNewlyCreatedDBObject(xrec, true);
             }
+            if ((xdataType & DatabaseXdataType.AllSortedStations) > 0)
+            {
+                var dictKey = Enum.GetName(typeof(DatabaseXdataType), DatabaseXdataType.AllSortedStations);
+                var xBuff = Options_Collections.ToResultBuffer_SortedStations();
+                Utils.ModifyDictXrecord(docMdf.acTransaction, baseDict, dictKey, xBuff);
+                //baseDict.SetAt(dictKey, xrec);
+                //docMdf.acTransaction.AddNewlyCreatedDBObject(xrec, true);
+            }
+
             baseDict.DowngradeOpen();
         }
 

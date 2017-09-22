@@ -60,6 +60,7 @@ namespace eZcad.SubgradeQuantity.Cmds
             }
             else if (res == DialogResult.Cancel)
             {
+                // 将内存中对全局选项的修改进行还原，还原的方法就是重新从数据库中加载修改前的数据。
                 DbXdata.RefreshOptionsFromDb(docMdf, handledXdataTypes);
             }
             return  ExternalCmdResult.Commit;

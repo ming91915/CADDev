@@ -1,15 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Windows.Forms;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
+using eZcad.AddinManager;
 using eZcad.SubgradeQuantity.Cmds;
-using eZcad.SubgradeQuantity.Entities;
 using eZcad.SubgradeQuantity.Options;
+using eZcad.SubgradeQuantity.ParameterForm;
 using eZcad.SubgradeQuantity.Utility;
-using eZcad.Utility;
 
 [assembly: CommandClass(typeof(SectionsConstructor))]
 
@@ -18,81 +18,61 @@ namespace eZcad.SubgradeQuantity.Cmds
     /// <summary>
     /// 根据 AutoCAD 中的几何图形构造出完整的路基横断面信息系统
     /// </summary>
-    public class SectionsConstructor
+    [EcDescription(CommandDescription)]
+    public class SectionsConstructor : ICADExCommand
     {
         #region --- 命令设计
 
         /// <summary> 命令行命令名称，同时亦作为命令语句所对应的C#代码中的函数的名称 </summary>
         public const string CommandName = "ConstructSections";
 
+        private const string CommandText = @"路基构造";
+        private const string CommandDescription = @"根据 AutoCAD 中的几何图形构造出完整的路基横断面信息系统";
+
+
         /// <summary> 根据 AutoCAD 中的几何图形构造出完整的路基横断面信息系统 </summary>
         [CommandMethod(ProtectionConstants.eZGroupCommnad, CommandName, CommandFlags.UsePickSet)
-            , DisplayName(@"构造路基断面"), Description("根据 AutoCAD 中的几何图形构造出完整的路基横断面信息系统")
-            , RibbonItem(@"路基构造", "根据 AutoCAD 中的几何图形构造出完整的路基横断面信息系统", ProtectionConstants.ImageDirectory + "Section_32.png")]
+        , DisplayName(CommandText), Description(CommandDescription)
+        , RibbonItem(CommandText, CommandDescription, ProtectionConstants.ImageDirectory + "Section_32.png")]
         public void ConstructSections()
         {
             DocumentModifier.ExecuteCommand(ConstructSections);
         }
 
-        /// <summary> 根据 AutoCAD 中的几何图形构造出完整的路基横断面信息系统 </summary>
-        public ExternalCmdResult ConstructSections(DocumentModifier docMdf, SelectionSet impliedSelection)
+        public ExternalCommandResult Execute(SelectionSet impliedSelection, ref string errorMessage,
+            ref IList<ObjectId> elementSet)
         {
-            ProtectionUtils.SubgradeEnvironmentConfiguration(docMdf);
-
-            //
-            var axes = GetCenterAxes(docMdf.acEditor);
-            if (axes != null && axes.Count > 0)
-            {
-                var sectionAxes = new List<SubgradeSection>();
-                foreach (var axis in axes)
-                {
-                    var cenA = SubgradeSection.Create(docMdf, axis);
-                    if (cenA != null)
-                    {
-                        cenA.CenterLine.UpgradeOpen();
-
-                        cenA.ClearXData(true);
-                        cenA.CalculateSectionInfoToXData();
-                        cenA.FlushXData();
-
-                        cenA.CenterLine.DowngradeOpen();
-
-                        sectionAxes.Add(cenA);
-                    }
-                }
-                MessageBox.Show($"添加{sectionAxes.Count}个横断面", @"成功");
-            }
-            return ExternalCmdResult.Commit;
+            var s = new SectionsConstructor();
+            return AddinManagerDebuger.DebugInAddinManager(s.ConstructSections,
+                impliedSelection, ref errorMessage, ref elementSet);
         }
 
         #endregion
 
-        private IList<Line> GetCenterAxes(Editor ed)
+        private DocumentModifier _docMdf;
+
+        /// <summary> 根据 AutoCAD 中的几何图形构造出完整的路基横断面信息系统 </summary>
+        public ExternalCmdResult ConstructSections(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
-            var filterType = new[]
-        {
-                new TypedValue((int) DxfCode.Start, "LINE"),
-                new TypedValue((int) DxfCode.LayerName, Options_LayerNames.LayerName_CenterAxis),
-            };
+            _docMdf = docMdf;
+            ProtectionUtils.SubgradeEnvironmentConfiguration(docMdf);
 
-            // 请求在图形区域选择对象
-            var op = new PromptSelectionOptions();
+            // 在界面中选择指定的断面
+            // var axes = ProtectionUtils.SelecteSectionLines(docMdf.acEditor);
+            // 直接提取整个文档中所有的断面
+            var axes = ProtectionUtils.GetAllSectionLines(docMdf.acEditor);
 
-            // Set our prompts to include our keywords
-            string kws = op.Keywords.GetDisplayString(true);
-            op.MessageForAdding = "\n选择横断面中轴线线 " + kws; // 当用户在命令行中输入A（或Add）时，命令行出现的提示字符。
-            op.MessageForRemoval = "\n选择横断面中轴线线 " + kws;
-            // 当用户在命令行中输入Re（或Remove）时，命令行出现的提示字符。
-            // pso.SingleOnly = true;
-
-            var res = ed.GetSelection(op, new SelectionFilter(filterType));
-            if (res.Status == PromptStatus.OK)
+            if (axes != null && axes.Count > 0)
             {
-                var lines =
-                  res.Value.GetObjectIds().Select(id => id.GetObject(OpenMode.ForRead)).OfType<Line>().ToArray();
-                return lines;
+                //
+                var f = new SectionsConstructorForm(docMdf, axes);
+                f.ShowDialog();
+                // 
+                Options_Collections.AllSortedStations = f.SectionAxes.Select(r => r.XData.Station).ToArray();
+                Array.Sort(Options_Collections.AllSortedStations);
+                DbXdata.FlushXData(docMdf, DbXdata.DatabaseXdataType.AllSortedStations);
             }
-            return null;
+            return ExternalCmdResult.Commit;
         }
     }
 }

@@ -77,8 +77,7 @@ namespace eZcad.SubgradeQuantity.DataExport
 
             public override void CutByBlock(double blockStation)
             {
-
-                // 啥也不用做
+                // 对于低填浅挖，这里啥也不用做
             }
 
             public string GetDescription()
@@ -167,31 +166,39 @@ namespace eZcad.SubgradeQuantity.DataExport
             if (countAll == 0) return;
 
             // 对桥梁隧道结构进行处理：截断对应的区间
-            CutWithBlocks(cutFillSections, Options_Collections.Structures);
+            CutWithBlocks(cutFillSections, Options_Collections.RangeBlocks);
 
             // 对于区间进行合并
             cutFillSections = MergeLinkedSections(cutFillSections);
 
-            // 将结果整理为二维数组，用来进行表格输出
-            var sheetArr = new object[countAll + 2, 7];
 
-            var baseRow = 0;
+            // 将结果整理为二维数组，用来进行表格输出
+
+
+            // 将结果整理为二维数组，用来进行表格输出
+            var rows = new List<object[]>();
+            var header = new string[] { "起始桩号", "结束桩号", "桩号区间", "长度", "处理措施", "平均处理宽度", "平均处理高度" };
+            rows.Add(header);
+
             for (int i = 0; i < cutFillSections.Count; i++)
             {
                 var thsc = cutFillSections[i];
                 thsc.UnionBackFront();
                 //
-                sheetArr[baseRow + i, 0] = thsc.BackValue.EdgeStation;
-                sheetArr[baseRow + i, 1] = thsc.FrontValue.EdgeStation;
-                sheetArr[baseRow + i, 2] = ProtectionUtils.GetStationString(thsc.BackValue.EdgeStation, thsc.FrontValue.EdgeStation, maxDigits: 0);
-                sheetArr[baseRow + i, 3] = thsc.FrontValue.EdgeStation - thsc.BackValue.EdgeStation;
-                sheetArr[baseRow + i, 4] = thsc.BackValue.GetDescription();
-                sheetArr[baseRow + i, 5] = thsc.BackValue.AverageWidth;
-                sheetArr[baseRow + i, 6] = thsc.BackValue.AverageHeight;
+                rows.Add(new object[]
+                {
+                    thsc.BackValue.EdgeStation,
+                thsc.FrontValue.EdgeStation,
+                ProtectionUtils.GetStationString(thsc.BackValue.EdgeStation, thsc.FrontValue.EdgeStation, maxDigits: 0),
+                thsc.FrontValue.EdgeStation - thsc.BackValue.EdgeStation,
+                thsc.BackValue.GetDescription(),
+                thsc.BackValue.AverageWidth,
+                thsc.BackValue.AverageHeight,
+                });
             }
-            // 插入表头
-            var headerFill = new string[] { "起始桩号", "结束桩号", "桩号区间", "长度", "处理措施", "平均处理宽度", "平均处理高度" };
-            sheetArr = sheetArr.InsertVector<object, string, object>(true, new[] { headerFill }, new[] { -1.5f });
+
+            var sheetArr = ArrayConstructor.FromList2D(listOfRows: rows);
+            // sheetArr = sheetArr.InsertVector<object, string, object>(true, new[] { header }, new[] { -1.5f, });
 
             var sheet_Infos = new List<WorkSheetData>
             {
@@ -215,7 +222,8 @@ namespace eZcad.SubgradeQuantity.DataExport
             height = 0.0;
             // 1. 基本判断标准
             var depth = center.CenterElevation_Road - center.CenterElevation_Ground;
-            if (depth >= 0 && depth <= _criterion.低填最大高度 && (center.LeftSlopeFill || center.RightSlopeFill))
+            if (depth >= 0 && depth <= _criterion.低填最大高度 &&
+                (center.LeftSlopeFill == null || center.LeftSlopeFill.Value || center.RightSlopeFill == null || center.RightSlopeFill.Value))
             {
                 // 2. 边坡的坡底点
                 var leftBottom = center.LeftSlopeExists
@@ -423,7 +431,7 @@ namespace eZcad.SubgradeQuantity.DataExport
         /// </param>
         /// <param name="upperDir">浅挖路堑判断向量的上边界，对于 1:5 的极限值，此参数的值为0.2</param>
         /// <returns></returns>
-        private static HalfFillCut HalfRoadShallowCut(bool slopeFill, Polyline ground, Polyline road, double upperDir,
+        private static HalfFillCut HalfRoadShallowCut(bool? slopeFill, Polyline ground, Polyline road, double upperDir,
             out double halfRoadWidth, out double centerCutWidth)
         {
             halfRoadWidth = road.Length; // 路面+路肩
@@ -432,7 +440,7 @@ namespace eZcad.SubgradeQuantity.DataExport
             centerCutWidth = halfCushionWidth;
             var ground2d = ground.Get2dLinearCurve();
             var groundTop = ground.StartPoint; // 道路中线 与 自然地面 的交点
-            if (!slopeFill)
+            if (slopeFill == null || !slopeFill.Value)
             {
                 // 此边坡为挖方边坡
                 var l = new Ray2d(pt, new Vector2d(0, 1));

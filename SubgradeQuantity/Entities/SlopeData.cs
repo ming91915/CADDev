@@ -89,7 +89,7 @@ namespace eZcad.SubgradeQuantity.Entities
 
         #endregion
 
-        public SlopeData(double station,bool onLeft) : this()
+        public SlopeData(double station, bool onLeft) : this()
         {
             Station = station;
             OnLeft = onLeft;
@@ -133,7 +133,7 @@ namespace eZcad.SubgradeQuantity.Entities
                 data.FillCut = Utils.GetExtendedDataBool(buffs[2]);
                 data.Station = (double)buffs[3].Value;
                 data.OnLeft = Utils.GetExtendedDataBool(buffs[4]);
-                data.SoilOrRock = (SubgradeType)Enum.ToObject(typeof(SubgradeType), (short)buffs[5].Value);
+                data.SoilOrRock = Utils.GetExtendedDataEnum<SubgradeType>(buffs[5]);//  (SubgradeType)Enum.ToObject(typeof(SubgradeType), (short)buffs[5].Value);
 
                 //  标高与长度
                 baseId = 5;
@@ -194,11 +194,13 @@ namespace eZcad.SubgradeQuantity.Entities
                 (
                 // new TypedValue((int)DxfCode.ExtendedDataRegAppName, AppName),
                 Utils.SetExtendedDataBool(FullyCalculated),
-                new TypedValue((int)DxfCode.ExtendedDataHandle, CenterAxisHandle),
+                new TypedValue((int) DxfCode.ExtendedDataHandle, CenterAxisHandle),
                 Utils.SetExtendedDataBool(FillCut),
-                new TypedValue((int)DxfCode.ExtendedDataReal, Station),
+                new TypedValue((int) DxfCode.ExtendedDataReal, Station),
                 Utils.SetExtendedDataBool(OnLeft),
-                new TypedValue((int)DxfCode.ExtendedDataInteger16, (short)SoilOrRock),
+                Utils.SetExtendedDataEnum(SoilOrRock),
+                
+                // new TypedValue((int)DxfCode.ExtendedDataInteger16, (short)SoilOrRock),
                 //  标高与长度
                 new TypedValue((int)DxfCode.ExtendedDataReal, TopElevation),
                 new TypedValue((int)DxfCode.ExtendedDataReal, BottomElevation),
@@ -214,7 +216,7 @@ namespace eZcad.SubgradeQuantity.Entities
         {
             int id = 0;
             var dbSlopes = new DBDictionary();
-            Utils.OverlayDictValue(trans,container,DictKey_Slopes,dbSlopes);
+            Utils.OverlayDictValue(trans, container, DictKey_Slopes, dbSlopes);
             //
             foreach (var sp in Slopes)
             {

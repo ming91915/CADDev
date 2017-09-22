@@ -183,7 +183,7 @@ namespace eZcad.SubgradeQuantity.Cmds
                         slps.Add(xdata_Section.Station, 0);
                     }
                     // 挡墙
-                    var retainingWall = xdata_Section.LeftRetainingWallExists
+                    var retainingWall = xdata_Section.LeftRetainingWallType!= RetainingWallType.无
                         ? xdata_Section.LeftRetainingWallHandle.GetDBObject<Polyline>(sec.DocMdf.acDataBase)
                         : null;
                     if (retainingWall != null)
@@ -223,7 +223,7 @@ namespace eZcad.SubgradeQuantity.Cmds
                         slps.Add(xdata_Section.Station, 0);
                     }
                     // 挡墙
-                    var retainingWall = xdata_Section.RightRetainingWallExists
+                    var retainingWall = xdata_Section.RightRetainingWallType!= RetainingWallType.无
                         ? xdata_Section.RightRetainingWallHandle.GetDBObject<Polyline>(sec.DocMdf.acDataBase)
                         : null;
                     if (retainingWall != null)

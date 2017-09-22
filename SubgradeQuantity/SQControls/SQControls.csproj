@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{A70160DF-0AA8-4BD2-88B6-C8E34D870658}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>eZcad.SubgradeQuantity</RootNamespace>
     <AssemblyName>SQControls</AssemblyName>
@@ -29,6 +29,12 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>eZcad.SubgradeQuantity.SQControls.Program</StartupObject>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>ConstructSlopes_32.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -42,6 +48,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CadAddinSetup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CadAddinSetup.Designer.cs">
+      <DependentUpon>CadAddinSetup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SQControls\ProtectionLister.cs">
       <SubType>UserControl</SubType>
@@ -50,11 +63,22 @@
       <DependentUpon>ProtectionLister.cs</DependentUpon>
     </Compile>
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
+    <ProjectReference Include="..\..\..\eZstd\Projects\eZstd\eZstd.csproj">
+      <Project>{FB9B6528-5424-4B7A-AEBA-6733450DC44B}</Project>
+      <Name>eZstd</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="CadAddinSetup.resx">
+      <DependentUpon>CadAddinSetup.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="SQControls\ProtectionLister.resx">
       <DependentUpon>ProtectionLister.cs</DependentUpon>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="ConstructSlopes_32.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

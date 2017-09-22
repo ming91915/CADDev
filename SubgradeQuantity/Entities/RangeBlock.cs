@@ -7,25 +7,26 @@ using System.Threading.Tasks;
 namespace eZcad.SubgradeQuantity.Entities
 {
 
-    public enum StructureType : short
+    public enum BlockType : short
     {
         桥梁 = 1,
         隧道 = 2,
+        短链 = 3,
     }
 
     /// <summary>
     /// 整个道路中的非路基段，比如桥梁或者隧道
     /// </summary>
-    public class Structure : StationRangeEntity,ICloneable
+    public class RangeBlock : StationRangeEntity, ICloneable
     {
         /// <summary> 离此结构最近的后方（较小桩号）的横断面桩号 </summary>
         public double ConnectedBackStaion { get; set; }
         /// <summary> 离此结构最近的前方（较大桩号）的横断面桩号 </summary>
         public double ConnectedFrontStaion { get; set; }
 
-        public StructureType Type { get; set; }
+        public BlockType Type { get; set; }
 
-        public Structure(StructureType type, double startStation, double endStation) : base(startStation, endStation)
+        public RangeBlock(BlockType type, double startStation, double endStation) : base(startStation, endStation)
         {
             Type = type;
             //
@@ -35,7 +36,7 @@ namespace eZcad.SubgradeQuantity.Entities
 
         public object Clone()
         {
-            return MemberwiseClone() as Structure;
+            return MemberwiseClone() as RangeBlock;
         }
 
         /// <summary> 根据道路中所有的横断面桩号，来确定离结构物最近的横断面桩号 </summary>
@@ -54,7 +55,16 @@ namespace eZcad.SubgradeQuantity.Entities
                 {
                     if (allSortedStations[i] >= StartStation)
                     {
-                        ConnectedBackStaion = allSortedStations[i - 1];
+                        if (allSortedStations[i] > StartStation)
+                        {
+                            ConnectedBackStaion = allSortedStations[i - 1];
+                        }
+                        else
+                        {
+                            // 说明断面桩号刚好与区间边界桩号相等
+                            ConnectedBackStaion = allSortedStations[i];
+                        }
+                        break;
                     }
                 }
             }
@@ -67,9 +77,18 @@ namespace eZcad.SubgradeQuantity.Entities
             {
                 for (int i = count - 2; i >= 0; i--)
                 {
-                    if (allSortedStations[i] <= StartStation)
+                    if (allSortedStations[i] <= EndStation)
                     {
-                        ConnectedFrontStaion = allSortedStations[i + 1];
+                        if (allSortedStations[i] < EndStation)
+                        {
+                            ConnectedFrontStaion = allSortedStations[i + 1];
+                        }
+                        else
+                        {
+                            // 说明断面桩号刚好与区间边界桩号相等
+                            ConnectedFrontStaion = allSortedStations[i];
+                        }
+                        break;
                     }
                 }
             }
@@ -77,5 +96,10 @@ namespace eZcad.SubgradeQuantity.Entities
 
         }
 
+        /// <summary> 某桩号是否位于区间内（包括与边界相交） </summary>
+        public bool ContainsStation(double station)
+        {
+            return station >= StartStation && station <= EndStation;
+        }
     }
 }

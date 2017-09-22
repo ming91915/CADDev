@@ -5,6 +5,8 @@ using System.Linq;
 using System.Windows.Forms;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using eZcad.SubgradeQuantity.Options;
+using eZcad.SubgradeQuantity.Utility;
 using eZstd.UserControls;
 
 namespace eZcad.SubgradeQuantity.SlopeProtection
@@ -35,15 +37,16 @@ namespace eZcad.SubgradeQuantity.SlopeProtection
                 //
                 if (!_uIConstructed)
                 {
-                    ConstructeZDataGridView(this);
+                    ConstructeZDataGridView();
                     _uIConstructed = true;
                 }
                 this.DataSource = Slopes;
                 this.Refresh();
             }
 
-            private void ConstructeZDataGridView(eZDataGridView dgv)
+            private void ConstructeZDataGridView()
             {
+                var dgv = this;
                 //
                 dgv.ManipulateRows = true;
                 dgv.ShowRowNumber = true;
@@ -60,6 +63,7 @@ namespace eZcad.SubgradeQuantity.SlopeProtection
                 var combo = new DataGridViewComboBoxColumn();
                 combo.DataSource = Enum.GetValues(typeof(Operator_Bool));
                 combo.DataPropertyName = "Fill";
+                combo.Width = 50;
                 combo.Name = "填方";
                 combo.ToolTipText = @"边坡为填方还是挖方";
                 dgv.Columns.Add(combo);
@@ -94,6 +98,19 @@ namespace eZcad.SubgradeQuantity.SlopeProtection
                 dgv.Columns.Add(column);
 
                 // -------------------------
+                var prots = Options_Collections.CommonFillProtections.ToList();
+                prots.AddRange(Options_Collections.CommonCutProtections);
+                var protsBinding = new BindingList<string>(prots);
+                combo = new DataGridViewComboBoxColumn();
+                // combo.drow = DataGridViewComboBoxDisplayStyle.DropDownButton;
+                combo.DataSource = protsBinding;
+                combo.DataPropertyName = "ProtectionMethod";
+                combo.Name = "防护";
+                combo.ToolTipText = @"当前面所有的条件都满足时，确定此边坡的具体防护形式";
+                combo.MinimumWidth = 100;
+                combo.AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
+                dgv.Columns.Add(combo);
+                // -------------------------
                 column = new DataGridViewTextBoxColumn();
                 column.DataPropertyName = "ProtectionMethod";
                 column.Name = "防护";
@@ -102,18 +119,15 @@ namespace eZcad.SubgradeQuantity.SlopeProtection
                 column.AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
                 dgv.Columns.Add(column);
 
-                // -------------------------
 
                 // 事件绑定 -------------------------------------------------------------
                 dgv.CellClick += DgvOnCellClick;
                 dgv.DataError += EZdgvOnDataError; // 响应表格中的数据类型不匹配等出错的情况
                                                    //dgv.CellContentClick += EZdgvOnCellContentClick;  // 响应表格中的按钮按下事件
                                                    //dgv.CurrentCellDirtyStateChanged += EZdgvOnCurrentCellDirtyStateChanged; // 在表格中Checkbox的值发生改变时立即作出响应
-
                 Slopes.AddingNew += SlopesOnAddingNew;
             }
-
-
+            
             private void SlopesOnAddingNew(object sender, AddingNewEventArgs e)
             {
                 SpCriterion spc = null;

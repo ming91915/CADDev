@@ -2,13 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
-using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.Geometry;
-using eZcad.SubgradeQuantity.Cmds;
 using eZcad.SubgradeQuantity.Entities;
 using eZcad.SubgradeQuantity.Options;
 using eZcad.SubgradeQuantity.SlopeProtection;
+using eZcad.SubgradeQuantity.SQControls;
 using eZcad.SubgradeQuantity.Utility;
 using eZcad.Utility;
 
@@ -241,6 +239,7 @@ namespace eZcad.SubgradeQuantity.ParameterForm
                 slp.FlushXData();
                 slp.Pline.DowngradeOpen();
             }
+            _docMdf.acEditor.UpdateScreen();
         }
 
     }

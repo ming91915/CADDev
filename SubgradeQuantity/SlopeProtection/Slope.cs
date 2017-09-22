@@ -142,9 +142,22 @@ namespace eZcad.SubgradeQuantity.SlopeProtection
         #region   ---   Index 的提取与设置
 
         /// <summary> 此边坡所属的某一级物理边坡 </summary>
+        public static int GetMainLevel(double index)
+        {
+            return (int)index;
+        }
+
+        /// <summary> 此边坡所属的某一级物理边坡 </summary>
         public int GetMainLevel()
         {
             return (int)Index;
+        }
+
+        /// <summary> 如果此级边坡中没有更细的子边坡，则返回0。1 表示其为对应某级边坡中的最靠路基侧一级子边坡，9 表示其为对应某级边坡中的最靠外侧一级子边坡。
+        /// 从内向外的三级子边坡的下标分别为1.1、1.2、1.9，所以本系统在某一级边坡中最多设置9级子边坡 </summary>
+        public static int GetSubLevel(double index)
+        {
+            return (int)(Math.Round(index % 1, 1) * 10);
         }
 
         /// <summary> 如果此级边坡中没有更细的子边坡，则返回0。1 表示其为对应某级边坡中的最靠路基侧一级子边坡，9 表示其为对应某级边坡中的最靠外侧一级子边坡。

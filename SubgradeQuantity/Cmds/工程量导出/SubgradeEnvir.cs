@@ -53,9 +53,8 @@ namespace eZcad.SubgradeQuantity.Cmds
         {
             _docMdf = docMdf;
 
-            var sss = Options_Collections.SoilRockRanges;
             // var allXdataTypes = DbXdata.GetAllXdataTypes();
-            var handledXdataTypes = DbXdata.DatabaseXdataType.Structures | DbXdata.DatabaseXdataType.SoilRockRange;
+            var handledXdataTypes = DbXdata.DatabaseXdataType.RangeBlocks | DbXdata.DatabaseXdataType.SoilRockRange;
             DbXdata.RefreshOptionsFromDb(docMdf, handledXdataTypes);
             //
             var fm = new Form_SubgradeEnvir(docMdf);
@@ -66,6 +65,7 @@ namespace eZcad.SubgradeQuantity.Cmds
             }
             else if (res == DialogResult.Cancel)
             {
+                // 将内存中对全局选项的修改进行还原，还原的方法就是重新从数据库中加载修改前的数据。
                 DbXdata.RefreshOptionsFromDb(docMdf, handledXdataTypes);
             }
             return ExternalCmdResult.Commit;

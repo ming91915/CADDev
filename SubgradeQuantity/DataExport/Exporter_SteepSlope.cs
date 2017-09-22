@@ -23,7 +23,7 @@ namespace eZcad.SubgradeQuantity.DataExport
             /// <summary> 需要挖台阶处理的位置 </summary>
             public SectionSide Treatment { get; set; }
 
-            /// <summary> 挖台阶平均处理宽度  </summary>
+            /// <summary> 挖台阶平均处理宽度，每一个断面的宽度表示挖台阶的左边缘到右边缘的水平距离  </summary>
             public double AverageTreatedWidth { get; set; }
 
             /// <summary> 此区间中挖台阶处理的平均面积（通过计算每一个小三角形的面积之和求得） </summary>
@@ -126,7 +126,7 @@ namespace eZcad.SubgradeQuantity.DataExport
             }
 
             // 对桥梁隧道结构进行处理：截断对应的区间
-            CutWithBlocks(steepSlopes, Options_Collections.Structures);
+            CutWithBlocks(steepSlopes, Options_Collections.RangeBlocks);
 
             // 对于区间进行合并
             // steepSlopes = MergeLinkedSections(steepSlopes);
@@ -138,16 +138,17 @@ namespace eZcad.SubgradeQuantity.DataExport
             // 将结果整理为二维数组，用来进行表格输出
             var rows = new List<object[]>();
             var header = new object[]
-            {"起始桩号", "结束桩号", "桩号区间", "长度", "挖台阶位置", "挖台阶平均处理宽度", "挖台阶平均处理面积", "土工格栅位置", "土工格栅数量"};
+            {"起始桩号", "结束桩号", "桩号区间", "左侧挖台阶", "右侧挖台阶",  "左侧土工格栅", "右侧土工格栅",
+                "段落长度","挖台阶平均处理宽度", "挖台阶土方量",
+               "土工格栅数量"};
             rows.Add(header);
 
-            int baseRow = 0;
             for (int i = 0; i < steepSlopes.Count; i++)
             {
                 var rg = steepSlopes[i];
                 rg.UnionBackFront();
                 //
-                var reinfCount = 0;
+                var reinfCount = 0;  // 土工格栅数量
                 if (rg.BackValue.Reinforcement == SectionSide.左 || rg.BackValue.Reinforcement == SectionSide.右)
                 {
                     reinfCount = 1;
@@ -156,17 +157,26 @@ namespace eZcad.SubgradeQuantity.DataExport
                 {
                     reinfCount = 2;
                 }
+                var rangeLength = rg.FrontValue.EdgeStation - rg.BackValue.EdgeStation;
                 rows.Add(new object[]
                 {
                     rg.BackValue.EdgeStation,
                     rg.FrontValue.EdgeStation,
-                    rg.FrontValue.EdgeStation - rg.BackValue.EdgeStation,
                     ProtectionUtils.GetStationString(rg.BackValue.EdgeStation, rg.FrontValue.EdgeStation, maxDigits: 0),
+                    // 挖台阶位置
+                    (rg.BackValue.Treatment & SectionSide.左)>0 ? ProtectionConstants.CheckMark: null,
+                    (rg.BackValue.Treatment & SectionSide.右)>0 ? ProtectionConstants.CheckMark:null,
+                    // Enum.GetName(typeof (SectionSide), rg.BackValue.Treatment),
+                    
+                    // 土工格栅位置
+                     (rg.BackValue.Reinforcement & SectionSide.左)>0 ? ProtectionConstants.CheckMark: null,
+                     (rg.BackValue.Reinforcement & SectionSide.右)>0 ? ProtectionConstants.CheckMark:null,
+                    // Enum.GetName(typeof (SectionSide), rg.BackValue.Reinforcement),
+
+                    rangeLength,
                     //
-                    Enum.GetName(typeof (SectionSide), rg.BackValue.Treatment),
                     rg.BackValue.AverageTreatedWidth,
-                    rg.BackValue.AverageStairArea,
-                    Enum.GetName(typeof (SectionSide), rg.BackValue.Reinforcement),
+                    rg.BackValue.AverageStairArea * rangeLength,
                     //
                     reinfCount,
                 });
@@ -178,7 +188,7 @@ namespace eZcad.SubgradeQuantity.DataExport
             // 输出到表格
             var sheet_Infos = new List<WorkSheetData>
             {
-                new WorkSheetData(WorkSheetDataType.SteepSlope, "高填深挖", sheetArr)
+                new WorkSheetData(WorkSheetDataType.SteepSlope, "陡坡路堤", sheetArr)
             };
             ExportWorkSheetDatas(sheet_Infos);
         }
@@ -207,28 +217,35 @@ namespace eZcad.SubgradeQuantity.DataExport
             bool rightSetReinforcement;
             var secData = sec.XData;
             //
-            var sideSlope = sec.GetSlopeLine(true); // 断面左侧边坡
-            var sideGround = secData.LeftGroundSurfaceHandle.GetDBObject<Polyline>(_docMdf.acDataBase);
-            if (IsSteepFill(secData, true, sideSlope, sideGround, out sideTreatedWidth, out sideStairArea,
-                out leftSetReinforcement))
+            SlopeLine sideSlope = null;
+            Polyline sideGround = null;
+            if (secData.LeftRetainingWallType != RetainingWallType.路肩墙)
             {
-                isSteep = true;
-                treatedSide = treatedSide | SectionSide.左;
-                reinforcementSide = leftSetReinforcement ? reinforcementSide | SectionSide.左 : reinforcementSide;
-                treatedWidth += sideTreatedWidth;
-                stairArea += sideStairArea;
+                sideSlope = sec.GetSlopeLine(true); // 断面左侧边坡
+                sideGround = secData.LeftGroundSurfaceHandle.GetDBObject<Polyline>(_docMdf.acDataBase);
+                if (IsSteepFill(secData, true, sideSlope, sideGround, out sideTreatedWidth, out sideStairArea,
+                    out leftSetReinforcement))
+                {
+                    isSteep = true;
+                    treatedSide = treatedSide | SectionSide.左;
+                    reinforcementSide = leftSetReinforcement ? reinforcementSide | SectionSide.左 : reinforcementSide;
+                    treatedWidth += sideTreatedWidth;
+                    stairArea += sideStairArea;
+                }
             }
-
-            sideSlope = sec.GetSlopeLine(false); // 断面右侧边坡
-            sideGround = secData.RightGroundSurfaceHandle.GetDBObject<Polyline>(_docMdf.acDataBase);
-            if (IsSteepFill(secData, false, sideSlope, sideGround, out sideTreatedWidth, out sideStairArea,
-                out rightSetReinforcement))
+            if (secData.RightRetainingWallType != RetainingWallType.路肩墙)
             {
-                isSteep = true;
-                treatedSide = treatedSide | SectionSide.右;
-                reinforcementSide = rightSetReinforcement ? reinforcementSide | SectionSide.右 : reinforcementSide;
-                treatedWidth += sideTreatedWidth;
-                stairArea += sideStairArea;
+                sideSlope = sec.GetSlopeLine(false); // 断面右侧边坡
+                sideGround = secData.RightGroundSurfaceHandle.GetDBObject<Polyline>(_docMdf.acDataBase);
+                if (IsSteepFill(secData, false, sideSlope, sideGround, out sideTreatedWidth, out sideStairArea,
+                    out rightSetReinforcement))
+                {
+                    isSteep = true;
+                    treatedSide = treatedSide | SectionSide.右;
+                    reinforcementSide = rightSetReinforcement ? reinforcementSide | SectionSide.右 : reinforcementSide;
+                    treatedWidth += sideTreatedWidth;
+                    stairArea += sideStairArea;
+                }
             }
             return isSteep;
         }
@@ -247,11 +264,7 @@ namespace eZcad.SubgradeQuantity.DataExport
             treatedWidth = 0;
             stairArea = 0;
             setReinforcement = false;
-            var slopeFill = slp == null || slp.XData.FillCut;
-            if (sec.HasShoulderWall(left, slp))
-            {
-                return false;
-            }
+            var slopeFill = (slp == null) || slp.XData.FillCut;
 
             // ----------------------------------------------------------------------------------------
             // 确定进行搜索的左右边界：路基边缘（或边坡脚） 到 道路中线
