@@ -256,7 +256,7 @@ namespace eZcad.SubgradeQuantity.Options
         /// <summary> 在纵向填挖交界点，取挖方区多少米宽度范围进行处理 </summary>
         [Browsable(true), Category(ctg_Calculate), Description("在纵向填挖交界点，取挖方区多少米宽度范围进行处理")]
         public double 挖方区处理宽度 { get; set; }
-        
+
         #endregion
 
         #region ---   构造全局唯一的实例对象
@@ -278,6 +278,116 @@ namespace eZcad.SubgradeQuantity.Options
         {
             填方区处理宽度 = 3;
             挖方区处理宽度 = 10;
+            // 这一句必须保留，因为在序列化时会直接进行此处的 public 构造函数，而不会从 public static DefinitionCollection GetUniqueInstance() 进入。
+            // 此时必须通过这一句保证 _uniqueInstance 与本全局对象的同步。
+            _uniqueInstance = this;
+            //
+        }
+
+        #endregion
+    }
+
+    /// <summary> 判断与计量标准——纵向挖台阶 </summary>
+    [XmlType(typeName: "纵向挖台阶")]
+    public class Criterion_StairExcavLong : StaticCriterion
+    {
+        [Browsable(false)]
+        public override string FormTitle => "纵向挖台阶";
+
+        #region ---   判断标准——挖台阶
+
+        /// <summary> 挖台阶量的最小分段宽度 </summary>
+        [Browsable(true), Category(ctg_Calculate), Description("挖台阶量的最小分段宽度")]
+        public double 最小区间宽度 { get; set; }
+
+        /// <summary> 要进行挖台阶处理的最小纵坡。在纵断面中，当原地面纵坡大于12% 时，应按设计要求挖台阶，或设置坡度向内并大于4%、宽度大于2m的台阶。 </summary>
+        [Browsable(true), Category(ctg_Calculate), Description("要进行挖台阶处理的最小纵坡。在纵断面中，当原地面纵坡大于12% 时，应按设计要求挖台阶，或设置坡度向内并大于4%、宽度大于2m的台阶。")]
+        public double 临界纵坡 { get; set; }
+
+        /// <summary> 每一个台阶的宽度。在纵断面中，当原地面纵坡大于12% 时，应按设计要求挖台阶，或设置坡度向内并大于4%、宽度大于2m的台阶。 </summary>
+        [Browsable(true), Category(ctg_Calculate), Description("每一个台阶的宽度。在纵断面中，当原地面纵坡大于12% 时，应按设计要求挖台阶，或设置坡度向内并大于4%、宽度大于2m的台阶。")]
+        public double 台阶宽度 { get; set; }
+
+        #endregion
+
+        #region ---   构造全局唯一的实例对象
+
+        private static Criterion_StairExcavLong _uniqueInstance;
+
+        /// <summary> 全局唯一的实例对象 </summary>
+        public static Criterion_StairExcavLong UniqueInstance
+        {
+            get
+            {
+                _uniqueInstance = _uniqueInstance ?? new Criterion_StairExcavLong();
+                return _uniqueInstance;
+            }
+        }
+
+        /// <summary> 私有的构造函数 </summary>
+        private Criterion_StairExcavLong() : base()
+        {
+            最小区间宽度 = 10;
+            台阶宽度 = 2;
+            临界纵坡 = 0.12;
+            // 这一句必须保留，因为在序列化时会直接进行此处的 public 构造函数，而不会从 public static DefinitionCollection GetUniqueInstance() 进入。
+            // 此时必须通过这一句保证 _uniqueInstance 与本全局对象的同步。
+            _uniqueInstance = this;
+            //
+        }
+
+        #endregion
+    }
+
+    /// <summary> 判断与计量标准——路面工程量 </summary>
+    [XmlType(typeName: "路面工程量")]
+    public class Criterion_RoadSurface : StaticCriterion
+    {
+        [Browsable(false)]
+        public override string FormTitle => "路面工程量";
+
+        #region ---   判断标准——挖台阶
+
+        /// <summary> 填方有挡墙路段的每延米路肩体积 </summary>
+        [Browsable(true), Category(ctg_Calculate), Description("填方有挡墙路段的每延米路肩体积")]
+        public double 路肩面积_挡墙 { get; set; }
+
+        /// <summary> 填方无挡墙而且设有护栏路段的每延米路肩体积 </summary>
+        [Browsable(true), Category(ctg_Calculate), Description("填方无挡墙而且设有护栏路段的每延米路肩体积")]
+        public double 路肩面积_护栏 { get; set; }
+
+        /// <summary> 填方无挡墙而且没有设护栏路段的每延米路肩体积 </summary>
+        [Browsable(true), Category(ctg_Calculate), Description("填方无挡墙而且没有设护栏路段的每延米路肩体积")]
+        public double 路肩面积_无护栏 { get; set; }
+
+        /// <summary> 当填方无挡墙时，如果填方边坡的高度大于3.0m时，则认为需要在路肩上需要设置护栏 </summary>
+        [Browsable(true), Category(ctg_Judge), Description("当填方无挡墙时，如果填方边坡的高度大于3.0m时，则认为需要在路肩上设置护栏")]
+        public double 设护栏段的填方高度 { get; set; }
+
+        #endregion
+
+        #region ---   构造全局唯一的实例对象
+
+        private static Criterion_RoadSurface _uniqueInstance;
+
+        /// <summary> 全局唯一的实例对象 </summary>
+        public static Criterion_RoadSurface UniqueInstance
+        {
+            get
+            {
+                _uniqueInstance = _uniqueInstance ?? new Criterion_RoadSurface();
+                return _uniqueInstance;
+            }
+        }
+
+        /// <summary> 私有的构造函数 </summary>
+        private Criterion_RoadSurface() : base()
+        {
+            路肩面积_挡墙 = 0.1125;
+            路肩面积_护栏 = 路肩面积_无护栏 + 0.225;
+            路肩面积_无护栏 = 0.2643750; // 0.258417;
+
+            设护栏段的填方高度 = 3.0;
             // 这一句必须保留，因为在序列化时会直接进行此处的 public 构造函数，而不会从 public static DefinitionCollection GetUniqueInstance() 进入。
             // 此时必须通过这一句保证 _uniqueInstance 与本全局对象的同步。
             _uniqueInstance = this;

@@ -51,7 +51,8 @@ namespace eZcad.SubgradeQuantity.Cmds
             // 刷新所有的全局选项到内存中
             // var allXdataTypes = DbXdata.GetAllXdataTypes();
             var handledXdataTypes = DbXdata.DatabaseXdataType.General | DbXdata.DatabaseXdataType.LayerNames;
-            DbXdata.RefreshOptionsFromDb(docMdf, handledXdataTypes);
+            // 在执行此方法前，已经通过“DbXdata.LoadAllOptionsFromDbToMemory”方法，将文档中的通用选项加载到了内存中，所以不需要再特别地调用 RefreshOptionsFromDb()方法了。
+            //DbXdata.RefreshOptionsFromDb(docMdf, handledXdataTypes);
 
             var f = new Form_ProjectInfos(docMdf);
             var res = f.ShowDialog(null);

@@ -26,6 +26,12 @@ namespace eZcad.SubgradeQuantity.Entities
         /// <summary> 区间的末尾桩号（较大） </summary>
         public double EndStation { get; set; }
 
+        /// <summary> 区间长度，因为区间范围的起止桩号可以动态修改，所以其区间长度不能作为一个常数返回 </summary>
+        public double GetLength()
+        {
+            return EndStation - StartStation;
+        }
+
         public StationRangeEntity(double startStation, double endStation)
         {
             StartStation = startStation;
@@ -46,6 +52,9 @@ namespace eZcad.SubgradeQuantity.Entities
             }
             return false;
         }
-
+        public override string ToString()
+        {
+            return $"{StartStation.ToString("0.0")}~{EndStation.ToString("0.0")}";
+        }
     }
 }

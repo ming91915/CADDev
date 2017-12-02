@@ -20,6 +20,7 @@ namespace eZcad.SubgradeQuantity.DataExport
         {
             Other,
             StairExcav,
+            /// <summary> 陡坡路堤 </summary>
             SteepSlope,
         }
 
@@ -31,6 +32,9 @@ namespace eZcad.SubgradeQuantity.DataExport
             /// <summary> 挖台阶平均处理宽度，每一个断面的宽度表示挖台阶的左边缘到右边缘的水平距离  </summary>
             public double AverageTreatedWidth { get; set; }
             //
+            /// <summary> 此区间中挖台阶处理的平均面积（通过计算每一个小三角形的面积之和求得） </summary>
+            public double AverageStairArea { get; set; }
+
 
             public override void Merge(IMergeable connectedHalf)
             {
@@ -38,6 +42,7 @@ namespace eZcad.SubgradeQuantity.DataExport
                 var dist1 = Math.Abs(ParentStation - EdgeStation);
                 var dist2 = Math.Abs(conn.EdgeStation - conn.ParentStation);
                 AverageTreatedWidth = (conn.AverageTreatedWidth * dist2 + AverageTreatedWidth * dist1) / (dist1 + dist2);
+                AverageStairArea = (conn.AverageStairArea * dist2 + AverageStairArea * dist1) / (dist1 + dist2);
             }
 
             /// <summary> 两个相邻区间是否可以合并到同一行 </summary>
@@ -89,29 +94,39 @@ namespace eZcad.SubgradeQuantity.DataExport
 
             // 断面的判断与计算
             double treatedWidth;
+            double stairArea;
             SectionSide treatedSide;
 
             foreach (var sec in _handledSections)
             {
-                _docMdf.WriteNow(sec.XData.Station);
-                var fillSlopeType = GetFillSlopeType(sec, out treatedSide, out treatedWidth);
+                var fillSlopeType = GetFillSlopeType(sec, out treatedSide, out treatedWidth, out stairArea);
                 if (fillSlopeType == FillSlopeType.StairExcav)
                 {
                     var hfdc = _sortedRanges[sec.XData.Station];
                     hfdc.BackValue.AverageTreatedWidth = treatedWidth;
                     hfdc.BackValue.StairCutSide = treatedSide;
+                    hfdc.BackValue.AverageStairArea = stairArea;
                     //
                     hfdc.FrontValue.AverageTreatedWidth = treatedWidth;
                     hfdc.FrontValue.StairCutSide = treatedSide;
+                    hfdc.FrontValue.AverageStairArea = stairArea;
                     //
                     stairsCut.Add(hfdc);
                 }
             }
             var countAll = stairsCut.Count;
-            if (countAll == 0) return;
+            if (countAll == 0)
+            {
+                _docMdf.WriteNow($"需要挖台阶的横断面数量：{countAll}");
+                return;
+            }
 
             // 对桥梁隧道结构进行处理：截断对应的区间
             CutWithBlocks(stairsCut, Options_Collections.RangeBlocks);
+
+
+            // 将位于桥梁隧道区间之内的断面移除
+            stairsCut = stairsCut.Where(r => !r.IsNull).ToList();
 
             // 对于区间进行合并
             // steepSlopes = MergeLinkedSections(steepSlopes);
@@ -119,32 +134,38 @@ namespace eZcad.SubgradeQuantity.DataExport
 
             countAll = stairsCut.Count;
             _docMdf.WriteNow($"需要挖台阶的横断面数量：{countAll}");
+            if (countAll == 0) return;
+
 
             // 将结果整理为二维数组，用来进行表格输出
-            var sheetArr = new object[countAll + 1, 7];
+            var rows = new List<object[]>();
+            var header = new string[] { "起始桩号", "结束桩号", "桩号区间", "段落长度", "左", "右", "挖台阶平均处理宽度", "挖台阶土方量" };
+            rows.Add(header);
 
             // 输出数据
-            int baseRow = 0;
+
             for (int i = 0; i < stairsCut.Count; i++)
             {
                 var rg = stairsCut[i];
                 rg.UnionBackFront();
                 //
+                var rangeLength = rg.FrontValue.EdgeStation - rg.BackValue.EdgeStation;
+                rows.Add(new object[]
+                {
+                    rg.BackValue.EdgeStation,
+                    rg.FrontValue.EdgeStation,
+                    ProtectionUtils.GetStationString(rg.BackValue.EdgeStation, rg.FrontValue.EdgeStation, 0),
+                   rangeLength,
 
-                sheetArr[baseRow + i, 0] = rg.BackValue.EdgeStation;
-                sheetArr[baseRow + i, 1] = rg.FrontValue.EdgeStation;
-                sheetArr[baseRow + i, 2] = ProtectionUtils.GetStationString(rg.BackValue.EdgeStation, rg.FrontValue.EdgeStation, 0);
-                sheetArr[baseRow + i, 3] = rg.FrontValue.EdgeStation - rg.BackValue.EdgeStation;
-                //
-                sheetArr[baseRow + i, 4] = (int)(rg.BackValue.StairCutSide & SectionSide.左) > 0 ? ProtectionConstants.CheckMark : null;
-                sheetArr[baseRow + i, 5] = (int)(rg.BackValue.StairCutSide & SectionSide.右) > 0 ? ProtectionConstants.CheckMark : null;
-                sheetArr[baseRow + i, 6] = rg.BackValue.AverageTreatedWidth;
+                    (int) (rg.BackValue.StairCutSide & SectionSide.左) > 0 ? ProtectionConstants.CheckMark : null,
+                    (int) (rg.BackValue.StairCutSide & SectionSide.右) > 0 ? ProtectionConstants.CheckMark : null,
+                    rg.BackValue.AverageTreatedWidth,
+                    rg.BackValue.AverageStairArea * rangeLength,
+                });
                 // 
             }
 
-            // 插入表头
-            var header = new string[] { "起始桩号", "结束桩号", "桩号区间", "段落长度", "左", "右", "挖台阶平均处理宽度" };
-            sheetArr = sheetArr.InsertVector<object, string, object>(true, new[] { header }, new[] { -1.5f, });
+            var sheetArr = ArrayConstructor.FromList2D(listOfRows: rows);
             // 输出到表格
             var sheet_Infos = new List<WorkSheetData>
             {
@@ -159,33 +180,38 @@ namespace eZcad.SubgradeQuantity.DataExport
         /// <param name="sec"> 道路中心填方高度</param>
         /// <param name="treatedWidth"> 陡坡路堤处理宽度 </param>
         /// <param name="treatedSide"> 要进行挖台阶处理的是断面的哪一侧 </param>
+        /// <param name="stairArea">某一侧边坡所挖台阶面积</param>
         /// <returns></returns>
-        private FillSlopeType GetFillSlopeType(SubgradeSection sec, out SectionSide treatedSide, out double treatedWidth)
+        private FillSlopeType GetFillSlopeType(SubgradeSection sec, out SectionSide treatedSide, out double treatedWidth, out double stairArea)
         {
             var sectionfillSlopeType = FillSlopeType.Other;
             treatedWidth = 0;
+            stairArea = 0.0;
             double sideTreatedWidth = 0;
+            double sideStairArea = 0.0;
             treatedSide = SectionSide.无;
             var secData = sec.XData;
             //
             var sideSlope = sec.GetSlopeLine(true); // 断面左侧边坡
             var sideGround = secData.LeftGroundSurfaceHandle.GetDBObject<Polyline>(_docMdf.acDataBase);
-            var fillSlopeType = GetFillSlopeType(secData, true, sideSlope, sideGround, out sideTreatedWidth);
+            var fillSlopeType = GetFillSlopeType(secData, true, sideSlope, sideGround, out sideTreatedWidth, out sideStairArea);
             if (fillSlopeType == FillSlopeType.StairExcav)
             {
                 sectionfillSlopeType = FillSlopeType.StairExcav;
                 treatedSide = treatedSide | SectionSide.左;
                 treatedWidth += sideTreatedWidth;
+                stairArea += sideStairArea;
             }
 
             sideSlope = sec.GetSlopeLine(false); // 断面右侧边坡
             sideGround = secData.RightGroundSurfaceHandle.GetDBObject<Polyline>(_docMdf.acDataBase);
-            fillSlopeType = GetFillSlopeType(secData, false, sideSlope, sideGround, out sideTreatedWidth);
+            fillSlopeType = GetFillSlopeType(secData, false, sideSlope, sideGround, out sideTreatedWidth, out sideStairArea);
             if (fillSlopeType == FillSlopeType.StairExcav)
             {
                 sectionfillSlopeType = FillSlopeType.StairExcav;
                 treatedSide = treatedSide | SectionSide.右;
                 treatedWidth += sideTreatedWidth;
+                stairArea += sideStairArea;
             }
 
             return sectionfillSlopeType;
@@ -197,11 +223,13 @@ namespace eZcad.SubgradeQuantity.DataExport
         /// <param name="slp">某一侧边坡，其值可能为null，表示此侧没有边坡线 </param>
         /// <param name="ground">边坡所对应的自然地面线</param>
         /// <param name="treatedWidth"></param>
+        /// <param name="stairArea">某一侧边坡所挖台阶面积</param>
         /// <returns></returns>
         private FillSlopeType GetFillSlopeType(SectionInfo sec, bool left, SlopeLine slp, Polyline ground,
-            out double treatedWidth)
+            out double treatedWidth, out double stairArea)
         {
             treatedWidth = 0;
+            stairArea = 0.0;
             double edgeXleft;
             double edgeXright;
             var cGround = ground.Get2dLinearCurve();
@@ -251,20 +279,29 @@ namespace eZcad.SubgradeQuantity.DataExport
                 //
                 lastX = thisX;
             }
-            if (!hasStairExcav) return FillSlopeType.Other;
-
-
-            //  判断是否为陡坡路堤，如果是，则不计入挖台阶工程量表中（因为在陡坡路堤工程量表中已经计入）
-            if (maxRatio >= (1 / _criterion.陡坡坡比))
+            if (!hasStairExcav)
             {
-                treatedWidth = 0;
-                return FillSlopeType.SteepSlope;
+                return FillSlopeType.Other;
             }
             else
             {
-                treatedWidth = edgeXright - edgeXleft;
-                return FillSlopeType.StairExcav;
+
+                //  判断是否为陡坡路堤，如果是，则不计入挖台阶工程量表中（因为在陡坡路堤工程量表中已经计入）
+                if (maxRatio >= (1 / _criterion.陡坡坡比))
+                {
+                    treatedWidth = 0;
+                    return FillSlopeType.SteepSlope;
+                }
+                else
+                {
+                    // 
+                    treatedWidth = edgeXright - edgeXleft;
+                    stairArea = Exporter_SteepSlope.CalculateStairArea(xYs, edgeXleft, edgeXright);
+                    return FillSlopeType.StairExcav;
+                }
             }
+
+
         }
 
         #endregion

@@ -17,8 +17,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SubgradeQuantity", "Subgrad
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SQControls", "SubgradeQuantity\SQControls\SQControls.csproj", "{A70160DF-0AA8-4BD2-88B6-C8E34D870658}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlockView.NET", "BlockView.NET\BlockView.NET.csproj", "{03CA9BF9-DEC0-470C-9E8A-16CEF89BAE79}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -113,18 +111,6 @@ Global
 		{A70160DF-0AA8-4BD2-88B6-C8E34D870658}.Release|x64.Build.0 = Release|Any CPU
 		{A70160DF-0AA8-4BD2-88B6-C8E34D870658}.Release|x86.ActiveCfg = Release|Any CPU
 		{A70160DF-0AA8-4BD2-88B6-C8E34D870658}.Release|x86.Build.0 = Release|Any CPU
-		{03CA9BF9-DEC0-470C-9E8A-16CEF89BAE79}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{03CA9BF9-DEC0-470C-9E8A-16CEF89BAE79}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{03CA9BF9-DEC0-470C-9E8A-16CEF89BAE79}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{03CA9BF9-DEC0-470C-9E8A-16CEF89BAE79}.Debug|x64.Build.0 = Debug|Any CPU
-		{03CA9BF9-DEC0-470C-9E8A-16CEF89BAE79}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{03CA9BF9-DEC0-470C-9E8A-16CEF89BAE79}.Debug|x86.Build.0 = Debug|Any CPU
-		{03CA9BF9-DEC0-470C-9E8A-16CEF89BAE79}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{03CA9BF9-DEC0-470C-9E8A-16CEF89BAE79}.Release|Any CPU.Build.0 = Release|Any CPU
-		{03CA9BF9-DEC0-470C-9E8A-16CEF89BAE79}.Release|x64.ActiveCfg = Release|Any CPU
-		{03CA9BF9-DEC0-470C-9E8A-16CEF89BAE79}.Release|x64.Build.0 = Release|Any CPU
-		{03CA9BF9-DEC0-470C-9E8A-16CEF89BAE79}.Release|x86.ActiveCfg = Release|Any CPU
-		{03CA9BF9-DEC0-470C-9E8A-16CEF89BAE79}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

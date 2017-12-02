@@ -132,8 +132,8 @@ namespace eZcad.SubgradeQuantity.Entities
         [Category(ctg_Left), ReadOnly(true), Description("左侧边坡线的句柄值")]
         public Handle LeftSlopeHandle { get; set; }
 
-        /// <summary> 左侧边坡为填方还是挖方，如果没有边坡线，默认为没有边坡线 </summary>
-        [Category(ctg_Left), ReadOnly(true), Description("左侧边坡为填方还是挖方，如果没有边坡线，默认为没有边坡线")]
+        /// <summary> "左侧边坡为填方还是挖方，如果没有边坡线，则为空值。true表示填方，false 表示挖方，默认为没有边坡线 </summary>
+        [Category(ctg_Left), ReadOnly(true), Description("左侧边坡为填方还是挖方，如果没有边坡线，则为空值。true表示填方，false 表示挖方，默认为没有边坡线")]
         public bool? LeftSlopeFill { get; set; }
 
         // ---------------------------------------------------------------------------
@@ -212,8 +212,8 @@ namespace eZcad.SubgradeQuantity.Entities
         [Category(ctg_Right), ReadOnly(true), Description("右侧边坡线的句柄值")]
         public Handle RightSlopeHandle { get; set; }
 
-        /// <summary> 右侧边坡为填方还是挖方，如果没有边坡线，默认为没有边坡线 </summary>
-        [Category(ctg_Right), ReadOnly(true), Description("右侧边坡为填方还是挖方，如果没有边坡线，默认为没有边坡线")]
+        /// <summary> 右侧边坡为填方还是挖方，如果没有边坡线，则为空值。true表示填方，false 表示挖方，默认为没有边坡线 </summary>
+        [Category(ctg_Right), ReadOnly(true), Description("右侧边坡为填方还是挖方，如果没有边坡线，则为空值。true表示填方，false 表示挖方，默认为没有边坡线")]
         public bool? RightSlopeFill { get; set; }
 
         // ---------------------------------------------------------------------------
@@ -679,11 +679,11 @@ namespace eZcad.SubgradeQuantity.Entities
         //    }
         //    return false;
         //}
-
+      
         #endregion
 
         #region --- 信息输出
-        
+
         public override string ToString()
         {
             return $"桩号: {Station},路面标高: {CenterElevation_Road}";

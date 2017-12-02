@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -84,7 +85,8 @@ namespace eZcad.SubgradeQuantity.Cmds
                 var ss = EditStateIdentifier.GetCurrentEditState(_docMdf);
                 ss.CurrentBTR.UpgradeOpen();
                 var layer_Slope = Utils.GetOrCreateLayer(_docMdf, ProtectionConstants.LayerName_LongitudinalSlopes);
-                // docMdf.acDataBase.Clayer = layer_Slope.Id;
+                var originalLayer = docMdf.acDataBase.Clayer;
+                docMdf.acDataBase.Clayer = layer_Slope.Id;
 
                 // 绘制中轴线
                 var roadCenterPl = CreatePolyline(allStations, new double[allStations.Length], basePt2D, minStation, rx,
@@ -138,6 +140,7 @@ namespace eZcad.SubgradeQuantity.Cmds
                     _docMdf.acTransaction.AddNewlyCreatedDBObject(pl, true);
                 }
                 //
+                docMdf.acDataBase.Clayer = originalLayer;
                 ss.CurrentBTR.DowngradeOpen();
             }
             return ExternalCmdResult.Commit;
@@ -177,13 +180,14 @@ namespace eZcad.SubgradeQuantity.Cmds
                             height = edgeElevation - xdata_Section.CenterElevation_Road;
                         }
                         slps.Add(xdata_Section.Station, height);
+
                     }
                     else
                     {
                         slps.Add(xdata_Section.Station, 0);
                     }
                     // 挡墙
-                    var retainingWall = xdata_Section.LeftRetainingWallType!= RetainingWallType.无
+                    var retainingWall = xdata_Section.LeftRetainingWallType != RetainingWallType.无
                         ? xdata_Section.LeftRetainingWallHandle.GetDBObject<Polyline>(sec.DocMdf.acDataBase)
                         : null;
                     if (retainingWall != null)
@@ -223,7 +227,7 @@ namespace eZcad.SubgradeQuantity.Cmds
                         slps.Add(xdata_Section.Station, 0);
                     }
                     // 挡墙
-                    var retainingWall = xdata_Section.RightRetainingWallType!= RetainingWallType.无
+                    var retainingWall = xdata_Section.RightRetainingWallType != RetainingWallType.无
                         ? xdata_Section.RightRetainingWallHandle.GetDBObject<Polyline>(sec.DocMdf.acDataBase)
                         : null;
                     if (retainingWall != null)

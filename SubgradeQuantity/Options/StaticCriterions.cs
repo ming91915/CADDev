@@ -11,6 +11,8 @@ namespace eZcad.SubgradeQuantity.Options
     [XmlInclude(typeof(Criterion_SteepFill))]
     [XmlInclude(typeof(Criterion_StairExcav))]
     [XmlInclude(typeof(Criterion_FillCutIntersect))]
+    [XmlInclude(typeof(Criterion_StairExcavLong))]
+    [XmlInclude(typeof(Criterion_RoadSurface))]
     public abstract class StaticCriterion
     {
         public const string ctg_Judge = "判断";
@@ -54,6 +56,9 @@ namespace eZcad.SubgradeQuantity.Options
                 Criterion_SteepFill.UniqueInstance,
                 Criterion_StairExcav.UniqueInstance,
                 Criterion_HighFillDeepCut.UniqueInstance,
+                Criterion_FillCutIntersect.UniqueInstance,
+                Criterion_StairExcavLong.UniqueInstance,
+                Criterion_RoadSurface.UniqueInstance,
             };
 
             // 这一句必须保留，因为在序列化时会直接进行此处的 public 构造函数，而不会从 public static DefinitionCollection GetUniqueInstance() 进入。

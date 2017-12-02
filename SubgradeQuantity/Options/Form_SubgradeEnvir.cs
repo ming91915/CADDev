@@ -44,12 +44,13 @@ namespace eZcad.SubgradeQuantity.Options
         private void DgvSetup_SoilRockRange(eZDataGridView eZdgv, IList<SoilRockRange> datasource)
         {
             eZdgv.AutoGenerateColumns = false;
-            eZdgv.EditMode = DataGridViewEditMode.EditOnEnter;
+            // eZdgv.EditMode = DataGridViewEditMode.EditOnEnter;
             //
             eZdgv.DataSource = datasource;
             //
             eZdgv.ManipulateRows = true;
             eZdgv.ShowRowNumber = true;
+            eZdgv.SupportPaste = true;
             // -------------------------
             var column = new DataGridViewTextBoxColumn();
             column.DataPropertyName = "StartStation";
@@ -106,12 +107,13 @@ namespace eZcad.SubgradeQuantity.Options
         private void DgvSetup_Structure(eZDataGridView eZdgv, IList<RangeBlock> datasource)
         {
             eZdgv.AutoGenerateColumns = false;
-            eZdgv.EditMode = DataGridViewEditMode.EditOnEnter;
+            // eZdgv.EditMode = DataGridViewEditMode.EditOnEnter;
             //
             eZdgv.DataSource = datasource;
             //
             eZdgv.ManipulateRows = true;
             eZdgv.ShowRowNumber = true;
+            eZdgv.SupportPaste = true;
             // -------------------------
             var column = new DataGridViewTextBoxColumn();
             column.DataPropertyName = "StartStation";
@@ -128,9 +130,14 @@ namespace eZcad.SubgradeQuantity.Options
             combo.DataSource = Enum.GetValues(typeof(BlockType));
             combo.DataPropertyName = "Type";
             combo.Name = "类型";
-            combo.Width = 100;
+            combo.Width = 75;
             eZdgv.Columns.Add(combo);
             // 如果要设置对应单元格的值为某枚举项：combo.Item(combo.Index,行号).Value = Gender.Male;
+
+            column = new DataGridViewTextBoxColumn();
+            column.DataPropertyName = "Description";
+            column.Name = "描述";
+            eZdgv.Columns.Add(column);
 
             // 事件绑定 -------------------------------------------------------------
             eZdgv.DataError += EZdgvOnDataError; // 响应表格中的数据类型不匹配等出错的情况

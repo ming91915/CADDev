@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Windows;
 using Autodesk.AutoCAD.DatabaseServices;
 using eZcad.SubgradeQuantity.Entities;
 using eZcad.Utility;
@@ -34,38 +35,42 @@ namespace eZcad.SubgradeQuantity.Options
         }
 
         /// <summary> 将<seealso cref="Xrecord"/>对象中的数据刷新到内存中的静态类中 </summary>
+        /// <param name="xrec">其值可以为 null，表示集合中一个数据都没有 </param>
         public static void FromXrecord_SortedStations(Xrecord xrec)
         {
             AllSortedStations = new double[0];
-            //
-            var buffs = xrec.Data.AsArray();
-            if (buffs == null || buffs.Length == 0)
+            if (xrec != null)
             {
-                return;
-            }
-            //
-            try
-            {
-                var itemsCount = (int)buffs[0].Value;
-                AllSortedStations = new double[itemsCount];
-                const int baseIndex = 1;
-                for (int i = 0; i < itemsCount; i++)
+                //
+                var buffs = xrec.Data.AsArray();
+                if (buffs == null || buffs.Length == 0)
                 {
-                    var s = (double)buffs[i + baseIndex].Value;
-                    //
-                    AllSortedStations[i] = s;
-                    // AllSortedStations.Add(s);
+                    return;
+                }
+                //
+                try
+                {
+                    var itemsCount = (int)buffs[0].Value;
+                    AllSortedStations = new double[itemsCount];
+                    const int baseIndex = 1;
+                    for (int i = 0; i < itemsCount; i++)
+                    {
+                        var s = (double)buffs[i + baseIndex].Value;
+                        //
+                        AllSortedStations[i] = s;
+                        // AllSortedStations.Add(s);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.Print("提取整条道路中所有的横断面（桩号从小到大排列）信息出错" + ex.AppendMessage());
+                    //MessageBox.Show($"刷新选项数据“{fields[index].Name}”出错。\r\n{ex.StackTrace}");
                 }
             }
-            catch (Exception ex)
-            {
-                Debug.Print("提取整条道路中所有的横断面（桩号从小到大排列）信息出错" + ex.AppendMessage());
-                //MessageBox.Show($"刷新选项数据“{fields[index].Name}”出错。\r\n{ex.StackTrace}");
-            }
+
         }
 
         #endregion
-
 
         #region ---   SoilRockRanges
 
@@ -93,44 +98,47 @@ namespace eZcad.SubgradeQuantity.Options
         }
 
         /// <summary> 将<seealso cref="Xrecord"/>对象中的数据刷新到内存中的静态类中 </summary>
+        /// <param name="xrec">其值可以为 null，表示集合中一个数据都没有 </param>
         public static void FromXrecord_SoilRockRanges(Xrecord xrec)
         {
             SoilRockRanges = new List<SoilRockRange>();
-            //
-            var buffs = xrec.Data.AsArray();
-            if (buffs == null || buffs.Length == 0)
+            if (xrec != null)
             {
-                return;
-            }
-            //
-            try
-            {
-                var itemsCount = (int)buffs[0].Value;
-                var fieldsCount = 4;
-                var baseIndex = 0;
-                for (int i = 0; i < itemsCount; i++)
+                var buffs = xrec.Data.AsArray();
+                if (buffs == null || buffs.Length == 0)
                 {
-                    var s = new SoilRockRange(
-                        startStation: (double) buffs[baseIndex + 1].Value,
-                        endStation: (double) buffs[baseIndex + 2].Value,
-                        distribution: Utils.GetExtendedDataEnum<SoilRockRange.Distribution>(buffs[baseIndex + 3]),
-                        type: Utils.GetExtendedDataEnum<SubgradeType>(buffs[baseIndex + 4]));
+                    return;
+                }
+                //
+                try
+                {
+                    var itemsCount = (int)buffs[0].Value;
+                    var fieldsCount = 4;
+                    var baseIndex = 0;
+                    for (int i = 0; i < itemsCount; i++)
+                    {
+                        var s = new SoilRockRange(
+                            startStation: (double)buffs[baseIndex + 1].Value,
+                            endStation: (double)buffs[baseIndex + 2].Value,
+                            distribution: Utils.GetExtendedDataEnum<SoilRockRange.Distribution>(buffs[baseIndex + 3]),
+                            type: Utils.GetExtendedDataEnum<SubgradeType>(buffs[baseIndex + 4]));
 
-                    //
-                    SoilRockRanges.Add(s);
-                    baseIndex += fieldsCount;
+                        //
+                        SoilRockRanges.Add(s);
+                        baseIndex += fieldsCount;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.Print("提取整条道路中岩土分区信息出错" + ex.AppendMessage());
                 }
             }
-            catch (Exception ex)
-            {
-                Debug.Print("提取整条道路中岩土分区信息出错" + ex.AppendMessage());
-            }
+            //
         }
-
 
         #endregion
 
-        #region ---   Blocks
+        #region ---   RangeBlocks
 
         /// <summary> 整个道路有所有的桥梁隧道等结构物 </summary>
         public static List<RangeBlock> RangeBlocks = new List<RangeBlock>();
@@ -149,6 +157,7 @@ namespace eZcad.SubgradeQuantity.Options
                 generalBuff.Add(new TypedValue((int)DxfCode.ExtendedDataReal, s.EndStation));
                 generalBuff.Add(new TypedValue((int)DxfCode.ExtendedDataReal, s.ConnectedBackStaion));
                 generalBuff.Add(new TypedValue((int)DxfCode.ExtendedDataReal, s.ConnectedFrontStaion));
+                generalBuff.Add(new TypedValue((int)DxfCode.ExtendedDataAsciiString, s.Description));
             }
             //
             //var rec = new Xrecord();
@@ -157,42 +166,45 @@ namespace eZcad.SubgradeQuantity.Options
         }
 
         /// <summary> 将<seealso cref="Xrecord"/>对象中的数据刷新到内存中的静态类中 </summary>
+        /// <param name="xrec">其值可以为 null，表示集合中一个数据都没有 </param>
         public static void FromXrecord_Blocks(Xrecord xrec)
         {
             RangeBlocks = new List<RangeBlock>();
-            //
-            var buffs = xrec.Data.AsArray();
-            if (buffs == null || buffs.Length == 0)
+            if (xrec != null)
             {
-                return;
-            }
-            //
-            try
-            {
-                var itemsCount = (int)buffs[0].Value;
-                var fieldsCount = 5;
-                var baseIndex = 1;
-                for (int i = 0; i < itemsCount; i++)
+                var buffs = xrec.Data.AsArray();
+                if (buffs == null || buffs.Length == 0)
                 {
-
-                    var s = new RangeBlock(
-                        type: Utils.GetExtendedDataEnum<BlockType>(buffs[baseIndex]),
-                        startStation: (double)buffs[baseIndex + 1].Value,
-                        endStation: (double)buffs[baseIndex + 2].Value)
+                    return;
+                }
+                //
+                try
+                {
+                    var itemsCount = (int)buffs[0].Value;
+                    var fieldsCount = 6;
+                    var baseIndex = 1;
+                    for (int i = 0; i < itemsCount; i++)
                     {
-
-                        ConnectedBackStaion = (double)buffs[baseIndex + 3].Value,
-                        ConnectedFrontStaion = (double)buffs[baseIndex + 4].Value,
+                        var s = new RangeBlock(
+                            type: Utils.GetExtendedDataEnum<BlockType>(buffs[baseIndex]),
+                            startStation: (double)buffs[baseIndex + 1].Value,
+                            endStation: (double)buffs[baseIndex + 2].Value)
+                        {
+                            ConnectedBackStaion = (double)buffs[baseIndex + 3].Value,
+                            ConnectedFrontStaion = (double)buffs[baseIndex + 4].Value,
+                            Description = (string)buffs[baseIndex + 5].Value,
                     };
-                    //
-                    RangeBlocks.Add(s);
-                    baseIndex += fieldsCount;
+                        //
+                        RangeBlocks.Add(s);
+                        baseIndex += fieldsCount;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    //MessageBox.Show($"刷新选项数据“{fields[index].Name}”出错。\r\n{ex.StackTrace}");
                 }
             }
-            catch (Exception ex)
-            {
-                //MessageBox.Show($"刷新选项数据“{fields[index].Name}”出错。\r\n{ex.StackTrace}");
-            }
+            //
         }
 
         #endregion

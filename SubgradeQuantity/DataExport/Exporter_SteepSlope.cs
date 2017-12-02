@@ -128,12 +128,16 @@ namespace eZcad.SubgradeQuantity.DataExport
             // 对桥梁隧道结构进行处理：截断对应的区间
             CutWithBlocks(steepSlopes, Options_Collections.RangeBlocks);
 
+            // 将位于桥梁隧道区间之内的断面移除
+            steepSlopes = steepSlopes.Where(r => !r.IsNull).ToList();
+
             // 对于区间进行合并
             // steepSlopes = MergeLinkedSections(steepSlopes);
             steepSlopes = MergeLinkedSections<SteepSlope>(steepSlopes);
 
             countAll = steepSlopes.Count;
             _docMdf.WriteNow($"陡坡路堤断面数量：{countAll}");
+            if (countAll == 0) return;
 
             // 将结果整理为二维数组，用来进行表格输出
             var rows = new List<object[]>();
@@ -297,8 +301,9 @@ namespace eZcad.SubgradeQuantity.DataExport
                 else
                 {
                     inters = new CurveCurveIntersector2d(cSlope, new Line2d(new Point2d(x, 0), new Vector2d(0, 1)));
-                    // 没有交点的情况必然会出现，即x对应路基位置，而不是对应边坡位置
-                    ySlope = inters.NumberOfIntersectionPoints == 0 ? 0 : inters.GetIntersectionPoint(0).Y;
+
+                    // 没有交点的情况必然会出现，即x对应路基位置，而不是对应边坡位置，比如当路基下的自然地面线是向路基中心倾斜时。
+                    ySlope = inters.NumberOfIntersectionPoints == 0 ? sec.CenterY : inters.GetIntersectionPoint(0).Y;
                 }
                 //
                 xYs.Add(new double[3] { x, yGround, ySlope });
@@ -343,11 +348,12 @@ namespace eZcad.SubgradeQuantity.DataExport
         /// <summary>
         /// 计算横断面中，填方区的三角形台阶面积
         /// </summary>
-        /// <param name="xyGround">集合中起码有两个元素</param>
+        /// <param name="xyGround">集合中起码有两个元素，其中每一个元素都代表一个包含两个数值的向量，
+        /// 向量中第一个元素代表地面线的某点的几何X坐标（横断面中的此X没有物理意义，纵断面中的此X一般代表纵断面中的桩号），第二个元素代表此点的Y坐标</param>
         /// <param name="xLeft"></param>
         /// <param name="xRight"></param>
         /// <returns></returns>
-        private double CalculateStairArea(List<double[]> xyGround, double xLeft, double xRight)
+        public static double CalculateStairArea(List<double[]> xyGround, double xLeft, double xRight)
         {
             if (xyGround.Count < 2) return 0.0;
             var stairArea = 0.0;
@@ -359,6 +365,7 @@ namespace eZcad.SubgradeQuantity.DataExport
                 x1 = xyGround[i][0];
                 if (x1 >= xLeft && x2 <= xRight)
                 {
+                    // 相邻两个X之差代表台阶的宽度
                     var dx = x2 - x1;
                     var dy = xyGround[i + 1][1] - xyGround[i][1];
                     stairArea += Math.Abs(dx * dy / 2);

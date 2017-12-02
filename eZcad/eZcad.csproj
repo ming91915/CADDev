@@ -140,7 +140,11 @@
     <Compile Include="Addins\DimAlignment.cs" />
     <Compile Include="Addins\DBTextsToMText.cs" />
     <Compile Include="Addins\DimTextScalor.cs" />
+    <Compile Include="Addins\NumAdd.cs" />
+    <Compile Include="Debug\Ec_BlockReference.cs" />
+    <Compile Include="Debug\Ec_RepairTextStyles.cs" />
     <Compile Include="Debug\Ec_GetThinedPolyline.cs" />
+    <Compile Include="Examples\DrawInUCS.cs" />
     <Compile Include="Examples\UISetup1.cs" />
     <Compile Include="Examples\UISetup2.cs" />
     <Compile Include="Examples\SplineHandler.cs" />

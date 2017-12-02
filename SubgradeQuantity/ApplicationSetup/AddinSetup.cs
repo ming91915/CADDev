@@ -9,6 +9,7 @@ using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Windows;
 using Autodesk.Windows;
+using eZcad.Addins;
 using eZcad.SubgradeQuantity;
 using eZcad.SubgradeQuantity.Cmds;
 using eZcad.SubgradeQuantity.Utility;
@@ -177,8 +178,14 @@ namespace eZcad.SubgradeQuantity
             AddButton(spltBtn2, method: typeof(InfosGetter_HighFill).GetMethod(InfosGetter_HighFill.CommandName, new Type[0]), size: RibbonItemSize.Large);
             AddButton(spltBtn2, method: typeof(InfosGetter_SteepSlope).GetMethod(InfosGetter_SteepSlope.CommandName, new Type[0]), size: RibbonItemSize.Large);
             AddButton(spltBtn2, method: typeof(InfosGetter_StairExcav).GetMethod(InfosGetter_StairExcav.CommandName, new Type[0]), size: RibbonItemSize.Large);
+            AddButton(spltBtn2, method: typeof(InfosGetter_RoadSurface).GetMethod(InfosGetter_RoadSurface.CommandName, new Type[0]), size: RibbonItemSize.Large);
 
             AddButton(pnl_Quantity, method: typeof(InfosGetter_FillCutInters).GetMethod(InfosGetter_FillCutInters.CommandName, new Type[0]), size: RibbonItemSize.Large);
+
+            // ----------------------------- 其他工具 ----------------------------------------
+            var pnl_Tools = CreatePanel(ribTab, "工具");
+            AddButton(pnl_Tools, method: typeof(ClosedAreaSumup).GetMethod(ClosedAreaSumup.CommandName, new Type[0]), size: RibbonItemSize.Large);
+
 
             // ----------------------------- 选项设置 ----------------------------------------
             // var pnl_Settings = CreatePanel(ribTab, "设置");

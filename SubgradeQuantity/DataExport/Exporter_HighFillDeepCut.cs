@@ -138,8 +138,12 @@ namespace eZcad.SubgradeQuantity.DataExport
 
             var countAll = highFillSections_Left.Count + deepCutSections_Left.Count + highFillSections_Right.Count +
                            deepCutSections_Right.Count;
-            _docMdf.WriteNow($"高填深挖断面数量：{countAll}");
-            if (countAll == 0) return;
+            if (countAll == 0)
+            {
+                _docMdf.WriteNow($"高填深挖断面数量：{countAll}");
+                return;
+            }
+            
 
             // 对桥梁隧道结构进行处理：截断对应的区间
             CutWithBlocks(highFillSections_Left, Options_Collections.RangeBlocks);
@@ -147,13 +151,24 @@ namespace eZcad.SubgradeQuantity.DataExport
             CutWithBlocks(highFillSections_Right, Options_Collections.RangeBlocks);
             CutWithBlocks(deepCutSections_Right, Options_Collections.RangeBlocks);
 
+
+            // 将位于桥梁隧道区间之内的断面移除
+            highFillSections_Left = highFillSections_Left.Where(r => !r.IsNull).ToList();
+            deepCutSections_Left = deepCutSections_Left.Where(r => !r.IsNull).ToList();
+            highFillSections_Right = highFillSections_Right.Where(r => !r.IsNull).ToList();
+            deepCutSections_Right = deepCutSections_Right.Where(r => !r.IsNull).ToList();
+            
             // 对于区间进行合并
             highFillSections_Left = MergeLinkedSections(highFillSections_Left);
             highFillSections_Right = MergeLinkedSections(highFillSections_Right);
             deepCutSections_Left = MergeLinkedSections(deepCutSections_Left);
             deepCutSections_Right = MergeLinkedSections(deepCutSections_Right);
+
+            //
             countAll = highFillSections_Left.Count + deepCutSections_Left.Count + highFillSections_Right.Count +
                        deepCutSections_Right.Count;
+            _docMdf.WriteNow($"高填深挖断面数量：{countAll}");
+            if (countAll == 0) return;
 
             // 将结果整理为二维数组，用来进行表格输出
             var sheetArr = new object[countAll + 2, 6];
