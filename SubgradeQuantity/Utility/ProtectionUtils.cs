@@ -329,6 +329,10 @@ namespace eZcad.SubgradeQuantity.Utility
                 matchedSheet = wkbk.Worksheets.Add();
                 matchedSheet.Name = sheetName;
             }
+            // 将表格中的单元格解锁
+            matchedSheet.Cells.Locked = false;
+            matchedSheet.Cells.FormulaHidden = false;
+            //
             return matchedSheet;
         }
 

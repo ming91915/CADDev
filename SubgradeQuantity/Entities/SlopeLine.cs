@@ -602,13 +602,8 @@ namespace eZcad.SubgradeQuantity.Entities
         public static void ExtractProtectionFromText(ISlopeSeg seg, Database db)
         {
             DBText text = null;
-            try
-            {
-                text = seg.ProtectionMethodText.GetDBObject<DBText>(db);
-            }
-            catch (Exception)
-            {
-            }
+            text = seg.ProtectionMethodText.GetDBObject<DBText>(db);
+
             if (text != null && !string.IsNullOrEmpty(text.TextString))
             {
                 seg.ProtectionMethod = text.TextString;
@@ -616,6 +611,7 @@ namespace eZcad.SubgradeQuantity.Entities
             else
             {
                 seg.ProtectionMethod = null;
+                seg.ProtectionMethodText = default(Handle);
             }
         }
 

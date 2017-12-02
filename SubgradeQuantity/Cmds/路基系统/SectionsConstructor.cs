@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
+using System.Windows;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
@@ -60,19 +62,52 @@ namespace eZcad.SubgradeQuantity.Cmds
             // 在界面中选择指定的断面
             // var axes = ProtectionUtils.SelecteSectionLines(docMdf.acEditor);
             // 直接提取整个文档中所有的断面
-            var axes = ProtectionUtils.GetAllSectionLines(docMdf.acEditor);
+            var axisLines = ProtectionUtils.GetAllSectionLines(docMdf.acEditor);
 
-            if (axes != null && axes.Count > 0)
+            if (axisLines != null && axisLines.Count > 0)
             {
+                // 先检查以前是否进行过横断面构造，免得由于误点击而将原来的数据删除
+                bool hasConstructed = true;
                 //
-                var f = new SectionsConstructorForm(docMdf, axes);
+                if (hasConstructed)
+                {
+                    var res = MessageBox.Show("是否要重新构造横断面系统？\r\n此操作会覆盖以前的横断面系统数据！", "提示", MessageBoxButton.YesNo, MessageBoxImage.Information);
+                    if (res == MessageBoxResult.No)
+                    {
+                        return ExternalCmdResult.Cancel;
+                    }
+                }
+
+                var f = new SectionsConstructorForm(docMdf, axisLines);
                 f.ShowDialog();
                 // 
-                Options_Collections.AllSortedStations = f.SectionAxes.Select(r => r.XData.Station).ToArray();
-                Array.Sort(Options_Collections.AllSortedStations);
-                DbXdata.FlushXData(docMdf, DbXdata.DatabaseXdataType.AllSortedStations);
+                var stations = f.SectionAxes.Select(r => r.XData.Station).ToArray();
+                //检查是否有重复的桩号出现
+                var duplicated = stations.GroupBy(x => x).Where(g => g.Count() > 1).ToArray();
+                if (duplicated.Length > 0)
+                {
+                    MessageBox.Show("路基系统中出现重复的桩号，请核对后再操作！\r\n重复的桩号见命令行提示。", "提示", MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                    docMdf.WriteNow("重复的桩号,重复的次数");
+                    foreach (var d in duplicated)
+                    {
+                        docMdf.WriteNow(d.Key, d.Count());
+                    }
+                }
+                else
+                {
+                    // 将桩号从小到大排序
+                    Array.Sort(stations);
+                    Options_Collections.AllSortedStations = stations;
+                    DbXdata.FlushXData(docMdf, DbXdata.DatabaseXdataType.AllSortedStations);
+                }
+            }
+            else
+            {
+                MessageBox.Show("未找到有效的横断面轴线，请核对后再操作！", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             return ExternalCmdResult.Commit;
         }
+
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -111,19 +112,29 @@ namespace eZcad.SubgradeQuantity.DataExport
         {
             foreach (var bs in blockStructures)
             {
-                var s = sections.FirstOrDefault(r => Math.Abs(r.StationInbetween - bs.ConnectedBackStaion) < ProtectionConstants.RangeMergeTolerance);
-                if (s != null)
+                //
+                var s1 = sections.FirstOrDefault(r => Math.Abs(r.StationInbetween - bs.ConnectedBackStaion) < ProtectionConstants.RangeMergeTolerance);
+                if (s1 != null)
                 {
                     // 说明此断面刚好位于指定的结构后面（桩号比结构起始桩号小一点）
-                    s.FrontValue.EdgeStation = bs.StartStation;
-                    s.FrontValue.CutByBlock(bs.StartStation);
+                    s1.FrontValue.EdgeStation = bs.StartStation;
+                    s1.FrontValue.CutByBlock(bs.StartStation);
                 }
-                s = sections.FirstOrDefault(r => Math.Abs(r.StationInbetween - bs.ConnectedFrontStaion) < ProtectionConstants.RangeMergeTolerance);
-                if (s != null)
+                //
+                var s2 = sections.FirstOrDefault(r => Math.Abs(r.StationInbetween - bs.ConnectedFrontStaion) < ProtectionConstants.RangeMergeTolerance);
+                if (s2 != null)
                 {
                     // 说明此断面刚好位于指定的结构前面（桩号比结构起始桩号大一点）
-                    s.BackValue.EdgeStation = bs.EndStation;
-                    s.BackValue.CutByBlock(bs.EndStation);
+                    s2.BackValue.EdgeStation = bs.EndStation;
+                    s2.BackValue.CutByBlock(bs.EndStation);
+                }
+                //
+                var nullSecs = sections.Where(r => (r.StationInbetween >= bs.StartStation) && (r.StationInbetween <= bs.EndStation));
+                foreach (var nullSec in nullSecs)
+                {
+                    // 说明此断面位于指定的结构所在区间的内部
+                    // 此时应该将此断面从计量集合中删除
+                    nullSec.IsNull = true;
                 }
             }
         }
@@ -249,6 +260,7 @@ namespace eZcad.SubgradeQuantity.DataExport
             }
             return res;
         }
+
 
         #region --- 数据导出到 Excel 或 文本
 
@@ -433,7 +445,10 @@ namespace eZcad.SubgradeQuantity.DataExport
                     {
                         sw.Write(sb.ToString());
                     }
-                }
+                    // 打开 .csv 文件
+                    Process.Start(infoPath);
+
+                }  // 下一个工程量表
             }
         }
 

@@ -10,6 +10,9 @@ namespace eZcad.SubgradeQuantity.Entities
     {
         #region --- Fields
 
+        /// <summary> 实际在计量时应该不考虑此断面，比如此断面位于桥梁或者隧道内部 </summary>
+        public bool IsNull { get;  set; }
+        
         /// <summary> true 表示此区间是某一个单独断面的区间； false 表示此区间是多个断面合并后的区间，此时对应的<seealso cref="StationInbetween"/>属性不再具有其实际的意义 </summary>
         public bool Merged { get; private set; }
 
@@ -29,6 +32,7 @@ namespace eZcad.SubgradeQuantity.Entities
             FrontValue = frontValue;
             //
             Merged = false;
+            IsNull = false;
         }
 
         #region --- 多区间的合并、剪切等操作

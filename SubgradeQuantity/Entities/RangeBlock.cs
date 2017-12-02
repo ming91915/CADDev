@@ -12,6 +12,7 @@ namespace eZcad.SubgradeQuantity.Entities
         桥梁 = 1,
         隧道 = 2,
         短链 = 3,
+        其他 = 4,
     }
 
     /// <summary>
@@ -25,10 +26,12 @@ namespace eZcad.SubgradeQuantity.Entities
         public double ConnectedFrontStaion { get; set; }
 
         public BlockType Type { get; set; }
+        public string Description { get; set; }
 
         public RangeBlock(BlockType type, double startStation, double endStation) : base(startStation, endStation)
         {
             Type = type;
+            Description = Enum.GetName(typeof(BlockType), type);
             //
             ConnectedBackStaion = startStation;
             ConnectedFrontStaion = endStation;

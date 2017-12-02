@@ -56,7 +56,7 @@ namespace eZcad.SubgradeQuantity.Cmds
             var allSections = ProtectionUtils.GetAllSections(docMdf, sort: true);
             _docMdf.WriteNow($"\n找到{allSections.Length}个横断面对象！\n");
             ExportSectionInfoToText(allSections);
-            return  ExternalCmdResult.Commit;
+            return ExternalCmdResult.Commit;
         }
 
         private void ExportSectionInfoToText(SubgradeSection[] allSections)
@@ -74,11 +74,14 @@ namespace eZcad.SubgradeQuantity.Cmds
                 methods.Sort(SortPropertiesByName);
                 //
                 var sb = new StringBuilder();
+                // 添加表头
                 foreach (var f in methods)
                 {
                     sb.Append(f.Name + ",");
                 }
                 sb.AppendLine();
+
+                // 添加数据行
                 foreach (var ss in allSections)
                 {
                     var xdata = ss.XData;
@@ -93,6 +96,10 @@ namespace eZcad.SubgradeQuantity.Cmds
                         else if (v is Handle)
                         {
                             strValue = "'" + ((Handle)v).ToString();
+                        }
+                        else if (v == null)
+                        {
+                            strValue = "NULL";
                         }
                         else
                         {

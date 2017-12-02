@@ -67,28 +67,20 @@ namespace eZcad.SubgradeQuantity.Options
             {
                 var dictKey = Enum.GetName(typeof(DatabaseXdataType), DatabaseXdataType.RangeBlocks);
                 var rec = Utils.GetDictionaryValue<Xrecord>(baseDict, dictKey);
-                if (rec != null)
-                {
-                    Options_Collections.FromXrecord_Blocks(rec);
-                }
+                Options_Collections.FromXrecord_Blocks(rec);
             }
             if ((xdataType & DatabaseXdataType.SoilRockRange) > 0)
             {
                 var dictKey = Enum.GetName(typeof(DatabaseXdataType), DatabaseXdataType.SoilRockRange);
                 var rec = Utils.GetDictionaryValue<Xrecord>(baseDict, dictKey);
-                if (rec != null)
-                {
-                    Options_Collections.FromXrecord_SoilRockRanges(rec);
-                }
+                Options_Collections.FromXrecord_SoilRockRanges(rec);
+
             }
             if ((xdataType & DatabaseXdataType.AllSortedStations) > 0)
             {
                 var dictKey = Enum.GetName(typeof(DatabaseXdataType), DatabaseXdataType.AllSortedStations);
                 var rec = Utils.GetDictionaryValue<Xrecord>(baseDict, dictKey);
-                if (rec != null)
-                {
-                    Options_Collections.FromXrecord_SortedStations(rec);
-                }
+                Options_Collections.FromXrecord_SortedStations(rec);
             }
         }
 

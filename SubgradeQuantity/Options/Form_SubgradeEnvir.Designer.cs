@@ -46,15 +46,11 @@ namespace eZcad.SubgradeQuantity.Options
             // 
             // btnCancel
             // 
-            this.btnCancel.Location = new System.Drawing.Point(476, 464);
-            this.btnCancel.Margin = new System.Windows.Forms.Padding(4);
-            this.btnCancel.Size = new System.Drawing.Size(100, 29);
+            this.btnCancel.Location = new System.Drawing.Point(357, 371);
             // 
             // btnOk
             // 
-            this.btnOk.Location = new System.Drawing.Point(584, 464);
-            this.btnOk.Margin = new System.Windows.Forms.Padding(4);
-            this.btnOk.Size = new System.Drawing.Size(100, 29);
+            this.btnOk.Location = new System.Drawing.Point(438, 371);
             this.btnOk.Click += new System.EventHandler(this.btnOk_Click);
             // 
             // dgv_Structures
@@ -62,12 +58,13 @@ namespace eZcad.SubgradeQuantity.Options
             this.dgv_Structures.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgv_Structures.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgv_Structures.KeyDelete = false;
-            this.dgv_Structures.Location = new System.Drawing.Point(3, 2);
-            this.dgv_Structures.Margin = new System.Windows.Forms.Padding(4);
+            this.dgv_Structures.Location = new System.Drawing.Point(2, 2);
+            this.dgv_Structures.ManipulateRows = false;
             this.dgv_Structures.Name = "dgv_Structures";
             this.dgv_Structures.RowTemplate.Height = 23;
             this.dgv_Structures.RowTemplate.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.dgv_Structures.Size = new System.Drawing.Size(659, 411);
+            this.dgv_Structures.ShowRowNumber = false;
+            this.dgv_Structures.Size = new System.Drawing.Size(493, 325);
             this.dgv_Structures.SupportPaste = false;
             this.dgv_Structures.TabIndex = 0;
             // 
@@ -76,23 +73,23 @@ namespace eZcad.SubgradeQuantity.Options
             this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tabControl1.Controls.Add(this.tabPage_SoilRockRanges);
             this.tabControl1.Controls.Add(this.tabPage_Structures);
-            this.tabControl1.Location = new System.Drawing.Point(15, 14);
-            this.tabControl1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.tabControl1.Controls.Add(this.tabPage_SoilRockRanges);
+            this.tabControl1.Location = new System.Drawing.Point(11, 11);
+            this.tabControl1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(673, 444);
+            this.tabControl1.Size = new System.Drawing.Size(505, 355);
             this.tabControl1.TabIndex = 2;
             // 
             // tabPage_SoilRockRanges
             // 
             this.tabPage_SoilRockRanges.Controls.Add(this.dgv_SoilRockRange);
-            this.tabPage_SoilRockRanges.Location = new System.Drawing.Point(4, 25);
-            this.tabPage_SoilRockRanges.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.tabPage_SoilRockRanges.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_SoilRockRanges.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.tabPage_SoilRockRanges.Name = "tabPage_SoilRockRanges";
-            this.tabPage_SoilRockRanges.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.tabPage_SoilRockRanges.Size = new System.Drawing.Size(665, 415);
+            this.tabPage_SoilRockRanges.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPage_SoilRockRanges.Size = new System.Drawing.Size(497, 329);
             this.tabPage_SoilRockRanges.TabIndex = 1;
             this.tabPage_SoilRockRanges.Text = "岩土分区";
             this.tabPage_SoilRockRanges.UseVisualStyleBackColor = true;
@@ -102,23 +99,24 @@ namespace eZcad.SubgradeQuantity.Options
             this.dgv_SoilRockRange.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgv_SoilRockRange.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgv_SoilRockRange.KeyDelete = false;
-            this.dgv_SoilRockRange.Location = new System.Drawing.Point(3, 2);
-            this.dgv_SoilRockRange.Margin = new System.Windows.Forms.Padding(4);
+            this.dgv_SoilRockRange.Location = new System.Drawing.Point(2, 2);
+            this.dgv_SoilRockRange.ManipulateRows = false;
             this.dgv_SoilRockRange.Name = "dgv_SoilRockRange";
             this.dgv_SoilRockRange.RowTemplate.Height = 23;
             this.dgv_SoilRockRange.RowTemplate.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.dgv_SoilRockRange.Size = new System.Drawing.Size(659, 411);
+            this.dgv_SoilRockRange.ShowRowNumber = false;
+            this.dgv_SoilRockRange.Size = new System.Drawing.Size(493, 325);
             this.dgv_SoilRockRange.SupportPaste = false;
             this.dgv_SoilRockRange.TabIndex = 1;
             // 
             // tabPage_Structures
             // 
             this.tabPage_Structures.Controls.Add(this.dgv_Structures);
-            this.tabPage_Structures.Location = new System.Drawing.Point(4, 25);
-            this.tabPage_Structures.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.tabPage_Structures.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_Structures.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.tabPage_Structures.Name = "tabPage_Structures";
-            this.tabPage_Structures.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.tabPage_Structures.Size = new System.Drawing.Size(665, 415);
+            this.tabPage_Structures.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPage_Structures.Size = new System.Drawing.Size(497, 329);
             this.tabPage_Structures.TabIndex = 0;
             this.tabPage_Structures.Text = "结构物";
             this.tabPage_Structures.UseVisualStyleBackColor = true;
@@ -126,14 +124,13 @@ namespace eZcad.SubgradeQuantity.Options
             // Form_SubgradeEnvir
             // 
             this.AcceptButton = null;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(703, 508);
+            this.ClientSize = new System.Drawing.Size(527, 406);
             this.Controls.Add(this.tabControl1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.Margin = new System.Windows.Forms.Padding(4);
             this.MaximizeBox = false;
-            this.MinimumSize = new System.Drawing.Size(578, 481);
+            this.MinimumSize = new System.Drawing.Size(438, 393);
             this.Name = "Form_SubgradeEnvir";
             this.Text = "道路环境配置";
             this.Controls.SetChildIndex(this.btnOk, 0);

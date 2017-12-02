@@ -96,11 +96,13 @@ namespace eZcad.Utility
 
         /// <summary> 根据 AutoCAD 中对象的句柄值，返回对应的对象的<seealso cref="ObjectId"/>值，如果不存在，则返回 <seealso cref="ObjectId.Null"/> </summary>
         /// <returns></returns>
-        public static ObjectId GetObjectId(this Handle handle, Database db)
+        private static ObjectId GetObjectId(this Handle handle, Database db)
         {
             ObjectId res = ObjectId.Null;
+            // var succ = db.TryGetObjectId(handle, out res);
             db.TryGetObjectId(handle, out res);
-            return res;
+            // 如果失败则输出 ObjectId.Null
+            return res; 
             // return db.GetObjectId(false, handle, 0);
         }
 
@@ -108,8 +110,18 @@ namespace eZcad.Utility
         /// <returns></returns>
         public static T GetDBObject<T>(this Handle handle, Database db) where T : DBObject
         {
-            var id = handle.GetObjectId(db);
-            return (id == ObjectId.Null) ? null : id.GetObject(OpenMode.ForRead) as T;
+            try
+            {
+               var id = db.GetObjectId(false, handle, 0);
+                return id.GetObject(OpenMode.ForRead) as T;
+            }
+            catch (Exception)
+            {
+                return null;
+                // ignored
+            }
+            //var id = handle.GetObjectId(db);
+            //return (id == ObjectId.Null) ? null : id.GetObject(OpenMode.ForRead) as T;
         }
         #endregion
 
