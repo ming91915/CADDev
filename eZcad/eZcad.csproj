@@ -131,6 +131,8 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Addins\PolylineRemesh2.cs" />
+    <Compile Include="Addins\Table\CopyColumns.cs" />
     <Compile Include="Addins\DbTextsFormator.cs" />
     <Compile Include="Addins\AreaSumup.cs" />
     <Compile Include="Addins\PolylineRemesh.cs" />

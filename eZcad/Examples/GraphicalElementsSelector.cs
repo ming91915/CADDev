@@ -336,5 +336,27 @@ namespace eZcad.Examples
             }
             return false;
         }
+
+        /// <summary> 在命令行中获取一个字符 </summary>
+        /// <param name="value">成功获得的数值</param>
+        /// <returns>操作成功，则返回 true，操作失败或手动取消操作，则返回 false</returns>
+        private static bool GetString(Editor ed, out string value)
+        {
+            value = "";
+            var op = new PromptStringOptions(message: "\n用来进行剪切的标高：")
+            {
+                AllowSpaces = true,
+                DefaultValue = "默认值",
+                UseDefaultValue = true
+            };
+            //
+            var res = ed.GetString(op);
+            if (res.Status == PromptStatus.OK)
+            {
+                value = res.StringResult;
+                return true;
+            }
+            return false;
+        }
     }
 }
