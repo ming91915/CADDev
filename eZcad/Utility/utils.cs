@@ -309,7 +309,7 @@ Windows Registry Editor Version 5.00
         /// <param name="cs"></param>
         /// <param name="segLength">每一分段的长度</param>
         /// <returns></returns>
-        public static CompositeCurve3d GetThinedPolyline(CompositeCurve3d cs, double segLength)
+        public static CompositeCurve3d GetThinedPolyline(Curve3d cs, double segLength)
         {
             var startPara = cs.GetParameterOf(cs.StartPoint);
             var endPara = cs.GetParameterOf(cs.EndPoint);

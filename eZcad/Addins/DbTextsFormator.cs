@@ -1,34 +1,60 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using Autodesk.AutoCAD.Customization;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
+using eZcad.AddinManager;
 using eZcad.Addins;
+using eZcad.Debug;
 using eZcad.Utility;
 
-[assembly: CommandClass(typeof (DbTextsFormator))]
+[assembly: CommandClass(typeof(DbTextsFormator))]
 
 namespace eZcad.Addins
 {
     /// <summary> 将多个单行文字按其定位进行组合 </summary>
-    public class DbTextsFormator
+    [EcDescription(CommandDescription)]
+    public class DbTextsFormator: ICADExCommand
     {
         #region --- 命令设计
 
-        /// <summary> 将多个单行文字按其定位进行组合 </summary>
-        [CommandMethod(eZConstants.eZGroupCommnad, "FormatDbTexts", CommandFlags.Modal | CommandFlags.UsePickSet
-            )]
-        public void EcFormatDbTexts()
+        /// <summary> 命令行命令名称，同时亦作为命令语句所对应的C#代码中的函数的名称 </summary>
+        public const string CommandName = @"FormatDbTexts";
+        private const string CommandText = @"文字拆分";
+        private const string CommandDescription = @"将多个单行文字按其定位进行拆分或组合";
+
+        /// <summary> 将多个单行文字按其定位进行拆分或组合 </summary>
+        [CommandMethod(eZConstants.eZGroupCommnad, CommandName,
+            CommandFlags.Interruptible | CommandFlags.UsePickSet | CommandFlags.NoBlockEditor)
+        , DisplayName(CommandText), Description(CommandDescription)
+        , RibbonItem(CommandText, CommandDescription, eZConstants.ImageDirectory + "HighFill_32.png")]
+        public void FormatDbTexts()
         {
             DocumentModifier.ExecuteCommand(FormatDbTexts);
         }
 
-        /// <summary> 将多个单行文字按其定位进行组合 </summary>
+        public ExternalCommandResult Execute(SelectionSet impliedSelection, ref string errorMessage,
+            ref IList<ObjectId> elementSet)
+        {
+            var s = new DbTextsFormator();
+            return AddinManagerDebuger.DebugInAddinManager(s.FormatDbTexts,
+                impliedSelection, ref errorMessage, ref elementSet);
+        }
+
+
+        #endregion
+
+        private DocumentModifier _docMdf;
+
+        /// <summary> 将多个单行文字按其定位进行拆分或组合 </summary>
         public ExternalCmdResult FormatDbTexts(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
+            _docMdf = docMdf;
             bool cont = true;
             ObjectId[] texts = null;
             bool sepOrCmb = true; // true 表示将文字进行分割
@@ -50,8 +76,6 @@ namespace eZcad.Addins
             }
             return ExternalCmdResult.Commit;
         }
-
-        #endregion
 
         #region --- ComineTexts
 
@@ -110,6 +134,7 @@ namespace eZcad.Addins
             var btr =
                 docMdf.acTransaction.GetObject(blkTb[BlockTableRecord.ModelSpace], OpenMode.ForWrite) as
                     BlockTableRecord;
+            SetTextHeight();
             foreach (var tId in texts)
             {
                 var txt = tId.GetObject(OpenMode.ForRead) as DBText;
@@ -124,17 +149,22 @@ namespace eZcad.Addins
         {
             var txtStr = txt.TextString;
             if (txtStr.Length == 0) return;
-            if (txtStr.Length == 1) return;
-            // 单行文字中至少有两个字符
+            // if (txtStr.Length == 1) return;
+            // 单行文字中至少有一个字符
 
-            bool lasteIsEng = (int) txtStr[0] < 127;
+            bool lasteIsEng = (int)txtStr[0] < 127;
             TextLanguage curTextLanguage = new TextLanguage(isEng: lasteIsEng);
-            var sepTexts = new List<TextLanguage> {curTextLanguage}; // 分割好的文字
+            var sepTexts = new List<TextLanguage> { curTextLanguage }; // 分割好的文字
             for (int i = 0; i < txtStr.Length; i++)
             {
                 char c = txtStr[i];
+                // 如果是空格，则保持其前面的中英文类型
+                if (char.IsWhiteSpace(c))
+                {
+                    curTextLanguage.Append(c);
+                }
                 // 1、用ASCII码判断：在 ASCII码表中，英文的范围是0 - 127，而汉字则是大于127。
-                if ((int) c > 127) // 说明是中文
+                else if ((int)c > 127) // 说明是中文
                 {
                     if (lasteIsEng)
                     {
@@ -158,86 +188,143 @@ namespace eZcad.Addins
                 }
             }
             // ------------- 对分割好的文字进行处理
-            double moveY;
+            double selfMoveY;
+            double nextMoveX;
             var firstT = sepTexts[0];
             if (sepTexts.Count == 1)
             {
                 // 只修改字高，不修改定位
                 txt.UpgradeOpen();
-                txt.Height = GetStringHeight(firstT._isEng, out moveY);
+                txt.Height = GetStringHeight(firstT._isEng, out nextMoveX, out selfMoveY);
                 txt.DowngradeOpen();
             }
             else if (sepTexts.Count > 1)
             {
-                var width = 1.0d;
-                var originalPosition = txt.Position;
+                DBText leftTxt = txt;
+                DBText rightTxt;
 
-                var baseY = originalPosition.Y;
                 // 先处理第一批字符
-                txt.UpgradeOpen();
-                txt.TextString = firstT.Text;
-                txt.Height = GetStringHeight(firstT._isEng, out moveY);
-                txt.Position = new Point3d(originalPosition.X, originalPosition.Y + moveY, originalPosition.Z);
+                leftTxt.UpgradeOpen();
+                leftTxt.TextString = firstT.Text;
 
-                width = GetTextWidth(txt);
-                    // GetStringWidth(firstT._isEng, firstT.Text.Length, originalHeight, widthFactor);
-                txt.DowngradeOpen();
+                // 将对齐方式转换为默认的左对齐
+                leftTxt.SetAlignment();
+                //
+                leftTxt.Height = GetStringHeight(firstT._isEng, out nextMoveX, out selfMoveY);
 
+                // GetStringWidth(firstT._isEng, firstT.Text.Length, originalHeight, widthFactor);
+                leftTxt.DowngradeOpen();
+                //
+                Point3d oriLeftBottom = leftTxt.Position; // 全部文本的最左下角点
+                var leftWidth = 0.0; // GetTextWidth(leftTxt); // 左侧文本的左下角点到全部文本最左下角点的距离
+                var rota = leftTxt.Rotation;
+                var thisMoveX = nextMoveX;
+                Point3d startPosition; ; // 字符末端的坐标
                 // 处理后面的字符串
                 for (int i = 1; i < sepTexts.Count; i++)
                 {
                     var tl = sepTexts[i];
-                    txt = txt.GetTransformedCopy(Matrix3d.Displacement(new Vector3d(width, 0, 0))) as DBText;
-                    txt.TextString = tl.Text;
-                    txt.Height = GetStringHeight(tl._isEng, out moveY);
-                    txt.Position = new Point3d(txt.Position.X, baseY + moveY, txt.Position.Z);
+                    rightTxt = leftTxt.GetTransformedCopy(Matrix3d.Identity) as DBText;
+                    rightTxt.TextString = tl.Text;
+                    rightTxt.Height = GetStringHeight(tl._isEng, out nextMoveX, out selfMoveY);
+                    startPosition = GetStartPosition(oriLeftBottom, ref leftWidth, leftTxt, rota, thisMoveX, selfMoveY);
+                    rightTxt.Position = startPosition;
                     //
-                    width = GetTextWidth(txt);
-                        // GetStringWidth(tl._isEng, tl.Text.Length, originalHeight, widthFactor);
+                    thisMoveX = nextMoveX;
+                    leftTxt = rightTxt;
+                    // GetStringWidth(tl._isEng, tl.Text.Length, originalHeight, widthFactor);
                     // 添加到数据库中
-                    btr.AppendEntity(txt);
-                    docMdf.acTransaction.AddNewlyCreatedDBObject(txt, true);
+                    btr.AppendEntity(rightTxt);
+                    docMdf.acTransaction.AddNewlyCreatedDBObject(rightTxt, true);
                 }
             }
         }
 
-        private static double GetTextWidth(DBText txt)
-        {
-            var b = txt.Bounds.Value;
-            return b.MaxPoint.X - b.MinPoint.X + 1; // 0.5mm 为两种语言之间的间隔
-        }
 
-        private static double GetStringWidth(bool isEng, int length, double height, double widthfactor)
-        {
-            var baseWidth = height*widthfactor*length;
-            if (isEng)
-            {
-                return baseWidth*1.2;
-            }
-            else
-            {
-                return baseWidth*1.5;
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="isEng"></param>
-        /// <param name="moveY">文字在Y方向上移动的距离</param>
+        /// <summary> 右侧单行文本的起始端（左下角）坐标 </summary>
+        /// <param name="oriLeftBottom">全部文本的最左下角点</param>
+        /// <param name="leftWidth">左侧文本的左下角点到全部文本最左下角点的距离</param>
+        /// <param name="leftTxt">左侧文本</param>
+        /// <param name="rota">文本的旋转角度，单位为弧度</param>
+        /// <param name="y0">右侧文本要在左侧基础上在Y方向上移动的距离</param>
         /// <returns></returns>
-        private static double GetStringHeight(bool isEng, out double moveY)
+        private Point3d GetStartPosition(Point3d oriLeftBottom, ref double leftWidth, DBText leftTxt, double rota, double moveX, double y0)
+        {
+            var x0 = leftWidth + leftTxt.GetTextWidth() + moveX;
+            //
+            var r = Math.Sqrt(x0 * x0 + y0 * y0);
+            var a0 = eZstd.Mathematics.MathUtils.GetAngleR(x0, y0);
+            //
+            var dx = r * Math.Cos(a0 + rota);
+            var dy = r * Math.Sin(a0 + rota);
+            //
+            leftWidth = x0;
+            return new Point3d(oriLeftBottom.X + dx, oriLeftBottom.Y + dy, oriLeftBottom.Z);
+        }
+
+        /// <summary> 中文与英文的字高，以逗号（中文逗号或英文逗号）分隔。比如“2.5,2.5”，表示中文字高3.5，英文字高2.5 </summary>
+        private static string CharHeight;
+        private static double ChiHeight = 3.5;
+        private static double EngHeight = 2.5;
+
+        /// <summary> 根据字条串是中文还是英文来设计不同的x与y方向上的偏移 </summary>
+        /// <param name="isEng"></param>
+        /// <param name="nextMoveX">下一个文字在X方向上移动的距离</param>
+        /// <param name="selfMoveY">文字在Y方向上移动的距离</param>
+        /// <returns></returns>
+        private double GetStringHeight(bool isEng, out double nextMoveX, out double selfMoveY)
         {
             if (isEng)
             {
-                moveY = 0.5;
-                return 2.5; // 英文的字高为 2.5 mm
+                nextMoveX = 1.2 * (EngHeight / 2.5); //  以英文的字高为 2.5 mm 作为基准
+                selfMoveY = 0.5 * (EngHeight / 2.5);  //  以英文的字高为 2.5 mm 作为基准
+                return EngHeight; // 英文的字高为 2.5 mm
             }
             else
             {
-                moveY = 0;
-                return 3.5; // 中文的字高为 3.5 mm
+                nextMoveX = 0.5 * (ChiHeight / 3.5);  //  以中文的字高为 3.5 mm 作为基准
+                selfMoveY = 0;   //  以中文的字高为 3.5 mm 作为基准
+                return ChiHeight; // 中文的字高为 3.5 mm
             }
+        }
+
+
+        /// <summary> 通过命令行交互，设置中文与英文的字高，以逗号（中文逗号或英文逗号）分隔。比如“2.5,2.5”，表示中文字高3.5，英文字高2.5 </summary>
+        /// <returns>操作成功，则返回 true，操作失败或手动取消操作，则返回 false</returns>
+        private bool SetTextHeight()
+        {
+
+            var defaultValue = ChiHeight.ToString("0.00") + "," + EngHeight.ToString("0.00");
+            //
+            var op = new PromptStringOptions(message: "\n设置中英文字高：")
+            {
+                AllowSpaces = false,
+                DefaultValue = defaultValue,
+                UseDefaultValue = true
+            };
+            //
+            var res = _docMdf.acEditor.GetString(op);
+            if (res.Status == PromptStatus.OK)
+            {
+                var v = res.StringResult;
+                var s = v.Split(',');
+                double num;
+                var isNum = double.TryParse(s[0], out num);
+                if (isNum)
+                {
+                    ChiHeight = num;
+                }
+                if (s.Length > 1)
+                {
+                    isNum = double.TryParse(s[1], out num);
+                    if (isNum)
+                    {
+                        EngHeight = num;
+                    }
+                }
+                return true;
+            }
+            return false;
         }
 
         private class TextLanguage
@@ -294,7 +381,7 @@ namespace eZcad.Addins
             // Implement a callback for when keywords are entered
             // 当用户在命令行中输入关键字时进行对应操作。
             pso.KeywordInput +=
-                delegate(object sender, SelectionTextInputEventArgs e)
+                delegate (object sender, SelectionTextInputEventArgs e)
                 {
                     if (e.Input.Equals("Seperate", StringComparison.CurrentCultureIgnoreCase))
                     {
@@ -309,7 +396,7 @@ namespace eZcad.Addins
                     }
                 };
             // Finally run the selection and show any results
-            var f = new SelectionFilter(new TypedValue[] {new TypedValue((int) DxfCode.Start, "TEXT")});
+            var f = new SelectionFilter(new TypedValue[] { new TypedValue((int)DxfCode.Start, "TEXT") });
             var psr = docMdf.acEditor.GetSelection(pso, f);
             sepOrCmb = sep;
             if (psr.Status == PromptStatus.OK)
