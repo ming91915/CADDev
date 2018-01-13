@@ -131,6 +131,15 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Addins\BlockRefEditor\AttriBlock.cs" />
+    <Compile Include="Addins\BlockRefEditor\BlockRefEditor.cs" />
+    <Compile Include="Addins\BlockRefEditor\BlockRefEditorForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Addins\BlockRefEditor\BlockRefEditorForm.Designer.cs">
+      <DependentUpon>BlockRefEditorForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Addins\BlockRefEditor\SortColumnCollection.cs" />
     <Compile Include="Addins\PolylineRemesh2.cs" />
     <Compile Include="Addins\Table\CopyColumns.cs" />
     <Compile Include="Addins\DbTextsFormator.cs" />
@@ -143,7 +152,7 @@
     <Compile Include="Addins\DBTextsToMText.cs" />
     <Compile Include="Addins\DimTextScalor.cs" />
     <Compile Include="Addins\NumAdd.cs" />
-    <Compile Include="Debug\Ec_BlockReference.cs" />
+    <Compile Include="Addins\BlockRef\Ec_BlockReference.cs" />
     <Compile Include="Debug\Ec_RepairTextStyles.cs" />
     <Compile Include="Debug\Ec_GetThinedPolyline.cs" />
     <Compile Include="Examples\DrawInUCS.cs" />
@@ -166,8 +175,8 @@
     <Compile Include="Addins\RoadMileage.cs" />
     <Compile Include="Addins\PerpendicularLine.cs" />
     <Compile Include="Debug\Ec_AddElevation.cs" />
-    <Compile Include="Debug\Ec_BlockRef.cs" />
-    <Compile Include="Debug\Ec_BlockRefField.cs" />
+    <Compile Include="Addins\BlockRef\Ec_BlockRef.cs" />
+    <Compile Include="Addins\BlockRef\Ec_BlockRefField.cs" />
     <Compile Include="Debug\Ec_RoadMileage.cs" />
     <Compile Include="Debug\Ec_PLineHandler.cs" />
     <Compile Include="Debug\Ec_ShowClassName.cs" />
@@ -217,6 +226,9 @@
     <Compile Include="Utility\Utils.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Addins\BlockRefEditor\BlockRefEditorForm.resx">
+      <DependentUpon>BlockRefEditorForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="myCommands.resx">
       <DependentUpon>myCommands.cs</DependentUpon>
       <Generator>ResXFileCodeGenerator</Generator>

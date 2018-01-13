@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.Runtime;
 
 namespace eZcad.Utility
 {
@@ -43,7 +44,75 @@ namespace eZcad.Utility
 
         #endregion
 
+        #region ---   BlockTableRecord
+
+        /// <summary> 根据块参照定义中所有的属性定义 </summary>
+        /// <param name="btr">要进行提取的块定义</param>
+        /// <returns></returns>
+        public static List<AttributeDefinition> GetAttributeDefinitions(this BlockTableRecord btr)
+        {
+            // return btr.Cast<AttributeDefinition>().ToList();
+
+            var attDefs = new List<AttributeDefinition>();
+            var attDefTp = RXObject.GetClass(typeof(AttributeDefinition));
+
+            foreach (ObjectId id in btr)
+            {
+                // 判断该实体是否是块属性定义
+                if (id.ObjectClass.Equals(attDefTp))
+                {
+                    var attDef = id.GetObject(OpenMode.ForRead) as AttributeDefinition;
+                    if (attDef != null)
+                    {
+                        attDefs.Add(attDef);
+                    }
+                }
+            }
+            return attDefs;
+        }
+
+        /// <summary> 根据块参照定义中 指定的 Tag 的属性定义 </summary>
+        /// <param name="btr">要进行提取的块定义</param>
+        /// <param name="tag">要进行提取的块定义</param>
+        /// <returns>如果未找到，则返回 null </returns>
+        public static AttributeDefinition GetAttributeDefinitions(this BlockTableRecord btr, string tag)
+        {
+            var attDefTp = RXObject.GetClass(typeof(AttributeDefinition));
+
+            foreach (ObjectId id in btr)
+            {
+                // 判断该实体是否是块属性定义
+                if (id.ObjectClass.Equals(attDefTp))
+                {
+                    var attDef = id.GetObject(OpenMode.ForRead) as AttributeDefinition;
+                    if (attDef != null && attDef.Tag == tag)
+                    {
+                        return attDef;
+                    }
+                }
+            }
+            return null;
+        }
+
+        #endregion
+
         #region ---   BlockReference
+
+        /// <summary> 根据块参照中属性定义的名称返回对应的项 </summary>
+        /// <param name="blk"></param>
+        /// <param name="attTag">属性定义的名称</param>
+        /// <returns></returns>
+        public static List<AttributeReference> GetAttributeReferences(this BlockReference blk)
+        {
+            var attRefs = new List<AttributeReference>();
+            foreach (ObjectId id in blk.AttributeCollection)
+            {
+                var att = id.GetObject(OpenMode.ForRead) as AttributeReference;
+                attRefs.Add(att);
+            }
+            return attRefs;
+        }
+
 
         /// <summary> 根据块参照中属性定义的名称返回对应的项 </summary>
         /// <param name="blk"></param>
@@ -54,13 +123,14 @@ namespace eZcad.Utility
             foreach (ObjectId id in blk.AttributeCollection)
             {
                 var att = id.GetObject(OpenMode.ForRead) as AttributeReference;
-                if (att.Tag == attTag)
+                if (att != null && att.Tag == attTag)
                 {
                     return att;
                 }
             }
             return null;
         }
+
         #endregion
 
         #region ---   几何操作
