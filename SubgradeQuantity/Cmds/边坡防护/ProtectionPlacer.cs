@@ -29,9 +29,9 @@ namespace eZcad.SubgradeQuantity.Cmds
         private const string CommandDescription = @"放置边坡防护的文字";
 
         /// <summary> 放置边坡防护的文字 </summary>
-        [CommandMethod(ProtectionConstants.eZGroupCommnad, CommandName, CommandFlags.UsePickSet)
+        [CommandMethod(SQConstants.eZGroupCommnad, CommandName, CommandFlags.UsePickSet)
         , DisplayName(CommandText), Description(CommandDescription)
-            , RibbonItem(CommandText, CommandDescription, ProtectionConstants.ImageDirectory + "PlaceProtection_32.png")]
+            , RibbonItem(CommandText, CommandDescription, SQConstants.ImageDirectory + "PlaceProtection_32.png")]
         public void PlaceProtection()
         {
             DocumentModifier.ExecuteCommand(PlaceProtection);
@@ -41,7 +41,7 @@ namespace eZcad.SubgradeQuantity.Cmds
             ref IList<ObjectId> elementSet)
         {
             var s = new ProtectionPlacer();
-            return AddinManagerDebuger.DebugInAddinManager(s.PlaceProtection,
+            return SQAddinManagerDebuger.DebugInAddinManager(s.PlaceProtection,
                 impliedSelection, ref errorMessage, ref elementSet);
         }
 
@@ -163,7 +163,7 @@ namespace eZcad.SubgradeQuantity.Cmds
         private DBText GetDbTextEntity(Editor ed, out bool cont)
         {
             var op = new PromptEntityOptions("\n选择要修改的单行文字");
-            op.SetRejectMessage($"\n选择的单行文字必须位于图层“{ProtectionConstants.LayerName_ProtectionMethod_Slope}”或“{ProtectionConstants.LayerName_ProtectionMethod_Platform}”中");
+            op.SetRejectMessage($"\n选择的单行文字必须位于图层“{SQConstants.LayerName_ProtectionMethod_Slope}”或“{SQConstants.LayerName_ProtectionMethod_Platform}”中");
             op.AddAllowedClass(typeof(DBText), exactMatch: true);
             var res = ed.GetEntity(op);
 
@@ -173,8 +173,8 @@ namespace eZcad.SubgradeQuantity.Cmds
                 var pl = res.ObjectId.GetObject(OpenMode.ForRead) as DBText;
                 if (pl != null)
                 {
-                    if ((pl.Layer == ProtectionConstants.LayerName_ProtectionMethod_Slope)
-                        || (pl.Layer == ProtectionConstants.LayerName_ProtectionMethod_Platform))
+                    if ((pl.Layer == SQConstants.LayerName_ProtectionMethod_Slope)
+                        || (pl.Layer == SQConstants.LayerName_ProtectionMethod_Platform))
                     {
                         cont = true;
                         return pl;
@@ -212,8 +212,8 @@ namespace eZcad.SubgradeQuantity.Cmds
             var acTypValAr = new TypedValue[]
             {
                   new TypedValue((int) DxfCode.Operator, "<OR"),
-                new TypedValue((int) DxfCode.LayerName, ProtectionConstants.LayerName_ProtectionMethod_Slope),
-                new TypedValue((int) DxfCode.LayerName, ProtectionConstants.LayerName_ProtectionMethod_Platform),
+                new TypedValue((int) DxfCode.LayerName, SQConstants.LayerName_ProtectionMethod_Slope),
+                new TypedValue((int) DxfCode.LayerName, SQConstants.LayerName_ProtectionMethod_Platform),
                 new TypedValue((int) DxfCode.Operator, "OR>")
             };
 

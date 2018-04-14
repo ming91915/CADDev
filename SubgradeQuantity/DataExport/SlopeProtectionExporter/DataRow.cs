@@ -164,7 +164,7 @@ namespace eZcad.SubgradeQuantity.DataExport
             private object[] GetRow()
             {
                 return new object[]
-                {StartStation, EndStation,ProtectionUtils.GetStationString(StartStation, EndStation, maxDigits: 0),
+                {StartStation, EndStation,SQUtils.GetStationString(StartStation, EndStation, maxDigits: 0),
                     EndStation - StartStation, Area, ProtectionName, GetDescription()};
             }
 

@@ -27,10 +27,10 @@ namespace eZcad.SubgradeQuantity.Cmds
         private const string CommandDescription = @"将所有的边坡信息提取出来并制成相应表格";
 
         /// <summary> 将所有的边坡信息提取出来并制成相应表格 </summary>
-        [CommandMethod(ProtectionConstants.eZGroupCommnad, CommandName,
-            ProtectionConstants.ModelState | CommandFlags.UsePickSet)
+        [CommandMethod(SQConstants.eZGroupCommnad, CommandName,
+            SQConstants.ModelState | CommandFlags.UsePickSet)
         , DisplayName(CommandText), Description(CommandDescription)
-        , RibbonItem(CommandText, CommandDescription, ProtectionConstants.ImageDirectory + "DataExport_32.png")]
+        , RibbonItem(CommandText, CommandDescription, SQConstants.ImageDirectory + "DataExport_32.png")]
         public void ExportSlopeInfos()
         {
             DocumentModifier.ExecuteCommand(ExportSlopeInfos);
@@ -40,7 +40,7 @@ namespace eZcad.SubgradeQuantity.Cmds
             ref IList<ObjectId> elementSet)
         {
             var sp = new InfosGetter_Slope();
-            return AddinManagerDebuger.DebugInAddinManager(sp.ExportSlopeInfos,
+            return SQAddinManagerDebuger.DebugInAddinManager(sp.ExportSlopeInfos,
                 impliedSelection, ref errorMessage, ref elementSet);
         }
 
@@ -50,11 +50,11 @@ namespace eZcad.SubgradeQuantity.Cmds
         public ExternalCmdResult ExportSlopeInfos(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
             _docMdf = docMdf;
-            ProtectionUtils.SubgradeEnvironmentConfiguration(docMdf);
+            SQUtils.SubgradeEnvironmentConfiguration(docMdf);
 
             // 所有的断面
-            var allSections = ProtectionUtils.GetAllSections(docMdf, sort: true);
-            var slopeLines = ProtectionUtils.SelecteExistingSlopeLines(docMdf, left: null, sort: true);
+            var allSections = SQUtils.GetAllSections(docMdf, sort: true);
+            var slopeLines = SQUtils.SelecteExistingSlopeLines(docMdf, left: null, sort: true);
 
             // 过滤掉没有实际边坡或者平台的对象（比如边坡与挡墙重合的）
             slopeLines = slopeLines.Where(r => r.XData.Slopes.Count + r.XData.Platforms.Count > 0).ToList();

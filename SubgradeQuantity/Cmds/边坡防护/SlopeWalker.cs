@@ -26,9 +26,9 @@ namespace eZcad.SubgradeQuantity.Cmds
         private const string CommandDescription = @"查看指定的边坡对象的信息";
 
         /// <summary> 提取所有的横断面块参照的信息 </summary>
-        [CommandMethod(ProtectionConstants.eZGroupCommnad, CommandName, CommandFlags.UsePickSet)
+        [CommandMethod(SQConstants.eZGroupCommnad, CommandName, CommandFlags.UsePickSet)
         , DisplayName(CommandText), Description(CommandDescription)
-        , RibbonItem(CommandText, CommandDescription, ProtectionConstants.ImageDirectory + "SlopeWalk_32.png")]
+        , RibbonItem(CommandText, CommandDescription, SQConstants.ImageDirectory + "SlopeWalk_32.png")]
         public void SlopeWalk()
         {
             DocumentModifier.ExecuteCommand(SlopeWalk);
@@ -38,7 +38,7 @@ namespace eZcad.SubgradeQuantity.Cmds
             ref IList<ObjectId> elementSet)
         {
             var s = new SlopeWalker();
-            return AddinManagerDebuger.DebugInAddinManager(s.SlopeWalk,
+            return SQAddinManagerDebuger.DebugInAddinManager(s.SlopeWalk,
                 impliedSelection, ref errorMessage, ref elementSet);
         }
 

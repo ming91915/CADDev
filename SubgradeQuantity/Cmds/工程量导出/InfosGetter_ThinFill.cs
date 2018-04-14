@@ -30,9 +30,9 @@ namespace eZcad.SubgradeQuantity.Cmds
         private const string CommandDescription = @"提取低填浅挖工程数量表";
 
         /// <summary> 将所有的边坡信息提取出来并制成相应表格 </summary>
-        [CommandMethod(ProtectionConstants.eZGroupCommnad, CommandName, ProtectionConstants.ModelState | CommandFlags.UsePickSet)
+        [CommandMethod(SQConstants.eZGroupCommnad, CommandName, SQConstants.ModelState | CommandFlags.UsePickSet)
         , DisplayName(CommandText), Description(CommandDescription)
-        , RibbonItem(CommandText, CommandDescription, ProtectionConstants.ImageDirectory + "ThinFill_32.png")]
+        , RibbonItem(CommandText, CommandDescription, SQConstants.ImageDirectory + "ThinFill_32.png")]
         public void ThinFillShallowCut()
         {
             DocumentModifier.ExecuteCommand(ThinFillShallowCut);
@@ -42,7 +42,7 @@ namespace eZcad.SubgradeQuantity.Cmds
                 ref IList<ObjectId> elementSet)
         {
             var sp = new InfosGetter_ThinFill();
-            return AddinManagerDebuger.DebugInAddinManager(sp.ThinFillShallowCut,
+            return SQAddinManagerDebuger.DebugInAddinManager(sp.ThinFillShallowCut,
                 impliedSelection, ref errorMessage, ref elementSet);
         }
 
@@ -52,14 +52,14 @@ namespace eZcad.SubgradeQuantity.Cmds
         public ExternalCmdResult ThinFillShallowCut(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
             _docMdf = docMdf;
-            ProtectionUtils.SubgradeEnvironmentConfiguration(docMdf);
+            SQUtils.SubgradeEnvironmentConfiguration(docMdf);
 
-            var centerLines = ProtectionUtils.SelecteSectionLines(docMdf.acEditor);
+            var centerLines = SQUtils.SelecteSectionLines(docMdf.acEditor);
             if (centerLines == null || centerLines.Count == 0) return ExternalCmdResult.Cancel;
 
             // 
             // 所有的断面
-            var allSections = ProtectionUtils.GetAllSections(docMdf, sort: true);
+            var allSections = SQUtils.GetAllSections(docMdf, sort: true);
             // var allStations = allSections.Select(r => r.XData.Station).ToArray();
 
             // 要处理的断面

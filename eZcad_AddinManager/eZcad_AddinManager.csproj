@@ -100,6 +100,7 @@
       <HintPath>..\eZcad\obj\Debug\Interop.AutoCAD.dll</HintPath>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
@@ -122,6 +123,9 @@
     <EmbeddedResource Include="AddinManager\form_AddinManager.resx">
       <DependentUpon>form_AddinManager.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="GlobalBases\Utility\FormOk.resx">
+      <DependentUpon>FormOk.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AddinManager\AddinManagerLoader.cs" />
@@ -136,8 +140,22 @@
     <Compile Include="Addins\EcLoadTemplate1.cs" />
     <Compile Include="Addins\CmdDuplicatesFinder.cs" />
     <Compile Include="Addins\MenuItemsLoader.cs" />
-    <Compile Include="Addins\Utilities\eZConstants.cs" />
-    <Compile Include="Addins\Utilities\Utils.cs" />
+    <Compile Include="GlobalBases\AddinManagerDebuger.cs" />
+    <Compile Include="GlobalBases\DocumentModifier.cs" />
+    <Compile Include="GlobalBases\Utility\aCadConstants.cs" />
+    <Compile Include="GlobalBases\Utility\AdvancedExtents3d.cs" />
+    <Compile Include="GlobalBases\Utility\CurrentEditState.cs" />
+    <Compile Include="GlobalBases\Utility\EntityArray2D.cs" />
+    <Compile Include="GlobalBases\Utility\ExtensionMethods.cs" />
+    <Compile Include="GlobalBases\Utility\eZConstants.cs" />
+    <Compile Include="GlobalBases\Utility\FormOk.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GlobalBases\Utility\LayoutUtil.cs" />
+    <Compile Include="GlobalBases\Utility\SolidUtils.cs" />
+    <Compile Include="GlobalBases\Utility\TextUtils.cs" />
+    <Compile Include="GlobalBases\Utility\SymbolTableUtils.cs" />
+    <Compile Include="GlobalBases\Utility\Utils.cs" />
     <Compile Include="AssemblyInfo\AddinManagerAssembly.cs" />
     <Compile Include="AssemblyInfo\AssemblyInfoDllManager.cs" />
     <Compile Include="AssemblyInfo\AssemblyInfoFileManager.cs" />
@@ -152,12 +170,12 @@
     <Compile Include="AssemblyLoader\eZAssemblyLoader.cs" />
     <Compile Include="AssemblyLoader\FileUtils.cs" />
     <Compile Include="cmd_AddinManagerLoader.cs" />
-    <Compile Include="DocumentModifier.cs" />
     <Compile Include="ExternalCommand\ExCommandExecutor.cs" />
     <Compile Include="ExternalCommand\ExCommandFinder.cs" />
     <Compile Include="ExternalCommand\ICADExCommand.cs" />
     <Compile Include="myPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="GlobalBases\Utility\ViewportUtil.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">
@@ -181,6 +199,7 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

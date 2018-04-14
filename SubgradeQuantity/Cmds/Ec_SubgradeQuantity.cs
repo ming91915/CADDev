@@ -18,7 +18,7 @@ namespace eZcad.SQcmds
             ref IList<ObjectId> elementSet)
         {
             var s = new StationNavigator();
-            return AddinManagerDebuger.DebugInAddinManager(s.NavigateStation,
+            return SQAddinManagerDebuger.DebugInAddinManager(s.NavigateStation,
                 impliedSelection, ref errorMessage, ref elementSet);
         }
     }
@@ -34,7 +34,7 @@ namespace eZcad.SQcmds
             ref IList<ObjectId> elementSet)
         {
             var s = new SlopeConstructor();
-            return AddinManagerDebuger.DebugInAddinManager(s.ConstructSlopes,
+            return SQAddinManagerDebuger.DebugInAddinManager(s.ConstructSlopes,
                 impliedSelection, ref errorMessage, ref elementSet);
         }
     }

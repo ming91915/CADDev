@@ -25,9 +25,9 @@ namespace eZcad.SubgradeQuantity.Cmds
         #region --- 命令设计
 
         /// <summary> 在 AutoCAD 界面中快速导航到指定的桩号 </summary>
-        [CommandMethod(ProtectionConstants.eZGroupCommnad, CommandName, CommandFlags.UsePickSet)
+        [CommandMethod(SQConstants.eZGroupCommnad, CommandName, CommandFlags.UsePickSet)
         , DisplayName(@"断面导航"), Description("在 AutoCAD 界面中快速导航到指定的桩号")
-            , RibbonItem(@"断面导航", "在 AutoCAD 界面中快速导航到指定的桩号", ProtectionConstants.ImageDirectory + "Navigator_32.png")]
+            , RibbonItem(@"断面导航", "在 AutoCAD 界面中快速导航到指定的桩号", SQConstants.ImageDirectory + "Navigator_32.png")]
         public void NavigateStation()
         {
             DocumentModifier.ExecuteCommand(NavigateStation);
@@ -43,7 +43,7 @@ namespace eZcad.SubgradeQuantity.Cmds
             var wantedStation = SetStation(docMdf.acEditor, out start);
 
             // 所有的断面
-            var allSections = ProtectionUtils.GetAllSections(docMdf, sort: true);
+            var allSections = SQUtils.GetAllSections(docMdf, sort: true);
             if (allSections != null && allSections.Length > 0)
             {
 

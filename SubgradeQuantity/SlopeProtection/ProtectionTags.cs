@@ -38,7 +38,7 @@ namespace eZcad.SubgradeQuantity.SlopeProtection
             string baseProt;
             foreach (var pt in allProtMethods)
             {
-                var i = pt.IndexOf(ProtectionConstants.ProtectionMethodStyleSeperator);
+                var i = pt.IndexOf(SQConstants.ProtectionMethodStyleSeperator);
                 if (i >= 0) // 说明是 “挂网喷锚_6” 的形式
                 {
                     baseProt = pt.Substring(0, i);
@@ -76,7 +76,7 @@ namespace eZcad.SubgradeQuantity.SlopeProtection
         public static Dictionary<string, ObjectId> MapProtectionLayers(DocumentModifier docMdf, IEnumerable<SlopeLine> slopes)
         {
             // 
-            Utils.GetOrCreateAppName(docMdf.acDataBase, docMdf.acTransaction, ProtTextData.RegAppName_SlopeText);
+            SymbolTableUtils.GetOrCreateAppName(docMdf.acDataBase, docMdf.acTransaction, ProtTextData.RegAppName_SlopeText);
             // Utils.GetOrCreateAppName(docMdf.acDataBase, docMdf.acTransaction, ProtTextData.RegAppName_Platform);
             //
             var protectionTypes = GetProtectionTypes(slopes);
@@ -85,7 +85,7 @@ namespace eZcad.SubgradeQuantity.SlopeProtection
             var protLayers = new Dictionary<string, ObjectId>();
             foreach (var protName in categorizedProtMtd.Keys)
             {
-                var layer = Utils.GetOrCreateLayer(docMdf, GetLayerNameFromProtection(protName));
+                var layer = SymbolTableUtils.GetOrCreateLayer(docMdf.acTransaction, docMdf.acDataBase, GetLayerNameFromProtection(protName));
                 // 设置图层线宽
                 if (layer.LineWeight != LineWeight.LineWeight050)
                 {
@@ -103,7 +103,7 @@ namespace eZcad.SubgradeQuantity.SlopeProtection
 
         private static string GetLayerNameFromProtection(string protectionName)
         {
-            return ProtectionConstants.SubgradeQuantityTag + "_P_" + protectionName;
+            return SQConstants.SubgradeQuantityTag + "_P_" + protectionName;
         }
 
         /// <summary> 提取数据库中所有的边坡防护图层。键表示 防护形式，值代表对应的 图层名，二者是一一对应的，值比键多个了字符前缀  </summary>
@@ -113,7 +113,7 @@ namespace eZcad.SubgradeQuantity.SlopeProtection
         {
             LayerTable layers = db.LayerTableId.GetObject(OpenMode.ForRead) as LayerTable;
             var protLayers = new Dictionary<string, string>();
-            const string prefix = ProtectionConstants.SubgradeQuantityTag + "_P_";
+            const string prefix = SQConstants.SubgradeQuantityTag + "_P_";
             foreach (var layerId in layers)
             {
                 var layerName = (layerId.GetObject(OpenMode.ForRead) as LayerTableRecord).Name;

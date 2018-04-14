@@ -68,7 +68,7 @@ namespace eZcad.SubgradeQuantity.DataExport
         public Exporter_HighFillDeepCut(DocumentModifier docMdf, IList<SubgradeSection> allSections,
             List<SubgradeSection> handledSections) : base(docMdf, allSections.Select(r => r.XData.Station).ToArray())
         {
-            handledSections.Sort(ProtectionUtils.CompareStation);
+            handledSections.Sort(SQUtils.CompareStation);
             _handledSections = handledSections;
             _handledLeftSlopes = handledSections.Select(r => r.GetSlopeLine(true)).ToArray();
             _handledRightSlopes = handledSections.Select(r => r.GetSlopeLine(false)).ToArray();

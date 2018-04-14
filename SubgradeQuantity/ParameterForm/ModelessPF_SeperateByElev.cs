@@ -48,7 +48,7 @@ namespace eZcad.SubgradeQuantity.ParameterForm
         {
             //
             Utils.FocusOnMainUIWindow();
-            var selectedSlopes = ProtectionUtils.SelecteExistingSlopeLines(DocMdf, left: null, sort: true);
+            var selectedSlopes = SQUtils.SelecteExistingSlopeLines(DocMdf, left: null, sort: true);
             if (selectedSlopes == null || selectedSlopes.Count == 0) return;
             var handledSlopes = selectedSlopes.ToArray();
 
@@ -78,7 +78,7 @@ namespace eZcad.SubgradeQuantity.ParameterForm
 
             //
             //var layer_Slope = Utils.GetOrCreateLayer(docMdf, ProtectionConstants.LayerName_ProtectionMethod_Slope);
-            var layer_WaterLine = Utils.GetOrCreateLayer_WaterLine(docMdf);
+            var layer_WaterLine = SQUtils.GetOrCreateLayer_WaterLine(docMdf);
             //var layer_Platform = Utils.GetOrCreateLayer(docMdf, ProtectionConstants.LayerName_ProtectionMethod_Platform);
             var es = EditStateIdentifier.GetCurrentEditState(docMdf);
             es.CurrentBTR.UpgradeOpen();

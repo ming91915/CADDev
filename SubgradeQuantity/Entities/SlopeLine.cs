@@ -156,8 +156,10 @@ namespace eZcad.SubgradeQuantity.Entities
             }
             // 判断当前多段线是横断面系统中的哪一个
             var xdata = ca.XData;
-            if (ca.XData.LeftSlopeHandle == pline.Handle)
+            bool slpMatchedCenterLine = false;
+            if (xdata.LeftSlopeHandle == pline.Handle)
             {
+                slpMatchedCenterLine = true;
                 var retainingWall = xdata.LeftRetainingWallType != RetainingWallType.无
                     ? docMdf.acDataBase.GetObjectId(false, xdata.LeftRetainingWallHandle, 0).GetObject(OpenMode.ForRead)
                         as Polyline
@@ -165,8 +167,9 @@ namespace eZcad.SubgradeQuantity.Entities
                 //
                 return new SlopeLine(docMdf, pline, ca, true, ca.XData.LeftSlopeFill.Value, xdata.LeftRetainingWallType, retainingWall);
             }
-            if (ca.XData.RightSlopeHandle == pline.Handle)
+            if (xdata.RightSlopeHandle == pline.Handle)
             {
+                slpMatchedCenterLine = true;
                 var retainingWall = xdata.RightRetainingWallType != RetainingWallType.无
                     ? docMdf.acDataBase.GetObjectId(false, xdata.RightRetainingWallHandle, 0)
                         .GetObject(OpenMode.ForRead) as Polyline
@@ -174,8 +177,14 @@ namespace eZcad.SubgradeQuantity.Entities
                 //
                 return new SlopeLine(docMdf, pline, ca, false, ca.XData.RightSlopeFill.Value, xdata.RightRetainingWallType, retainingWall);
             }
-
-            errMsg = $"提取边坡对象出现异常，请重新通过“{SectionsConstructor.CommandName}”命令对横断面系统进行构造";
+            if (!slpMatchedCenterLine)
+            {
+                errMsg = $"边坡线条（{pline.Handle}）无法匹配道路中心线（桩号 {xdata.Station}）的对应的左边坡（{xdata.LeftSlopeHandle}）或右边坡（{xdata.RightSlopeHandle}）。";
+            }
+            else
+            {
+                errMsg = $"提取边坡对象出现异常，请重新通过“{SectionsConstructor.CommandName}”命令对横断面系统进行构造";
+            }
             return null;
         }
 
@@ -320,7 +329,7 @@ namespace eZcad.SubgradeQuantity.Entities
 
             foreach (var c in curve.GetCurves().OfType<LineSegment3d>())
             {
-                if (c.Length > ProtectionConstants.MinSlopeSegLength)
+                if (c.Length > SQConstants.MinSlopeSegLength)
                 {
                     segs.Add(c);
                 }
@@ -345,11 +354,11 @@ namespace eZcad.SubgradeQuantity.Entities
                 else
                 {
                     // 设定与水平方向平行的向量容差
-                    if (seg.Direction.IsParallelTo(ProtectionConstants.HorizontalVec3,
+                    if (seg.Direction.IsParallelTo(SQConstants.HorizontalVec3,
                         new Tolerance(0.0005, Tolerance.Global.EqualPoint)))
                     {
                         // 说明可能是平台，但如果其长度大于设置的平台最宽值，则认为其为一个平坡
-                        if (seg.Length <= ProtectionConstants.MaxPlatformLength)
+                        if (seg.Length <= SQConstants.MaxPlatformLength)
                         {
                             // 说明是一个平台
                             if (lastIsPlatform)
@@ -769,7 +778,7 @@ namespace eZcad.SubgradeQuantity.Entities
             // 一般性的数据 保存到 Dictionary
             var genBuff = slopeXdata.ToResBuff_General();
             var rec = new Xrecord() { Data = genBuff };
-            Utils.OverlayDictValue(trans, extensionDict, SlopeData.DictKey_General, rec);
+            SymbolTableUtils.OverlayDictValue(trans, extensionDict, SlopeData.DictKey_General, rec);
 
             // 边坡数据 保存到 Dictionary
             slopeXdata.ToDict_Slopes(_docMdf.acTransaction, extensionDict);
@@ -777,7 +786,7 @@ namespace eZcad.SubgradeQuantity.Entities
             // 水位线数据 保存到 Dictionary
             var waterlines = slopeXdata.ToResBuff_Waterlines();
             rec = new Xrecord() { Data = waterlines };
-            Utils.OverlayDictValue(trans, extensionDict, SlopeData.DictKey_Waterlines, rec);
+            SymbolTableUtils.OverlayDictValue(trans, extensionDict, SlopeData.DictKey_Waterlines, rec);
             //
             extensionDict.DowngradeOpen();
         }

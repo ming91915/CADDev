@@ -8,7 +8,7 @@ using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
 using eZcad.Addins;
-using eZcad.Addins.Utilities;
+using eZcad.Utility;
 
 [assembly: CommandClass(typeof(MenuItemsLoader))]
 
@@ -29,14 +29,14 @@ namespace eZcad.Addins
         #endregion
 
         /// <summary> 将多个单行文字按其定位进行组合 </summary>
-        public void LoadMenuItems(DocumentModifier docMdf, SelectionSet impliedSelection)
+        public ExternalCmdResult LoadMenuItems(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
             string assPath = @"D:\ProgrammingCases\GitHubProjects\CADDev\bin\eZcad - 副本.dll";
             string[] assPaths = Utils.ChooseOpenFile("选择要加载菜单的程序集", "程序集(*.dll; *.exe)| *.dll; *.exe",
                 multiselect: false);
             if (assPaths == null)
             {
-                return;
+                return ExternalCmdResult.Cancel;
             }
             assPath = assPaths[0];
 
@@ -63,6 +63,7 @@ namespace eZcad.Addins
                     AddMenus(app, menuName + "", mtds);
                 }
             }
+            return ExternalCmdResult.Commit;
         }
 
         private static List<MethodInfo> GetExternalCommands(CommandClassAttribute[] classes)
@@ -142,7 +143,7 @@ namespace eZcad.Addins
 
                 AcadPopupMenuItem childMenuItem = topPpMenu.AddMenuItem(Index: topPpMenu.Count + 1, Label: label,
                     Macro: att.GlobalName + "\n");
-                
+
                 //// 添加可以包含子项的菜单
                 //AcadPopupMenu menuItemContainer = topPpMenu.AddSubMenu(Index: topPpMenu.Count + 1, Label: "block");
                 //AcadPopupMenuItem childMenuItem2 = menuItemContainer.AddMenuItem(Index: menuItemContainer.Count + 1,

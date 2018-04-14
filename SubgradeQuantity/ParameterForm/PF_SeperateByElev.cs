@@ -47,15 +47,15 @@ namespace eZcad.SubgradeQuantity.ParameterForm
             // 左右侧
             if (radioButton_left.Checked)
             {
-                selectedSlopes = ProtectionUtils.SelecteExistingSlopeLines(_docMdf, left: true, sort: true);
+                selectedSlopes = SQUtils.SelecteExistingSlopeLines(_docMdf, left: true, sort: true);
             }
             else if (radioButton_right.Checked)
             {
-                selectedSlopes = ProtectionUtils.SelecteExistingSlopeLines(_docMdf, left: false, sort: true);
+                selectedSlopes = SQUtils.SelecteExistingSlopeLines(_docMdf, left: false, sort: true);
             }
             else
             {
-                selectedSlopes = ProtectionUtils.SelecteExistingSlopeLines(_docMdf, left: null, sort: true);
+                selectedSlopes = SQUtils.SelecteExistingSlopeLines(_docMdf, left: null, sort: true);
             }
             if (selectedSlopes == null || selectedSlopes.Count == 0) return;
             var handledSlopes = selectedSlopes.ToArray();
@@ -87,7 +87,7 @@ namespace eZcad.SubgradeQuantity.ParameterForm
 
             //
             //var layer_Slope = Utils.GetOrCreateLayer(docMdf, ProtectionConstants.LayerName_ProtectionMethod_Slope);
-            var layer_WaterLine = Utils.GetOrCreateLayer_WaterLine(docMdf);
+            var layer_WaterLine = eZcad.SubgradeQuantity.Utility.SQUtils.GetOrCreateLayer_WaterLine(docMdf);
             //var layer_Platform = Utils.GetOrCreateLayer(docMdf, ProtectionConstants.LayerName_ProtectionMethod_Platform);
             var es = EditStateIdentifier.GetCurrentEditState(docMdf);
             es.CurrentBTR.UpgradeOpen();

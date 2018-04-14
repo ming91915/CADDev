@@ -81,7 +81,7 @@ namespace eZcad.SubgradeQuantity.DataExport
         public Exporter_StairsExcavCross(DocumentModifier docMdf, IList<SubgradeSection> allSections,
             List<SubgradeSection> handledSections) : base(docMdf, allSections.Select(r => r.XData.Station).ToArray())
         {
-            handledSections.Sort(ProtectionUtils.CompareStation);
+            handledSections.Sort(SQUtils.CompareStation);
             _handledSections = handledSections;
             //
             _sortedRanges = InitializeGeometricRange<StairsExcav>(AllStations);
@@ -154,11 +154,11 @@ namespace eZcad.SubgradeQuantity.DataExport
                 {
                     rg.BackValue.EdgeStation,
                     rg.FrontValue.EdgeStation,
-                    ProtectionUtils.GetStationString(rg.BackValue.EdgeStation, rg.FrontValue.EdgeStation, 0),
+                    SQUtils.GetStationString(rg.BackValue.EdgeStation, rg.FrontValue.EdgeStation, 0),
                    rangeLength,
 
-                    (int) (rg.BackValue.StairCutSide & SectionSide.左) > 0 ? ProtectionConstants.CheckMark : null,
-                    (int) (rg.BackValue.StairCutSide & SectionSide.右) > 0 ? ProtectionConstants.CheckMark : null,
+                    (int) (rg.BackValue.StairCutSide & SectionSide.左) > 0 ? SQConstants.CheckMark : null,
+                    (int) (rg.BackValue.StairCutSide & SectionSide.右) > 0 ? SQConstants.CheckMark : null,
                     rg.BackValue.AverageTreatedWidth,
                     rg.BackValue.AverageStairArea * rangeLength,
                 });

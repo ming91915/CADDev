@@ -113,7 +113,7 @@ namespace eZcad.SubgradeQuantity.DataExport
             foreach (var bs in blockStructures)
             {
                 //
-                var s1 = sections.FirstOrDefault(r => Math.Abs(r.StationInbetween - bs.ConnectedBackStaion) < ProtectionConstants.RangeMergeTolerance);
+                var s1 = sections.FirstOrDefault(r => Math.Abs(r.StationInbetween - bs.ConnectedBackStaion) < SQConstants.RangeMergeTolerance);
                 if (s1 != null)
                 {
                     // 说明此断面刚好位于指定的结构后面（桩号比结构起始桩号小一点）
@@ -121,7 +121,7 @@ namespace eZcad.SubgradeQuantity.DataExport
                     s1.FrontValue.CutByBlock(bs.StartStation);
                 }
                 //
-                var s2 = sections.FirstOrDefault(r => Math.Abs(r.StationInbetween - bs.ConnectedFrontStaion) < ProtectionConstants.RangeMergeTolerance);
+                var s2 = sections.FirstOrDefault(r => Math.Abs(r.StationInbetween - bs.ConnectedFrontStaion) < SQConstants.RangeMergeTolerance);
                 if (s2 != null)
                 {
                     // 说明此断面刚好位于指定的结构前面（桩号比结构起始桩号大一点）
@@ -205,7 +205,7 @@ namespace eZcad.SubgradeQuantity.DataExport
         /// <remarks>整个项目的所有断面的数据，有的断面有测量数据，而有的只是用来标识或插值。集合中，桩号小的元素下标值较小</remarks>
         private List<StationInfo<T>> Sort_FilterMeasured<T>(List<StationInfo<T>> sections)
         {
-            sections.Sort(ProtectionUtils.CompareStation);
+            sections.Sort(SQUtils.CompareStation);
             // 排序后集合中可能会有重复的里程(比如一个里程中，将一种边坡防护分两级坡分开算)
 
             // 现在将排序后相同里程的数据进行相加
@@ -305,7 +305,7 @@ namespace eZcad.SubgradeQuantity.DataExport
                     //
                     foreach (var tpInfo in sheet_Infos)
                     {
-                        var sht = ProtectionUtils.GetOrCreateWorkSheet(wkbk, tpInfo.SheetName);
+                        var sht = SQUtils.GetOrCreateWorkSheet(wkbk, tpInfo.SheetName);
                         if (sht != null)
                         {
                             RangeValueConverter.FillRange(sht, startRow: 1, startCol: 1, arr: tpInfo.Data,
@@ -368,7 +368,7 @@ namespace eZcad.SubgradeQuantity.DataExport
                     }
                     else
                     {
-                        excelApp = ProtectionUtils.GetExcelApp(visible: false);
+                        excelApp = SQUtils.GetExcelApp(visible: false);
                         // excelApp = new Application() { Visible = false };
                         wkbk = excelApp.Workbooks.Add();
                         wkbk.SaveAs(Filename: filePath, FileFormat: XlFileFormat.xlAddIn8);

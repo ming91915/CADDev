@@ -28,10 +28,10 @@ namespace eZcad.SubgradeQuantity.Cmds
         private const string CommandDescription = @"设置整个道路中的结构物、岩土环境等信息";
 
         /// <summary> 按标高将边坡对象进行分割，以实现同一级边坡中分别设置不同的防护形式 </summary>
-        [CommandMethod(ProtectionConstants.eZGroupCommnad, CommandName,
+        [CommandMethod(SQConstants.eZGroupCommnad, CommandName,
             CommandFlags.Interruptible | CommandFlags.UsePickSet | CommandFlags.NoBlockEditor)
         , DisplayName(CommandText), Description(CommandDescription)
-        , RibbonItem(CommandText, CommandDescription, ProtectionConstants.ImageDirectory + "Structures_32.png")]
+        , RibbonItem(CommandText, CommandDescription, SQConstants.ImageDirectory + "Structures_32.png")]
         public void SetSubgradeEnvir()
         {
             DocumentModifier.ExecuteCommand(SetSubgradeEnvir);
@@ -41,7 +41,7 @@ namespace eZcad.SubgradeQuantity.Cmds
             ref IList<ObjectId> elementSet)
         {
             var s = new SubgradeEnvir();
-            return AddinManagerDebuger.DebugInAddinManager(s.SetSubgradeEnvir,
+            return SQAddinManagerDebuger.DebugInAddinManager(s.SetSubgradeEnvir,
                 impliedSelection, ref errorMessage, ref elementSet);
         }
 

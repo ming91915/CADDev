@@ -29,9 +29,9 @@ namespace eZcad.SubgradeQuantity.Cmds
         private const string CommandDescription = @"将边坡线所绑定的防护方式的文字保存到边坡线数据中";
 
         /// <summary> 从边坡线所绑定的防护方式的文字对象来设置防护 </summary>
-        [CommandMethod(ProtectionConstants.eZGroupCommnad, CommandName, CommandFlags.UsePickSet)
+        [CommandMethod(SQConstants.eZGroupCommnad, CommandName, CommandFlags.UsePickSet)
         , DisplayName(CommandText), Description(CommandDescription)
-            , RibbonItem(CommandText, CommandDescription, ProtectionConstants.ImageDirectory + "FlushProtection_32.png")]
+            , RibbonItem(CommandText, CommandDescription, SQConstants.ImageDirectory + "FlushProtection_32.png")]
         public void FlushProtection()
         {
             DocumentModifier.ExecuteCommand(FlushProtection);
@@ -41,7 +41,7 @@ namespace eZcad.SubgradeQuantity.Cmds
             ref IList<ObjectId> elementSet)
         {
             var s = new ProtectionFlusher();
-            return AddinManagerDebuger.DebugInAddinManager(s.FlushProtection,
+            return SQAddinManagerDebuger.DebugInAddinManager(s.FlushProtection,
                 impliedSelection, ref errorMessage, ref elementSet);
         }
 
@@ -51,9 +51,9 @@ namespace eZcad.SubgradeQuantity.Cmds
         public ExternalCmdResult FlushProtection(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
             _docMdf = docMdf;
-            ProtectionUtils.SubgradeEnvironmentConfiguration(docMdf);
+            SQUtils.SubgradeEnvironmentConfiguration(docMdf);
             // var allSections = ProtectionUtils.GetAllSections(docMdf);
-            var slopeLines = ProtectionUtils.SelecteExistingSlopeLines(docMdf, left: null, sort: true);
+            var slopeLines = SQUtils.SelecteExistingSlopeLines(docMdf, left: null, sort: true);
 
             // 从文字中提取边坡防护方式的数据
             foreach (var slp in slopeLines)

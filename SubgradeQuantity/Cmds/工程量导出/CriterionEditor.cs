@@ -28,9 +28,9 @@ namespace eZcad.SubgradeQuantity.Cmds
         private const string CommandDescription = @"路基工程量计算中，判断与计量的相关选项设置";
 
         /// <summary> 边坡防护的选项设置 </summary>
-        [CommandMethod(ProtectionConstants.eZGroupCommnad, CommandName, ProtectionConstants.ModelState | CommandFlags.UsePickSet)
+        [CommandMethod(SQConstants.eZGroupCommnad, CommandName, SQConstants.ModelState | CommandFlags.UsePickSet)
         , DisplayName(CommandText), Description(CommandDescription)
-        , RibbonItem(CommandText, CommandDescription, ProtectionConstants.ImageDirectory + "SetOptions_32.png")]
+        , RibbonItem(CommandText, CommandDescription, SQConstants.ImageDirectory + "SetOptions_32.png")]
         public void EditCriterion()
         {
             DocumentModifier.ExecuteCommand(EditCriterion);
@@ -40,7 +40,7 @@ namespace eZcad.SubgradeQuantity.Cmds
             ref IList<ObjectId> elementSet)
         {
             var s = new CriterionEditor();
-            return AddinManagerDebuger.DebugInAddinManager(s.EditCriterion,
+            return SQAddinManagerDebuger.DebugInAddinManager(s.EditCriterion,
                 impliedSelection, ref errorMessage, ref elementSet);
         }
 

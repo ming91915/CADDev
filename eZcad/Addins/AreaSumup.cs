@@ -40,7 +40,7 @@ namespace eZcad.Addins
             ref IList<ObjectId> elementSet)
         {
             var s = new AreaSumup();
-            return AddinManagerDebuger.DebugInAddinManager(s.SumupArea,
+            return eZcadAddinManagerDebuger.DebugInAddinManager(s.SumupArea,
                 impliedSelection, ref errorMessage, ref elementSet);
         }
 

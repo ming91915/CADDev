@@ -108,7 +108,7 @@ namespace eZcad.SubgradeQuantity.DataExport
         public Exporter_RoadSurface(DocumentModifier docMdf, IList<SubgradeSection> allSections,
             List<SubgradeSection> handledSections) : base(docMdf, allSections.Select(r => r.XData.Station).ToArray())
         {
-            handledSections.Sort(ProtectionUtils.CompareStation);
+            handledSections.Sort(SQUtils.CompareStation);
             _handledSections = handledSections;
             //
             _sortedRanges_RoadSurface = InitializeGeometricRange<RoadSurface>(AllStations);

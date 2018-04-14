@@ -23,7 +23,7 @@ namespace eZcad.SQcmds
             return ExternalCommandResult.Succeeded;
 
             var s = new DebugTemplate();
-            return AddinManagerDebuger.DebugInAddinManager(s.DoSomething,
+            return SQAddinManagerDebuger.DebugInAddinManager(s.DoSomething,
                 impliedSelection, ref errorMessage, ref elementSet);
         }
 

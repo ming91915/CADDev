@@ -28,9 +28,9 @@ namespace eZcad.SubgradeQuantity.Cmds
 
 
         /// <summary> 将边坡对象清理为一般的边坡线，并删除其中所有与边坡相关的数据 </summary>
-        [CommandMethod(ProtectionConstants.eZGroupCommnad, CommandName, ProtectionConstants.ModelState | CommandFlags.UsePickSet)
+        [CommandMethod(SQConstants.eZGroupCommnad, CommandName, SQConstants.ModelState | CommandFlags.UsePickSet)
         , DisplayName(CommandText), Description(CommandDescription),
-         RibbonItem(CommandText, CommandDescription, ProtectionConstants.ImageDirectory + "EraseSlope_32.png")]
+         RibbonItem(CommandText, CommandDescription, SQConstants.ImageDirectory + "EraseSlope_32.png")]
         public void EraseSlope()
         {
             DocumentModifier.ExecuteCommand(EraseSlope);
@@ -40,7 +40,7 @@ namespace eZcad.SubgradeQuantity.Cmds
             ref IList<ObjectId> elementSet)
         {
             var s = new SlopeEraser();
-            return AddinManagerDebuger.DebugInAddinManager(s.EraseSlope,
+            return SQAddinManagerDebuger.DebugInAddinManager(s.EraseSlope,
                 impliedSelection, ref errorMessage, ref elementSet);
         }
 
@@ -50,11 +50,11 @@ namespace eZcad.SubgradeQuantity.Cmds
         public ExternalCmdResult EraseSlope(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
             _docMdf = docMdf;
-            ProtectionUtils.SubgradeEnvironmentConfiguration(docMdf);
+            SQUtils.SubgradeEnvironmentConfiguration(docMdf);
 
             // 所有的断面
             // var allSections = ProtectionUtils.GetAllSections(docMdf,sort:true);
-            var slopes = ProtectionUtils.SelecteExistingSlopeLines(docMdf, left: null, sort: false);
+            var slopes = SQUtils.SelecteExistingSlopeLines(docMdf, left: null, sort: false);
             var es = EditStateIdentifier.GetCurrentEditState(_docMdf);
             es.CurrentBTR.UpgradeOpen();
             foreach (var slp in slopes)

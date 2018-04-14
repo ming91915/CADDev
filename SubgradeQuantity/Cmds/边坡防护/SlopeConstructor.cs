@@ -26,9 +26,9 @@ namespace eZcad.SubgradeQuantity.Cmds
         public const string CommandName = "ConstructSlopes";
 
         /// <summary> 创建边坡并设置每一个边坡的数据 </summary>
-        [CommandMethod(ProtectionConstants.eZGroupCommnad, CommandName, CommandFlags.UsePickSet)
+        [CommandMethod(SQConstants.eZGroupCommnad, CommandName, CommandFlags.UsePickSet)
         , DisplayName(@"创建边坡"), Description("创建边坡并设置每一个边坡的数据")
-        , RibbonItem(@"创建边坡", "创建边坡并设置每一个边坡的数据", ProtectionConstants.ImageDirectory + "ConstructSlopes_32.png")]
+        , RibbonItem(@"创建边坡", "创建边坡并设置每一个边坡的数据", SQConstants.ImageDirectory + "ConstructSlopes_32.png")]
         public void ConstructSlopes()
         {
             DocumentModifier.ExecuteCommand(ConstructSlopes);
@@ -38,9 +38,9 @@ namespace eZcad.SubgradeQuantity.Cmds
         public ExternalCmdResult ConstructSlopes(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
             _docMdf = docMdf;
-            ProtectionUtils.SubgradeEnvironmentConfiguration(docMdf);
+            SQUtils.SubgradeEnvironmentConfiguration(docMdf);
             var justModifyCalculatedSlopes = ModifyOrAdd(docMdf.acEditor);
-            var slopeLines = ProtectionUtils.SelecteSlopeLines(docMdf.acEditor, left: null);
+            var slopeLines = SQUtils.SelecteSlopeLines(docMdf.acEditor, left: null);
             if (slopeLines != null && slopeLines.Count > 0)
             {
                 ConfigerSlopes(slopeLines, justModifyCalculatedSlopes);
@@ -77,7 +77,7 @@ namespace eZcad.SubgradeQuantity.Cmds
         {
             if (slopeLines == null || slopeLines.Count == 0) return;
             //
-            var app = Utils.GetOrCreateAppName(_docMdf.acDataBase, _docMdf.acTransaction, SlopeData.AppName);
+            var app = SymbolTableUtils.GetOrCreateAppName(_docMdf.acDataBase, _docMdf.acTransaction, SlopeData.AppName);
 
             var selectedSlpLines = new List<SlopeLine>();
             string errMsg;

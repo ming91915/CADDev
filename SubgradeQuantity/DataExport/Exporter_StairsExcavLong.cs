@@ -29,8 +29,8 @@ namespace eZcad.SubgradeQuantity.DataExport
             public bool IsMergeable(IMergeable next)
             {
                 var nextRange = next as LongitudinalStairExcav;
-                if ((nextRange.StartStation - EndStation > ProtectionConstants.RangeMergeTolerance)
-                    || (StartStation - nextRange.EndStation > ProtectionConstants.RangeMergeTolerance))
+                if ((nextRange.StartStation - EndStation > SQConstants.RangeMergeTolerance)
+                    || (StartStation - nextRange.EndStation > SQConstants.RangeMergeTolerance))
                 {
                     return false;
                 }
@@ -157,7 +157,7 @@ namespace eZcad.SubgradeQuantity.DataExport
                 {
                     stair.StartStation,
                     stair.EndStation,
-                    ProtectionUtils.GetStationString(stair.StartStation, stair.EndStation, 0),
+                    SQUtils.GetStationString(stair.StartStation, stair.EndStation, 0),
                     stair.EndStation - stair.StartStation,
                     stair.StairArea,
                 });

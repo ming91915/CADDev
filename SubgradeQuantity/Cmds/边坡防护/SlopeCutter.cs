@@ -26,10 +26,10 @@ namespace eZcad.SubgradeQuantity.Cmds
         private const string CommandDescription = @"按标高将边坡对象进行分割，以实现同一级边坡中分别设置不同的防护形式";
 
         /// <summary> 按标高将边坡对象进行分割，以实现同一级边坡中分别设置不同的防护形式 </summary>
-        [CommandMethod(ProtectionConstants.eZGroupCommnad, CommandName,
+        [CommandMethod(SQConstants.eZGroupCommnad, CommandName,
             CommandFlags.Interruptible | CommandFlags.UsePickSet | CommandFlags.NoBlockEditor)
         , DisplayName(CommandText), Description(CommandDescription)
-        , RibbonItem(CommandText, CommandDescription, ProtectionConstants.ImageDirectory + "SepByElev_32.png")]
+        , RibbonItem(CommandText, CommandDescription, SQConstants.ImageDirectory + "SepByElev_32.png")]
         public void CutSlopes()
         {
             DocumentModifier.ExecuteCommand(CutSlopes);
@@ -39,7 +39,7 @@ namespace eZcad.SubgradeQuantity.Cmds
             ref IList<ObjectId> elementSet)
         {
             var s = new SlopeCutter();
-            return AddinManagerDebuger.DebugInAddinManager(s.CutSlopes,
+            return SQAddinManagerDebuger.DebugInAddinManager(s.CutSlopes,
                 impliedSelection, ref errorMessage, ref elementSet);
         }
 

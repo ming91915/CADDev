@@ -57,7 +57,7 @@ namespace eZcad.SubgradeQuantity.Options
             if ((xdataType & DatabaseXdataType.LayerNames) > 0)
             {
                 var dictKey = Enum.GetName(typeof(DatabaseXdataType), DatabaseXdataType.LayerNames);
-                var rec = Utils.GetDictionaryValue<Xrecord>(baseDict, dictKey);
+                var rec = SymbolTableUtils.GetDictionaryValue<Xrecord>(baseDict, dictKey);
                 if (rec != null)
                 {
                     Options_LayerNames.FromXrecord(rec);
@@ -66,20 +66,20 @@ namespace eZcad.SubgradeQuantity.Options
             if ((xdataType & DatabaseXdataType.RangeBlocks) > 0)
             {
                 var dictKey = Enum.GetName(typeof(DatabaseXdataType), DatabaseXdataType.RangeBlocks);
-                var rec = Utils.GetDictionaryValue<Xrecord>(baseDict, dictKey);
+                var rec = SymbolTableUtils.GetDictionaryValue<Xrecord>(baseDict, dictKey);
                 Options_Collections.FromXrecord_Blocks(rec);
             }
             if ((xdataType & DatabaseXdataType.SoilRockRange) > 0)
             {
                 var dictKey = Enum.GetName(typeof(DatabaseXdataType), DatabaseXdataType.SoilRockRange);
-                var rec = Utils.GetDictionaryValue<Xrecord>(baseDict, dictKey);
+                var rec = SymbolTableUtils.GetDictionaryValue<Xrecord>(baseDict, dictKey);
                 Options_Collections.FromXrecord_SoilRockRanges(rec);
 
             }
             if ((xdataType & DatabaseXdataType.AllSortedStations) > 0)
             {
                 var dictKey = Enum.GetName(typeof(DatabaseXdataType), DatabaseXdataType.AllSortedStations);
-                var rec = Utils.GetDictionaryValue<Xrecord>(baseDict, dictKey);
+                var rec = SymbolTableUtils.GetDictionaryValue<Xrecord>(baseDict, dictKey);
                 Options_Collections.FromXrecord_SortedStations(rec);
             }
         }
@@ -93,7 +93,7 @@ namespace eZcad.SubgradeQuantity.Options
             {
                 var dictKey = Enum.GetName(typeof(DatabaseXdataType), DatabaseXdataType.LayerNames);
                 var xBuff = Options_LayerNames.ToResultBuffer();
-                Utils.ModifyDictXrecord(docMdf.acTransaction, baseDict, dictKey, xBuff);
+                SymbolTableUtils.ModifyDictXrecord(docMdf.acTransaction, baseDict, dictKey, xBuff);
                 //baseDict.SetAt(dictKey, xBuff);
                 //docMdf.acTransaction.AddNewlyCreatedDBObject(xBuff, true);
             }
@@ -101,7 +101,7 @@ namespace eZcad.SubgradeQuantity.Options
             {
                 var dictKey = Enum.GetName(typeof(DatabaseXdataType), DatabaseXdataType.RangeBlocks);
                 var xBuff = Options_Collections.ToResultBuffer_Blocks();
-                Utils.ModifyDictXrecord(docMdf.acTransaction, baseDict, dictKey, xBuff);
+                SymbolTableUtils.ModifyDictXrecord(docMdf.acTransaction, baseDict, dictKey, xBuff);
                 //baseDict.SetAt(dictKey, xrec);
                 //docMdf.acTransaction.AddNewlyCreatedDBObject(xrec, true);
             }
@@ -109,7 +109,7 @@ namespace eZcad.SubgradeQuantity.Options
             {
                 var dictKey = Enum.GetName(typeof(DatabaseXdataType), DatabaseXdataType.SoilRockRange);
                 var xBuff = Options_Collections.ToResultBuffer_SoilRockRanges();
-                Utils.ModifyDictXrecord(docMdf.acTransaction, baseDict, dictKey, xBuff);
+                SymbolTableUtils.ModifyDictXrecord(docMdf.acTransaction, baseDict, dictKey, xBuff);
                 //baseDict.SetAt(dictKey, xrec);
                 //docMdf.acTransaction.AddNewlyCreatedDBObject(xrec, true);
             }
@@ -117,7 +117,7 @@ namespace eZcad.SubgradeQuantity.Options
             {
                 var dictKey = Enum.GetName(typeof(DatabaseXdataType), DatabaseXdataType.AllSortedStations);
                 var xBuff = Options_Collections.ToResultBuffer_SortedStations();
-                Utils.ModifyDictXrecord(docMdf.acTransaction, baseDict, dictKey, xBuff);
+                SymbolTableUtils.ModifyDictXrecord(docMdf.acTransaction, baseDict, dictKey, xBuff);
                 //baseDict.SetAt(dictKey, xrec);
                 //docMdf.acTransaction.AddNewlyCreatedDBObject(xrec, true);
             }
@@ -134,7 +134,7 @@ namespace eZcad.SubgradeQuantity.Options
         private static DBDictionary GetBaseDict(DocumentModifier docMdf)
         {
             var nod = docMdf.acDataBase.NamedObjectsDictionaryId.GetObject(OpenMode.ForRead) as DBDictionary;
-            var baseDict = Utils.GetDictionaryValue<DBDictionary>(nod, DatabaseDictKey);
+            var baseDict = SymbolTableUtils.GetDictionaryValue<DBDictionary>(nod, DatabaseDictKey);
             if (baseDict == null)
             {
                 // DBDictionary 中插入 DBDictionary

@@ -28,10 +28,10 @@ namespace eZcad.SubgradeQuantity.Cmds
         private const string CommandDescription = @"对于横断面坡度过陡的断面进行判断，并设置土工格栅";
 
         /// <summary> 对于横断面坡度过陡的断面进行判断，并设置土工格栅 </summary>
-        [CommandMethod(ProtectionConstants.eZGroupCommnad, CommandName,
+        [CommandMethod(SQConstants.eZGroupCommnad, CommandName,
             CommandFlags.Interruptible | CommandFlags.UsePickSet | CommandFlags.NoBlockEditor)
         , DisplayName(CommandText), Description(CommandDescription)
-        , RibbonItem(CommandText, CommandDescription, ProtectionConstants.ImageDirectory + "SteepSlope_32.png")]
+        , RibbonItem(CommandText, CommandDescription, SQConstants.ImageDirectory + "SteepSlope_32.png")]
         public void SteepSlope()
         {
             DocumentModifier.ExecuteCommand(SteepSlope);
@@ -41,7 +41,7 @@ namespace eZcad.SubgradeQuantity.Cmds
             ref IList<ObjectId> elementSet)
         {
             var s = new InfosGetter_SteepSlope();
-            return AddinManagerDebuger.DebugInAddinManager(s.SteepSlope,
+            return SQAddinManagerDebuger.DebugInAddinManager(s.SteepSlope,
                 impliedSelection, ref errorMessage, ref elementSet);
         }
 
@@ -55,12 +55,12 @@ namespace eZcad.SubgradeQuantity.Cmds
             _docMdf = docMdf;
             //  ProtectionUtils.SubgradeEnvironmentConfiguration(docMdf);
 
-            var centerLines = ProtectionUtils.SelecteSectionLines(docMdf.acEditor);
+            var centerLines = SQUtils.SelecteSectionLines(docMdf.acEditor);
             if (centerLines == null || centerLines.Count == 0) return ExternalCmdResult.Cancel;
 
             // 
             // 所有的断面
-            var allSections = ProtectionUtils.GetAllSections(docMdf, sort: true);
+            var allSections = SQUtils.GetAllSections(docMdf, sort: true);
             // var allStations = allSections.Select(r => r.XData.Station).ToArray();
 
             // 要处理的断面

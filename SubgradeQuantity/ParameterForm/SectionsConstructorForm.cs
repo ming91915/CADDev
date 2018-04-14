@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using eZcad.SubgradeQuantity.Entities;
 
 namespace eZcad.SubgradeQuantity.ParameterForm
@@ -75,7 +76,7 @@ namespace eZcad.SubgradeQuantity.ParameterForm
         private void ConstructSections_DoWork(System.Object sender, DoWorkEventArgs e)
         {
             BackgroundWorker worker = (BackgroundWorker)sender;
-            //  _docMdf.WriteLineIntoDebuger("提取出错的断面：");
+            var errorCenterLine = new List<Line>();
             for (int i = 0; i < _count; i++)
             {
                 var axis = _centerLines[i];
@@ -93,8 +94,27 @@ namespace eZcad.SubgradeQuantity.ParameterForm
                     }
                     cenA.CenterLine.DowngradeOpen();
                 }
+                else
+                {
+                    errorCenterLine.Add(axis);
+                }
                 // 显示进度
                 worker.ReportProgress(i);
+            }
+            // 列出出错的断面
+            if (errorCenterLine.Count > 0)
+            {
+                _docMdf.WriteLineIntoDebuger("提取出错的断面：");
+                _docMdf.WriteLineIntoDebuger("序号    起点  终点");
+                int index = 0;
+                var acPoly = new Polyline();
+                foreach (var ecl in errorCenterLine)
+                {
+                    var pt = new Point2d(ecl.StartPoint.X, ecl.StartPoint.Y);
+                    acPoly.AddVertexAt(index, pt, 0, startWidth: 0, endWidth: 0);
+                    _docMdf.WriteLineIntoDebuger(index + 1, ecl.StartPoint, ecl.EndPoint);
+                    index += 1;
+                }
             }
         }
         // -----------------------------------------------------------------------------------------------------------

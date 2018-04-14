@@ -52,7 +52,7 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="ApplicationSetup\AddinManagerDebuger.cs" />
+    <Compile Include="ApplicationSetup\SQAddinManagerDebuger.cs" />
     <Compile Include="ApplicationSetup\AddinSetup.cs" />
     <Compile Include="ApplicationSetup\ApplicationSetup.cs">
       <SubType>Form</SubType>
@@ -61,7 +61,6 @@
       <DependentUpon>ApplicationSetup.cs</DependentUpon>
     </Compile>
     <Compile Include="ApplicationSetup\DllActivator_SubgradeQuantity.cs" />
-    <Compile Include="ApplicationSetup\DocumentModifier.cs" />
     <Compile Include="ApplicationSetup\RibbonButtonAttribute.cs" />
     <Compile Include="Cmds\Ec_DebugTemplate.cs" />
     <Compile Include="Cmds\Ec_SubgradeQuantity.cs" />
@@ -119,14 +118,6 @@
     <Compile Include="Entities\StationRangeEntity.cs" />
     <Compile Include="Entities\RangeBlock.cs" />
     <Compile Include="Entities\SubgradeSection.cs" />
-    <Compile Include="eZcadUtility\CurrentEditState.cs" />
-    <Compile Include="eZcadUtility\EntityArray2D.cs" />
-    <Compile Include="eZcadUtility\ExtensionMethods.cs" />
-    <Compile Include="eZcadUtility\FormOk.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="eZcadUtility\TextUtils.cs" />
-    <Compile Include="eZcadUtility\Utils.cs" />
     <Compile Include="Options\DbXdata.cs" />
     <Compile Include="Options\Form_CriterionEditor.cs">
       <SubType>Form</SubType>
@@ -234,13 +225,10 @@
     <Compile Include="SlopeProtection\SlopeSegLister.Designer.cs">
       <DependentUpon>SlopeSegLister.cs</DependentUpon>
     </Compile>
-    <Compile Include="Utility\ProtectionConstants.cs" />
-    <Compile Include="Utility\ProtectionUtils.cs" />
+    <Compile Include="SQUtility\SQConstants.cs" />
+    <Compile Include="SQUtility\SQUtils.cs" />
     <EmbeddedResource Include="ApplicationSetup\ApplicationSetup.resx">
       <DependentUpon>ApplicationSetup.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="eZcadUtility\FormOk.resx">
-      <DependentUpon>FormOk.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Options\Form_CriterionEditor.resx">
       <DependentUpon>Form_CriterionEditor.cs</DependentUpon>

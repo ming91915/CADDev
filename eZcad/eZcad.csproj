@@ -131,6 +131,7 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Addins\Annotation\AnnotationEntity.cs" />
     <Compile Include="Addins\BlockRefEditor\AttriBlock.cs" />
     <Compile Include="Addins\BlockRefEditor\BlockRefEditor.cs" />
     <Compile Include="Addins\BlockRefEditor\BlockRefEditorForm.cs">
@@ -140,46 +141,61 @@
       <DependentUpon>BlockRefEditorForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Addins\BlockRefEditor\SortColumnCollection.cs" />
-    <Compile Include="Addins\PolylineRemesh2.cs" />
+    <Compile Include="Addins\Annotation\Ec_EntityAnnotationEditor.cs" />
+    <Compile Include="Addins\Geometry\PolylineRemesh2.cs" />
+    <Compile Include="Addins\LayoutViewport\Form_LayoutLister.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Addins\LayoutViewport\Form_LayoutLister.Designer.cs">
+      <DependentUpon>Form_LayoutLister.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Addins\Text\Ec_CentrolizedDimer.cs" />
+    <Compile Include="Addins\Text\Ec_TextRegexTool.cs" />
+    <Compile Include="Addins\Text\TextRegex.cs" />
+    <Compile Include="Debuger\eZcadAddinManagerDebuger.cs" />
+    <Compile Include="Examples\KeanExampleOnLayouts.cs" />
+    <Compile Include="Addins\LayoutViewport\LayoutLister.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Addins\Table\CopyColumns.cs" />
-    <Compile Include="Addins\DbTextsFormator.cs" />
+    <Compile Include="Addins\Text\DbTextCenterAlign.cs" />
+    <Compile Include="Addins\Text\DbTextsFormator.cs" />
     <Compile Include="Addins\AreaSumup.cs" />
-    <Compile Include="Addins\PolylineRemesh.cs" />
-    <Compile Include="Addins\ReverseCurve.cs" />
-    <Compile Include="Addins\PolyfaceToSubdmesh.cs" />
+    <Compile Include="Addins\Geometry\PolylineRemesh.cs" />
+    <Compile Include="Addins\Geometry\ReverseCurve.cs" />
+    <Compile Include="Addins\Geometry\PolyfaceToSubdmesh.cs" />
     <Compile Include="Addins\EcLoadTemplate1.cs" />
-    <Compile Include="Addins\DimAlignment.cs" />
-    <Compile Include="Addins\DBTextsToMText.cs" />
-    <Compile Include="Addins\DimTextScalor.cs" />
-    <Compile Include="Addins\NumAdd.cs" />
-    <Compile Include="Addins\BlockRef\Ec_BlockReference.cs" />
+    <Compile Include="Addins\Dim\DimAlignment.cs" />
+    <Compile Include="Addins\Text\DBTextsToMText.cs" />
+    <Compile Include="Addins\Dim\DimTextScalor.cs" />
+    <Compile Include="Addins\Text\Ec_NumAdd.cs" />
+    <Compile Include="Addins\LayoutViewport\Ec_ViewportCreator.cs" />
+    <Compile Include="Debug\Ec_extractPoints.cs" />
+    <Compile Include="Examples\ViewportHandler.cs" />
+    <Compile Include="OnCode\BlockAttStyleEditor.cs" />
     <Compile Include="Debug\Ec_RepairTextStyles.cs" />
     <Compile Include="Debug\Ec_GetThinedPolyline.cs" />
     <Compile Include="Examples\DrawInUCS.cs" />
     <Compile Include="Examples\UISetup1.cs" />
     <Compile Include="Examples\UISetup2.cs" />
     <Compile Include="Examples\SplineHandler.cs" />
-    <Compile Include="Addins\TextScaler.cs" />
-    <Compile Include="Addins\IntersectSelSet.cs" />
-    <Compile Include="Debug\AddinManagerDebuger.cs" />
-    <Compile Include="Debug\Ec_Addins.cs" />
+    <Compile Include="Addins\Text\Ec_TextScaler.cs" />
+    <Compile Include="Addins\SelSetIntersector.cs" />
     <Compile Include="Debug\Ec_Boundary.cs" />
     <Compile Include="Debug\Ec_SlopeStandards.cs" />
-    <Compile Include="Debug\Ec_FormatDbTexts.cs" />
     <Compile Include="Debug\Ec_ProxyEntity.cs" />
     <Compile Include="Debug\Ec_GeoMesh.cs" />
-    <Compile Include="Debug\Ec_DimStyles.cs" />
-    <Compile Include="Debug\Ec_intersectionFinder.cs" />
+    <Compile Include="OnCode\DimStyles.cs" />
+    <Compile Include="Addins\HaveATry\Ec_intersectionFinder.cs" />
     <Compile Include="Addins\HaveATry\IntersectionFinder.cs" />
     <Compile Include="Addins\HaveATry\Item.cs" />
     <Compile Include="Addins\RoadMileage.cs" />
-    <Compile Include="Addins\PerpendicularLine.cs" />
-    <Compile Include="Debug\Ec_AddElevation.cs" />
+    <Compile Include="Addins\Geometry\PerpendicularLine.cs" />
+    <Compile Include="OnCode\ElevationPlacer.cs" />
     <Compile Include="Addins\BlockRef\Ec_BlockRef.cs" />
     <Compile Include="Addins\BlockRef\Ec_BlockRefField.cs" />
     <Compile Include="Debug\Ec_RoadMileage.cs" />
-    <Compile Include="Debug\Ec_PLineHandler.cs" />
-    <Compile Include="Debug\Ec_ShowClassName.cs" />
+    <Compile Include="Addins\Ec_ShowClassName.cs" />
     <Compile Include="Debug\PlaneTemplate.cs" />
     <Compile Include="Examples\TextEditorHandler.cs" />
     <Compile Include="Addins\RoadMileageRS.cs" />
@@ -190,8 +206,7 @@
     <Compile Include="Debug\Ec_CutRegion.cs" />
     <Compile Include="Debug\Ec_DebugTemplate.cs" />
     <Compile Include="Debug\Ec_DrawPolyline.cs" />
-    <Compile Include="DllActivator_eZcad.cs" />
-    <Compile Include="DocumentModifier.cs" />
+    <Compile Include="Debuger\DllActivator_eZcad.cs" />
     <Compile Include="Examples\GraphicalElementsCreator.cs" />
     <Compile Include="Examples\GraphicalElementsSelector.cs" />
     <Compile Include="Examples\GraphicalElementsFilter.cs" />
@@ -199,37 +214,33 @@
     <Compile Include="Examples\LayerHandler.cs" />
     <Compile Include="Examples\SolidHandler.cs" />
     <Compile Include="Examples\XRecords_ResultBuffer.cs" />
-    <Compile Include="myCommands.Designer.cs">
+    <Compile Include="Debuger\myCommands.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>myCommands.resx</DependentUpon>
     </Compile>
-    <Compile Include="myPlugin.cs" />
-    <Compile Include="myCommands.cs" />
+    <Compile Include="Debuger\myPlugin.cs" />
+    <Compile Include="Debuger\myCommands.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Addins\TableDataGetter.cs" />
+    <Compile Include="Addins\Table\TableDataGetter.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="RibbonButtonAttribute.cs" />
-    <Compile Include="Utility\EntityArray2D.cs" />
-    <Compile Include="Utility\ExtensionMethods.cs" />
-    <Compile Include="Utility\eZConstants.cs" />
-    <Compile Include="Utility\FormOk.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Utility\SolidUtils.cs" />
-    <Compile Include="Utility\TextUtils.cs" />
-    <Compile Include="Utility\CurrentEditState.cs" />
-    <Compile Include="Utility\Utils.cs" />
+    <Compile Include="Debuger\RibbonButtonAttribute.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Addins\BlockRefEditor\BlockRefEditorForm.resx">
       <DependentUpon>BlockRefEditorForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="myCommands.resx">
+    <EmbeddedResource Include="Addins\LayoutViewport\Form_LayoutLister.resx">
+      <DependentUpon>Form_LayoutLister.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Addins\LayoutViewport\LayoutLister.resx">
+      <DependentUpon>LayoutLister.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Debuger\myCommands.resx">
       <DependentUpon>myCommands.cs</DependentUpon>
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>myCommands.Designer.cs</LastGenOutput>
@@ -237,9 +248,7 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Utility\FormOk.resx">
-      <DependentUpon>FormOk.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -298,6 +307,12 @@
       <Name>eZcad_AddinManager</Name>
       <Private>False</Private>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\RegexTips.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Utility\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

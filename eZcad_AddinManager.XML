@@ -301,30 +301,444 @@
         <member name="M:eZcad.Addins.MenuItemsLoader.LoadMenuItems(eZcad.DocumentModifier,Autodesk.AutoCAD.EditorInput.SelectionSet)">
             <summary> 将多个单行文字按其定位进行组合 </summary>
         </member>
-        <member name="F:eZcad.Addins.Utilities.eZConstants.eZGroupCommnad">
+        <member name="T:eZcad.AddinManagerDebuger">
+            <summary>
+            用来辅助调试工作
+            </summary>
+        </member>
+        <member name="M:eZcad.AddinManagerDebuger.PickObject``1(Autodesk.AutoCAD.EditorInput.Editor,System.String)">
+            <summary> 在界面中选择一个对象 </summary>
+            <typeparam name="T"></typeparam>
+            <param name="ed"></param>
+            <param name="message"></param>
+            <returns></returns>
+        </member>
+        <member name="M:eZcad.AddinManagerDebuger.DoSomethingTemplate(eZcad.DocumentModifier,Autodesk.AutoCAD.EditorInput.SelectionSet)">
+            <summary>
+            具体的高度操作的代码模板
+            </summary>
+            <param name="docMdf"></param>
+            <param name="impliedSelection"></param>
+        </member>
+        <member name="T:eZcad.ExternalCommand">
+            <param name="docMdf"></param>
+            <param name="impliedSelection"></param>
+            <returns>如果要取消操作（即将事务 Abort 掉），则返回 false，如果要提交事务，则返回 true </returns>
+        </member>
+        <member name="T:eZcad.DocumentModifier">
+            <summary> 对文档进行配置，以启动文档的改写模式 </summary>
+        </member>
+        <member name="M:eZcad.DocumentModifier.ExecuteCommand(eZcad.ExternalCommand)">
+            <summary> 执行外部命令，并且在执行命令之前，自动将 事务打开</summary>
+            <param name="cmd">要执行的命令</param>
+        </member>
+        <member name="F:eZcad.DocumentModifier._originalTransaction">
+            <summary> 启动命令时的最被的那个事务，区别于在命令执行过程中新开启的事务 </summary>
+        </member>
+        <member name="F:eZcad.DocumentModifier.acActiveDocument">
+            <summary> 当前活动的AutoCAD文档 </summary>
+        </member>
+        <member name="F:eZcad.DocumentModifier.acDataBase">
+            <summary> 当前活动的AutoCAD文档中的数据库 </summary>
+        </member>
+        <member name="F:eZcad.DocumentModifier.acEditor">
+            <summary>  </summary>
+        </member>
+        <member name="M:eZcad.DocumentModifier.#ctor(System.Boolean)">
+            <summary> 对文档进行配置，以启动文档的改写模式 </summary>
+            <param name="openDebugerText">是否要打开一个文本调试器</param>
+        </member>
+        <member name="M:eZcad.DocumentModifier.RestartTransaction(System.Boolean)">
+            <summary> 重启一个新的事务 </summary>
+            <param name="commitCancel">true 表示将当前事务提交后再重启，false 表示将当前事务回滚后再重启。 </param>
+        </member>
+        <member name="M:eZcad.DocumentModifier.WriteLineIntoDebuger(System.Object[])">
+            <summary> 向文本调试器中写入数据 </summary>
+            <param name="value"></param>
+        </member>
+        <member name="M:eZcad.DocumentModifier.WriteLinesIntoDebuger(System.Object[])">
+            <summary> 向文本调试器中写入多行数据 </summary>
+            <param name="lines"></param>
+        </member>
+        <member name="M:eZcad.DocumentModifier.WriteNow(System.Object[])">
+            <summary> 实时显示调试信息在同一行中 </summary>
+            <param name="value">集合中的所有数据写在一行，并以“,”分隔</param>
+        </member>
+        <member name="M:eZcad.DocumentModifier.WriteLinesNow(System.Object[])">
+            <summary> 实时显示调试信息在不同行中 </summary>
+            <param name="value">集合中的所有数据分别写在不同行</param>
+        </member>
+        <member name="M:eZcad.DocumentModifier.LineFeedInCommandLine">
+            <summary> 将 各种无关提示进行换行 ，使命令行中显示更清爽 </summary>
+        </member>
+        <member name="T:eZcad.Utility.ACadConstants">
+            <summary> AutoCAD 软件中的系统常数 </summary>
+        </member>
+        <member name="F:eZcad.Utility.ACadConstants.LayoutName_Model">
+            <summary> 模型空间也属于<seealso cref="T:Autodesk.AutoCAD.DatabaseServices.Layout"/>，其对应的LayoutName为“Model” </summary>
+        </member>
+        <member name="F:eZcad.Utility.ACadConstants.LayerName_Defpoints">
+            <summary> AutoCAD 中默认的那个不打印层的名称 </summary>
+        </member>
+        <member name="T:eZcad.Utility.AdvancedExtents3d">
+            <summary> 对空间立方体进行一系列的信息提取 </summary>
+        </member>
+        <member name="F:eZcad.Utility.AdvancedExtents3d.Anchor.GeometryCenter">
+            <summary> 几何中心 </summary>
+        </member>
+        <member name="M:eZcad.Utility.AdvancedExtents3d.GetAnchor(eZcad.Utility.AdvancedExtents3d.Anchor)">
+            <summary> 获取空间立方体的特征角点 </summary>
+            <param name="anchor"></param>
+            <returns></returns>
+        </member>
+        <member name="M:eZcad.Utility.AdvancedExtents3d.GetHeight">
+            <summary> 高度 </summary>
+            <returns></returns>
+        </member>
+        <member name="T:eZcad.Utility.EditStateIdentifier">
+            <summary> 用来获取AutoCAD界面中的编辑状态 </summary>
+        </member>
+        <member name="T:eZcad.Utility.EditStateIdentifier.CurrentEditState">
+            <summary> 用户当前的编辑状态 </summary>
+        </member>
+        <member name="F:eZcad.Utility.EditStateIdentifier.CurrentEditState.BlockTable">
+            <summary> 所有<seealso cref="T:Autodesk.AutoCAD.DatabaseServices.BlockTableRecord"/>对象的集合 </summary>
+        </member>
+        <member name="F:eZcad.Utility.EditStateIdentifier.CurrentEditState.EditState">
+            <summary> 用户当前正在编辑状态 </summary>
+        </member>
+        <member name="F:eZcad.Utility.EditStateIdentifier.CurrentEditState.CurrentBTR">
+            <summary> 用户当前正在编辑的块定义 </summary>
+        </member>
+        <member name="M:eZcad.Utility.EditStateIdentifier.CurrentEditState.#ctor(Autodesk.AutoCAD.DatabaseServices.BlockTable,Autodesk.AutoCAD.DatabaseServices.BlockTableRecord,eZcad.Utility.EditStateIdentifier.EditState)">
+            <summary> 构造函数 </summary>
+        </member>
+        <member name="M:eZcad.Utility.EditStateIdentifier.CurrentEditState.ExitBlockEditor(Autodesk.AutoCAD.ApplicationServices.Document)">
+            <summary> 退出块编辑模式 </summary>
+            <param name="doc"></param>
+        </member>
+        <member name="T:eZcad.Utility.EditStateIdentifier.EditState">
+            <summary> AutoCAD界面中的编辑状态 </summary>
+        </member>
+        <member name="F:eZcad.Utility.EditStateIdentifier.EditState.InModel">
+            <summary> 正在模型空间进行操作，同时包括视口编辑模式、块定义的编辑器模式，以及块定义的在位编辑模式 </summary>
+        </member>
+        <member name="F:eZcad.Utility.EditStateIdentifier.EditState.InLayout">
+            <summary> 正在布局空间进行操作 </summary>
+        </member>
+        <member name="F:eZcad.Utility.EditStateIdentifier.EditState.InBlockEditor">
+            <summary> 正在块编辑器中对某个块定义进行操作，此时的坐标原点为块定义的基点 </summary>
+        </member>
+        <member name="F:eZcad.Utility.EditStateIdentifier.EditState.InRefEditor">
+            <summary> 正在块的在位编辑状态中对某个块定义进行操作，此时的坐标原点为文档模型的原点 </summary>
+        </member>
+        <member name="F:eZcad.Utility.EditStateIdentifier.EditState.InViewport">
+            <summary> 正在模型空间或者布局空间的视口中进行操作 </summary>
+        </member>
+        <member name="M:eZcad.Utility.EntityArray2D`1.Arrange2D">
+            <summary>
+            将集合中的元素在二维平面中进行分格填空，以形成一个按二维几何排布的数组
+            每一个方格中可能有多个实体，比如多个文字挤在一堆。第(0,0)个元素代表位于几何坐标系中的靠左上角的元素们。
+            </summary>
+            <returns>考虑到AutoCAD几何坐标系中，Y坐标较小者位于集合前面，而在计算机的二维数组表示方法中，
+            下标(0,0)一般表示位于左上角的元素，所以，这里在将几何元素填充到二维数组中时，将Y值的排序进行反转。</returns>
+        </member>
+        <member name="M:eZcad.Utility.EntityArray2D`1.SortToOneVector(System.Boolean,System.Collections.Generic.List{eZcad.Utility.EntityArray2D{`0}.EntBound},System.Int32@)">
+            <summary> 将集合中的元素排列到一行或一列中（紧密算法，即相交实体的认为在同一行或同一列） </summary>
+            <param name="inRow">true 表示将集合中的元素排列到一行中，false 表示将集合中的实体排列到一列中 </param>
+            <param name="entities"></param>
+            <param name="count">排列完成后，共有多少行或者多少列</param>
+            <returns>返回的字典中，键表示每一个实体对象，值代表此对象在排列好的行中的下标，第一个值的下标为0。多个实体可能对应同一个下标</returns>
+        </member>
+        <member name="M:eZcad.Utility.EntityArray2D`1.InsertEntityToOneVec(System.Boolean,System.Collections.Generic.SortedDictionary{System.Double,eZcad.Utility.Rectangle2D},System.Collections.Generic.Dictionary{eZcad.Utility.EntityArray2D{`0}.EntBound,System.Double},eZcad.Utility.EntityArray2D{`0}.EntBound)">
+            <summary> 将新的实体在原集合中按是否在同一列进行插值，即将所有的元素压缩到同一行中 </summary>
+            <param name="inRow"> true 表示将新的实体在原集合中按是否在同一列进行插值，即将所有的元素压缩到同一行中；
+            false 表示 将新的实体在原集合中按是否在同一行进行插值，即将所有的元素压缩到同一列中 </param>
+            <param name="sepratedSortedBounds"></param>
+            <param name="sortedEntIndex"></param>
+            <param name="newEnt"></param>
+        </member>
+        <member name="T:eZcad.Utility.Rectangle2D">
+            <summary>
+            二维矩形方框区域
+            </summary>
+        </member>
+        <member name="M:eZcad.Utility.Rectangle2D.RowIntersectWith(eZcad.Utility.Rectangle2D)">
+            <summary> 比较 Y 值，以确定是否在同一行 </summary>
+            <param name="recB"></param>
+            <returns></returns>
+        </member>
+        <member name="M:eZcad.Utility.Rectangle2D.ColumnIntersectWith(eZcad.Utility.Rectangle2D)">
+            <summary> 比较 X 值，以确定是否在同一列 </summary>
+        </member>
+        <member name="T:eZcad.Utility.IntersectState">
+            <summary>
+            两个矩形之间的相交关系。
+            对于左右的比较，左即对应于下，右即对应于上。
+            </summary>
+        </member>
+        <member name="F:eZcad.Utility.IntersectState.Intersect">
+            <summary> B 与 A 相交面积不为0 </summary>
+        </member>
+        <member name="F:eZcad.Utility.IntersectState.ITop">
+            <summary> B 与 A 相交，而且B的最上边比A的最上边高 </summary>
+        </member>
+        <member name="F:eZcad.Utility.IntersectState.IBottom">
+            <summary> B 与 A 相交，而且B的最下边比A的最下边低 </summary>
+        </member>
+        <member name="F:eZcad.Utility.IntersectState.IInside">
+            <summary> A 完全将 B 包含 </summary>
+        </member>
+        <member name="F:eZcad.Utility.IntersectState.IContain">
+            <summary> B 完全将 A 包含 </summary>
+        </member>
+        <member name="F:eZcad.Utility.IntersectState.ICoinside">
+            <summary> B 与 A 完全重合 </summary>
+        </member>
+        <member name="F:eZcad.Utility.IntersectState.Apart">
+            <summary> B 与 A 相交面积为 0  </summary>
+        </member>
+        <member name="F:eZcad.Utility.IntersectState.OTop">
+            <summary> B 在 A 的上方，不相交或者只有边界相交 </summary>
+        </member>
+        <member name="F:eZcad.Utility.IntersectState.OBottom">
+            <summary> B 在 A 的下方，不相交或者只有边界相交 </summary>
+        </member>
+        <member name="T:eZcad.Utility.ExtensionMethods">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:eZcad.Utility.ExtensionMethods.ToXYPlane(Autodesk.AutoCAD.Geometry.Point3d)">
+            <summary> 以直接取消Z坐标的方式投影到XY平面 </summary>
+            <param name="pt"></param>
+            <returns></returns>
+        </member>
+        <member name="M:eZcad.Utility.ExtensionMethods.SetLength(Autodesk.AutoCAD.Geometry.Vector3d,System.Double)">
+            <summary> 设置一个向量的长度 </summary>
+            <param name="originalVec"></param>
+            <param name="newLength"></param>
+            <returns></returns>
+        </member>
+        <member name="M:eZcad.Utility.ExtensionMethods.GetAttributeDefinitions(Autodesk.AutoCAD.DatabaseServices.BlockTableRecord)">
+            <summary> 根据块参照定义中所有的属性定义 </summary>
+            <param name="btr">要进行提取的块定义</param>
+            <returns></returns>
+        </member>
+        <member name="M:eZcad.Utility.ExtensionMethods.GetAttributeDefinitions(Autodesk.AutoCAD.DatabaseServices.BlockTableRecord,System.String)">
+            <summary> 根据块参照定义中 指定的 Tag 的属性定义 </summary>
+            <param name="btr">要进行提取的块定义</param>
+            <param name="tag">要进行提取的块定义</param>
+            <returns>如果未找到，则返回 null </returns>
+        </member>
+        <member name="M:eZcad.Utility.ExtensionMethods.GetAttributeReferences(Autodesk.AutoCAD.DatabaseServices.BlockReference)">
+            <summary> 根据块参照中属性定义的名称返回对应的项 </summary>
+            <param name="blk"></param>
+            <param name="attTag">属性定义的名称</param>
+            <returns></returns>
+        </member>
+        <member name="M:eZcad.Utility.ExtensionMethods.GetAttributeReference(Autodesk.AutoCAD.DatabaseServices.BlockReference,System.String)">
+            <summary> 根据块参照中属性定义的名称返回对应的项 </summary>
+            <param name="blk"></param>
+            <param name="attTag">属性定义的名称</param>
+            <returns></returns>
+        </member>
+        <member name="M:eZcad.Utility.ExtensionMethods.Get2dCurve(Autodesk.AutoCAD.DatabaseServices.Polyline)">
+            <summary> 将三维多段线投影到XY平面上，以转换为二维多段线 </summary>
+            <param name="pl"></param>
+            <returns></returns>
+        </member>
+        <member name="M:eZcad.Utility.ExtensionMethods.Get2dLinearCurve(Autodesk.AutoCAD.DatabaseServices.Polyline)">
+            <summary> 将三维折线多段线投影到XY平面上，以转换为二维多段线 </summary>
+            <param name="pl"></param>
+            <returns></returns>
+        </member>
+        <member name="M:eZcad.Utility.ExtensionMethods.Get2dLinearCurve(Autodesk.AutoCAD.Geometry.CompositeCurve3d)">
+            <summary> 将三维折线多段线投影到XY平面上，以转换为二维多段线 </summary>
+            <param name="pl"></param>
+            <returns></returns>
+        </member>
+        <member name="M:eZcad.Utility.ExtensionMethods.ConvertToHandle(System.String)">
+            <summary> 将表示句柄值的字符转换为句柄 </summary>
+            <param name="handle">表示句柄的字符，即16进制的数值，比如“409E”。最小的句柄值为1。</param>
+        </member>
+        <member name="M:eZcad.Utility.ExtensionMethods.GetObjectId(Autodesk.AutoCAD.DatabaseServices.Handle,Autodesk.AutoCAD.DatabaseServices.Database)">
+            <summary> 根据 AutoCAD 中对象的句柄值，返回对应的对象的<seealso cref="T:Autodesk.AutoCAD.DatabaseServices.ObjectId"/>值，如果不存在，则返回 <seealso cref="P:Autodesk.AutoCAD.DatabaseServices.ObjectId.Null"/> </summary>
+            <returns></returns>
+        </member>
+        <member name="M:eZcad.Utility.ExtensionMethods.GetDBObject``1(Autodesk.AutoCAD.DatabaseServices.Handle,Autodesk.AutoCAD.DatabaseServices.Database)">
+            <summary> 根据 AutoCAD 中对象的句柄值，返回对应的对象，未找到对应的对象，或者对象类型转换出错，则返回 null </summary>
+            <returns></returns>
+        </member>
+        <member name="M:eZcad.Utility.ExtensionMethods.GetTextWidth(Autodesk.AutoCAD.DatabaseServices.DBText)">
+            <summary> 单行文本的宽度，不论此文本的旋转角度是多少，都返回其文字宽度，而不是其水平宽度 </summary>
+            <remarks>对于旋转角度为0的单行文字，其宽度可以通过Bounds来直接提取，而对于有旋转的单行文字，其Bounds的水平宽度不代表其真实宽度，而应该进行一些折减。本
+            算法的大致思路是通过Bounds的矩形对角线长度减去两侧的误差值。
+            折减后的宽度与真实宽度的误差可控制在4%以内，文字旋转角度靠近45、135、225、315度时误差最大。</remarks>
+        </member>
+        <member name="M:eZcad.Utility.ExtensionMethods.GetRigion(System.Double)">
+            <summary> 计算某角度位于哪一象限 </summary>
+        </member>
+        <member name="M:eZcad.Utility.ExtensionMethods.SetAlignment(Autodesk.AutoCAD.DatabaseServices.DBText,Autodesk.AutoCAD.DatabaseServices.AttachmentPoint)">
+            <summary> 在不改变单行文字定位的情况下，修改其对正方式。默认为默认的左对齐 </summary>
+            <param name="txt"></param>
+            <param name="justify"> 整体对正方式 </param>
+        </member>
+        <member name="M:eZcad.Utility.ExtensionMethods.SetAlignment(Autodesk.AutoCAD.DatabaseServices.DBText,Autodesk.AutoCAD.DatabaseServices.TextVerticalMode,Autodesk.AutoCAD.DatabaseServices.TextHorizontalMode)">
+            <summary> 在不改变单行文字定位的情况下，修改其对齐方式。默认为默认的左对齐 </summary>
+            <param name="txt"></param>
+            <param name="horiMode">水平对齐方式</param>
+            <param name="vertMode">竖直对齐方式</param>
+        </member>
+        <member name="M:eZcad.Utility.ExtensionMethods.Contains(Autodesk.AutoCAD.DatabaseServices.Extents3d,Autodesk.AutoCAD.Geometry.Point3d)">
+            <summary> 是否包含某一点（包括边界） </summary>
+        </member>
+        <member name="M:eZcad.Utility.ExtensionMethods.AppendMessage(System.Exception)">
+            <summary> 具体的报错信息与报错位置 </summary>
+            <returns></returns>
+        </member>
+        <member name="F:eZcad.Utility.eZConstants.eZGroupCommnad">
             <summary>
             在<see cref="T:Autodesk.AutoCAD.Runtime.CommandMethodAttribute"/>中设置的外部命令的 GroupName。
             </summary>
         </member>
-        <member name="T:eZcad.Addins.Utilities.Utils">
+        <member name="F:eZcad.Utility.eZConstants.ImageDirectory">
+            <summary>
+            外部命令在 AutoCAD 界面中对应的控件的图片所在的文件夹。
+            当引用某个图片文件时，直接通过“<seealso cref="F:eZcad.Utility.eZConstants.ImageDirectory"/> + "picture.png"”即可
+            </summary>
+            <remarks>“.\”表示当前正在执行的程序集所在的文件夹，“..\”表示当前正在执行的程序集所在的文件夹</remarks>
+        </member>
+        <member name="P:eZcad.Utility.FormOk.CloseOnEscape">
+            <summary> 是否支持按下ESC时退出窗口 </summary>
+        </member>
+        <member name="T:eZcad.Utility.LayoutUtil">
+            <summary> 将多个块的属性值进行统一编辑 </summary>
+        </member>
+        <member name="M:eZcad.Utility.LayoutUtil.CreateLayout(System.String)">
+            <summary> 创建一个新的布局 </summary>
+        </member>
+        <member name="M:eZcad.Utility.LayoutUtil.SwitchLayout">
+            <summary> 切换到模型空间 </summary>
+        </member>
+        <member name="M:eZcad.Utility.LayoutUtil.SwitchLayout(Autodesk.AutoCAD.DatabaseServices.ObjectId)">
+            <summary> 切换到图纸空间 </summary>
+            <param name="layoutId">除模型空间之外的 Layout 的Id</param>
+        </member>
+        <member name="M:eZcad.Utility.LayoutUtil.SwitchLayout(System.String)">
+            <summary> 切换到图纸空间 </summary>
+            <param name="layoutName">除模型空间之外的 Layout 的名称，其值不可能为 Model</param>
+        </member>
+        <member name="M:eZcad.Utility.LayoutUtil.SetPlotSettings(Autodesk.AutoCAD.DatabaseServices.Layout,System.String,System.String,System.String)">
+            <summary> Apply plot settings to the provided layout. </summary>
+            <param name="layout">要进行设置的布局</param>
+            <param name="pageSize">The canonical media name for our page size. 比如 "ANSI_B_(11.00_x_17.00_Inches)"</param>
+            <param name="styleSheet">The pen settings file (ctb or stb). 比如 "monochrome.ctb"</param>
+            <param name="device">The name of the output device. 比如 "DWF6 ePlot.pc3"</param>
+        </member>
+        <member name="T:eZcad.Utility.SolidUtils">
+            <summary>
+            与实体、曲面、网格相关的操作
+            </summary>
+        </member>
+        <member name="M:eZcad.Utility.SolidUtils.CreateMeshFromSolid">
+            <summary> 将任意实体转换为网格 </summary>
+        </member>
+        <member name="M:eZcad.Utility.SolidUtils.ConvertToSubDMesh(Autodesk.AutoCAD.DatabaseServices.PolyFaceMesh)">
+            <summary> 将多面网格转换为细分网格 </summary>
+        </member>
+        <member name="M:eZcad.Utility.SolidUtils.ConvertToPolyFaceMesh(Autodesk.AutoCAD.DatabaseServices.SubDMesh,Autodesk.AutoCAD.DatabaseServices.BlockTableRecord,Autodesk.AutoCAD.DatabaseServices.Transaction)">
+            <summary> 将多面网格转换为细分网格 </summary>
+        </member>
+        <member name="M:eZcad.Utility.TextUtils.ConvertDbTextSpecialSymbols(Autodesk.AutoCAD.DatabaseServices.DBText)">
+            <summary> 将单行文字中的特殊字符转换为对应的数据，以填充到多行文字中，使其显示效果相同 </summary>
+            <param name="dbText">以 Hztxt 作为字体的单行文字对象中的文本</param>
+            <returns></returns>
+        </member>
+        <member name="M:eZcad.Utility.TextUtils.ConvertDbTextSpecialSymbols(System.String)">
+            <summary> 将单行文字中的特殊字符转换为对应的数据，以填充到多行文字中，使其显示效果相同 </summary>
+            <param name="dbText">以 Hztxt 作为字体的单行文字对象中的文本</param>
+            <returns></returns>
+        </member>
+        <member name="F:eZcad.Utility.TextUtils.HztxtSpecialSymbols">
+            <summary>
+            HZTXT 字体中的特殊符号与对应的编码
+            </summary>
+        </member>
+        <member name="F:eZcad.Utility.TextUtils.SsUpper2">
+            <summary> 上标 2 </summary>
+        </member>
+        <member name="F:eZcad.Utility.TextUtils.ssUpper3">
+            <summary> 上标 3 </summary>
+        </member>
+        <member name="F:eZcad.Utility.TextUtils.SsDiameter">
+            <summary> 直径符号(圆+斜竖线) </summary>
+        </member>
+        <member name="F:eZcad.Utility.TextUtils.SsHPB300">
+            <summary> HPB300 的钢筋符号 </summary>
+        </member>
+        <member name="F:eZcad.Utility.TextUtils.SsHRB335">
+            <summary> HRB335 的钢筋符号（不再生产 20170510） </summary>
+        </member>
+        <member name="F:eZcad.Utility.TextUtils.SsHRB400">
+            <summary> HRB400 的钢筋符号 </summary>
+        </member>
+        <member name="T:eZcad.Utility.SymbolTableUtils">
+            <summary> 字典 Dictionary 与 符号表 SymbolTable 操作 </summary>
+            <remarks></remarks>
+        </member>
+        <member name="M:eZcad.Utility.SymbolTableUtils.GetDictionaryValue``1(Autodesk.AutoCAD.DatabaseServices.DBDictionary,System.String)">
+            <summary> 提取字典中的键所对应的值 </summary>
+            <typeparam name="T"></typeparam>
+            <param name="src"></param>
+            <param name="Key"></param>
+            <returns></returns>
+        </member>
+        <member name="M:eZcad.Utility.SymbolTableUtils.ModifyDictXrecord(Autodesk.AutoCAD.DatabaseServices.Transaction,Autodesk.AutoCAD.DatabaseServices.DBDictionary,System.String,Autodesk.AutoCAD.DatabaseServices.ResultBuffer)">
+            <summary> 直接修改字典中 Xrecord 类型数据的属性 </summary>
+            <param name="dict"> 用户必须自行确保此时 dict 已经打开写入权限 </param>
+            <param name="buffer"> 要添加或者修改的键中的新值 </param>
+            <remarks>也可以不通过修改属性的方法，而参考<seealso cref="M:eZcad.Utility.SymbolTableUtils.OverlayDictValue(Autodesk.AutoCAD.DatabaseServices.Transaction,Autodesk.AutoCAD.DatabaseServices.DBDictionary,System.String,Autodesk.AutoCAD.DatabaseServices.DBObject)"/>函数直接将同名键删除然后新建的方式来进行同名键值的刷新。</remarks>
+        </member>
+        <member name="M:eZcad.Utility.SymbolTableUtils.OverlayDictValue(Autodesk.AutoCAD.DatabaseServices.Transaction,Autodesk.AutoCAD.DatabaseServices.DBDictionary,System.String,Autodesk.AutoCAD.DatabaseServices.DBObject)">
+            <summary> 先移除同名键，然后再通过SetAt添加新的同名键值对 </summary>
+            <param name="trans"></param>
+            <param name="dict"> 用户必须自行确保此时 dict 已经打开写入权限 </param>
+            <param name="key">要进行添加或者修改的键</param>
+            <param name="value">要添加或者刷新的新值，可以是 <seealso cref="T:Autodesk.AutoCAD.DatabaseServices.Xrecord"/>、<seealso cref="T:Autodesk.AutoCAD.DatabaseServices.DBDictionary"/> 等类型 </param>
+            <remarks>对于<seealso cref="T:Autodesk.AutoCAD.DatabaseServices.DBDictionary"/>的键值对的修改，一般是要求先将键值对添加到<seealso cref="T:Autodesk.AutoCAD.DatabaseServices.DBDictionary"/>中，然后再对<param name="value"></param>值的属性进行设置</remarks>
+        </member>
+        <member name="M:eZcad.Utility.SymbolTableUtils.GetOrCreateLayer(Autodesk.AutoCAD.DatabaseServices.Transaction,Autodesk.AutoCAD.DatabaseServices.Database,System.String)">
+            <summary> 如果数据库中有此图层，则直接返回，如果没有，则创建对应图层 </summary>
+            <param name="trans">请确保事务已经打开</param>
+            <param name="db"></param>
+            <param name="layerName"></param>
+        </member>
+        <member name="M:eZcad.Utility.SymbolTableUtils.GetOrCreateAppName(Autodesk.AutoCAD.DatabaseServices.Database,Autodesk.AutoCAD.DatabaseServices.Transaction,System.String)">
+            <summary>
+            从数据库中按名称搜索或者创建出<seealso cref="T:Autodesk.AutoCAD.DatabaseServices.RegAppTableRecord"/>对象
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:eZcad.Utility.Utils">
             <summary>
             提供一些基础性的操作工具
             </summary>
             <remarks></remarks>
         </member>
-        <member name="M:eZcad.Addins.Utilities.Utils.GetNullableGenericArgurment(System.Type)">
+        <member name="M:eZcad.Utility.Utils.GetNullableGenericArgurment(System.Type)">
             <summary>
             返回Nullable所对应的泛型。如果不是Nullable泛型，则返回null。
             </summary>
             <param name="typeIn"></param>
             <returns></returns>
         </member>
-        <member name="M:eZcad.Addins.Utilities.Utils.StringHasNonEnglish(System.String)">
+        <member name="M:eZcad.Utility.Utils.StringHasNonEnglish(System.String)">
             <summary> 指定的字符串中是否包含有非英文字符 </summary>
             <param name="str"></param>
             <returns></returns>
         </member>
-        <member name="M:eZcad.Addins.Utilities.Utils.ChooseOpenFile(System.String,System.String,System.Boolean)">
+        <member name="M:eZcad.Utility.Utils.ChooseOpenFile(System.String,System.String,System.Boolean)">
             <summary> 选择一个或多个要打开的文件。成功选择，则返回对应文件的绝对路径，否则返回 null </summary>
             <param name="title">对话框的标题</param>
             <param name="filter"> 文件过滤规则，比如 
@@ -334,7 +748,7 @@
             <param name="multiselect"> 是否支持多选 </param>
             <returns> 成功选择，则返回对应文件的绝对路径，如果没有选择任何文件，则返回 null </returns>
         </member>
-        <member name="M:eZcad.Addins.Utilities.Utils.ChooseSaveFile(System.String,System.String)">
+        <member name="M:eZcad.Utility.Utils.ChooseSaveFile(System.String,System.String)">
             <summary> 选择要将数据保存到哪个文件。成功选择，则返回对应文件的绝对路径，否则返回 null </summary>
             <param name="title">对话框的标题</param>
             <param name="filter"> 文件过滤规则，比如 
@@ -342,6 +756,89 @@
             “Excel文件(*.xls; *.xlsx; *.xlsb)| *.xls; *.xlsx; *.xlsb”、
             “Excel工作簿(*.xlsx)|*.xlsx| Excel二进制工作簿(*.xlsb) |*.xlsb| Excel 97-2003 工作簿(*.xls)|*.xls” </param>
             <returns> 成功选择，则返回对应文件的绝对路径，否则返回 null </returns>
+        </member>
+        <member name="M:eZcad.Utility.Utils.GetPointFromString(System.String)">
+            <summary> 从字符中解析出坐标点，比如“1.2, 2.3, 5” </summary>
+        </member>
+        <member name="M:eZcad.Utility.Utils.WriteRegistryKey">
+            <summary> 将插件程序注册到注册表中 </summary>
+            <returns></returns>
+        </member>
+        <member name="M:eZcad.Utility.Utils.Sort(Autodesk.AutoCAD.DatabaseServices.ObjectId[],System.Func{System.Object,System.String},System.Func{System.Collections.Generic.KeyValuePair{Autodesk.AutoCAD.DatabaseServices.ObjectId,System.String},System.String})">
+            <summary>
+                Sorts an array of ObjectIds based on a string property and order.
+            </summary>
+            <param name="ids">The array of IDs to sort.</param>
+            <param name="propertySelector">A function selecting the string property.</param>
+            <param name="orderSelector">A function to specify the selection order.</param>
+            <returns>An ordered enumerable of key-value pairs.</returns>
+            <remarks>
+            举例1：Sort ObjectIds based on the layer name
+                var sorted = psr.Value.GetObjectIds().Sort(propertySelector: id => id.Layer, orderSelector: kv => kv.Value);
+            </remarks>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:eZcad.Utility.Utils.Sort``1(Autodesk.AutoCAD.DatabaseServices.ObjectId[],System.Func{System.Object,``0},System.Func{System.Collections.Generic.KeyValuePair{Autodesk.AutoCAD.DatabaseServices.ObjectId,``0},``0})" -->
+        <member name="M:eZcad.Utility.Utils.ConvertToHandle(System.String)">
+            <summary> 将表示句柄值的字符转换为句柄 </summary>
+            <param name="handle">表示句柄的字符，即16进制的数值，比如“409E”。最小的句柄值为1。</param>
+        </member>
+        <member name="M:eZcad.Utility.Utils.GetThinedPolyline(Autodesk.AutoCAD.Geometry.Curve3d[],System.Int32,System.Boolean)">
+            <summary> 将给定的线性多段线的段数变稀 </summary>
+            <param name="cs">用来变稀的那条比较密的多段线几何，集合中的曲线必须首尾相连</param>
+            <param name="segPoints">每隔多少个点取用一个，比如2表示只取源多段线中的第1、3、5、7 ... 个点</param>
+            <param name="includeAllNonlinear"> true 表示保留所有的曲线段，只将直线段的顶点变疏；false 表示不管是曲线段还是直线段，最终都按顶点坐标转换为直线段 </param>
+            <returns></returns>
+        </member>
+        <member name="M:eZcad.Utility.Utils.GetThinedPolyline(Autodesk.AutoCAD.Geometry.Curve3d,System.Double)">
+            <summary>
+            通过限定分段长度来对多段线变稀或者变密（保留首尾两个点）
+            </summary>
+            <param name="cs"></param>
+            <param name="segLength">每一分段的长度</param>
+            <returns></returns>
+        </member>
+        <member name="M:eZcad.Utility.Utils.ShowExtentsInView(Autodesk.AutoCAD.EditorInput.Editor,Autodesk.AutoCAD.DatabaseServices.Extents3d)">
+            <summary> 在AutoCAD界面中显示出指定的二维矩形范围 </summary>
+        </member>
+        <member name="M:eZcad.Utility.Utils.SetExtendedDataBool(System.Boolean)">
+            <summary> 将一个布尔值转换为对应的 ExtendedData </summary>
+        </member>
+        <member name="M:eZcad.Utility.Utils.GetExtendedDataBool(Autodesk.AutoCAD.DatabaseServices.TypedValue)">
+            <summary> 从 ExtendedData 值中提取出对应的 布尔值  </summary>
+        </member>
+        <member name="M:eZcad.Utility.Utils.SetExtendedDataBool3(System.Nullable{System.Boolean})">
+            <summary> 将一个布尔值转换为对应的 ExtendedData </summary>
+        </member>
+        <member name="M:eZcad.Utility.Utils.GetExtendedDataBool3(Autodesk.AutoCAD.DatabaseServices.TypedValue)">
+            <summary> 从 ExtendedData 值中提取出对应的 布尔值  </summary>
+        </member>
+        <member name="M:eZcad.Utility.Utils.SetExtendedDataEnum(System.Enum)">
+            <summary> 将一个枚举值转换为对应的 ExtendedData </summary>
+        </member>
+        <member name="M:eZcad.Utility.Utils.GetExtendedDataEnum``1(Autodesk.AutoCAD.DatabaseServices.TypedValue)">
+            <summary> 从 ExtendedData 值中提取出对应的 枚举值  </summary>
+        </member>
+        <member name="M:eZcad.Utility.Utils.FocusOnMainUIWindow">
+            <summary> 将焦点从操作的<seealso cref="T:System.Windows.Forms.Form"/>转移到 AutoCAD 主界面窗口。此操作在对 无模态窗口 操作时非常有用。 </summary>
+        </member>
+        <member name="T:eZcad.Utility.ViewportUtil">
+            <summary> 将多个块的属性值进行统一编辑 </summary>
+        </member>
+        <member name="M:eZcad.Utility.ViewportUtil.RotateViewport(Autodesk.AutoCAD.DatabaseServices.Viewport,eZcad.DocumentModifier,Autodesk.AutoCAD.DatabaseServices.Layout,Autodesk.AutoCAD.Geometry.Point2d,System.Double)">
+            <summary> 旋转视口，并保持视口内容相对于视口的位置不变 </summary>
+            <param name="vp">要进行旋转的视口</param>
+            <param name="layout">视口所在的那个布局空间</param>
+            <param name="basePt">旋转的基点在图纸空间中的坐标</param>
+            <param name="angle">要旋转的角度，单位为弧度，按右手准则进行旋转</param>
+        </member>
+        <member name="T:eZcad.Utility.ViewportUtil.DrawingBorder">
+            <summary> 绘图图框 </summary>
+        </member>
+        <member name="P:eZcad.Utility.ViewportUtil.DrawingBorder.CenterPoint">
+            <summary> 绘图区的中心点 </summary>
+        </member>
+        <member name="P:eZcad.Utility.ViewportUtil.DrawingBorder.InsertPoint">
+            <summary> 绘图图框的插入点 </summary>
         </member>
         <member name="T:eZcad.AssemblyLoader.eZAssemblyLoader">
             <summary>
@@ -388,41 +885,6 @@
             <summary> 将程序集加载到程序中 </summary>
             <param name="filePath">程序集的文件路径</param>
             <returns></returns>
-        </member>
-        <member name="T:eZcad.DocumentModifier">
-            <summary> 对文档进行配置，以启动文档的改写模式 </summary>
-        </member>
-        <member name="M:eZcad.DocumentModifier.ExecuteCommand(eZcad.DocumentModifier.ExternalCommand)">
-            <summary> 执行外部命令，并且在执行命令之前，自动将 事务打开</summary>
-            <param name="cmd">要执行的命令</param>
-        </member>
-        <member name="F:eZcad.DocumentModifier.acActiveDocument">
-            <summary> 当前活动的AutoCAD文档 </summary>
-        </member>
-        <member name="F:eZcad.DocumentModifier.acDataBase">
-            <summary> 当前活动的AutoCAD文档中的数据库 </summary>
-        </member>
-        <member name="F:eZcad.DocumentModifier.acEditor">
-            <summary>  </summary>
-        </member>
-        <member name="M:eZcad.DocumentModifier.#ctor(System.Boolean)">
-            <summary> 对文档进行配置，以启动文档的改写模式 </summary>
-            <param name="openDebugerText">是否要打开一个文本调试器</param>
-        </member>
-        <member name="M:eZcad.DocumentModifier.WriteLineIntoDebuger(System.Object[])">
-            <summary> 向文本调试器中写入数据 </summary>
-            <param name="value"></param>
-        </member>
-        <member name="M:eZcad.DocumentModifier.WriteLinesIntoDebuger(System.Object[])">
-            <summary> 向文本调试器中写入多行数据 </summary>
-            <param name="lines"></param>
-        </member>
-        <member name="M:eZcad.DocumentModifier.WriteNow(System.Object[])">
-            <summary> 实时显示调试信息 </summary>
-            <param name="value"></param>
-        </member>
-        <member name="M:eZcad.DocumentModifier.LineFeedInCommandLine">
-            <summary> 将 各种无关提示进行换行 ，使命令行中显示更清爽 </summary>
         </member>
         <member name="M:eZcad_AddinManager.cmd_AddinManagerLoader.SetImpliedSelection">
             <summary> 在执行方法之前先获取已经选择到的选择对象集合 </summary>
