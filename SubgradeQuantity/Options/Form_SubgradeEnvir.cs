@@ -189,7 +189,7 @@ namespace eZcad.SubgradeQuantity.Options
             }
 
             // 设置边坡的岩土性质
-            var allSlopes = ProtectionUtils.GetAllExistingSlopeLines(_docMdf, sort: true);
+            var allSlopes = SQUtils.GetAllExistingSlopeLines(_docMdf, sort: true);
             SetSlopeSoilRock(allSlopes);
 
             // 设置Block的连接桩号

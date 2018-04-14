@@ -102,7 +102,7 @@ namespace eZcad.SubgradeQuantity.ParameterForm
             var protMethod = textBox_ProtMethod.Text;
             if (!string.IsNullOrEmpty(textBox_Style.Text))
             {
-                protMethod += ProtectionConstants.ProtectionMethodStyleSeperator + textBox_Style.Text;
+                protMethod += SQConstants.ProtectionMethodStyleSeperator + textBox_Style.Text;
             }
             // 如果最后的 protMethod 字符为空，则表示清除对应的防护
 
@@ -156,7 +156,7 @@ namespace eZcad.SubgradeQuantity.ParameterForm
             if (checkBox_ChooseRangeOnUI.Checked)
             {
                 // 通过界面选择边坡
-                slps = ProtectionUtils.SelecteExistingSlopeLines(_docMdf, left: leftOnly, sort: true);
+                slps = SQUtils.SelecteExistingSlopeLines(_docMdf, left: leftOnly, sort: true);
             }
             else
             {
@@ -169,7 +169,7 @@ namespace eZcad.SubgradeQuantity.ParameterForm
                     MessageBox.Show(@"起始桩号必须小于结尾桩号");
                     return null;
                 }
-                var secs = ProtectionUtils.GetAllSections(_docMdf, sort: true);
+                var secs = SQUtils.GetAllSections(_docMdf, sort: true);
                 SectionInfo data;
                 SlopeLine slp = null;
                 foreach (var sec in secs)

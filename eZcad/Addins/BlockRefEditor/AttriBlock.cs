@@ -19,6 +19,7 @@ namespace eZcad.Addins
 
         [Browsable(false)]
         public BlockReference BlockRef { get; }
+        public string Space { get; }
 
         [Browsable(false)]
         public List<AttributeReference> AttRefs { get; }
@@ -27,10 +28,11 @@ namespace eZcad.Addins
         /// 构造函数
         /// </summary>
         /// <param name="blockRef"></param>
-        public AttriBlock(BlockReference blockRef)
+        public AttriBlock(BlockReference blockRef, string space)
         {
             //
             BlockRef = blockRef;
+            Space = space;
             Handle = blockRef.Handle;
             X = blockRef.Position.X;
             Y = blockRef.Position.Y;
@@ -46,8 +48,9 @@ namespace eZcad.Addins
             foreach (var af in AttRefs)
             {
                 var index = defs.IndexOf(af.Tag);
-                if (index >= 0)
+                if (index >= 0 && values[index] != af.TextString)
                 {
+                    // 有对应项而且其字符值发生了修改
                     af.UpgradeOpen();
                     af.TextString = values[index];
                     af.DowngradeOpen();

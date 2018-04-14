@@ -1,0 +1,44 @@
+
+符号	含义	示例	匹配的示例
+
+--------------------------------------------------------------------------------
+
+*	可以重复0次或多次的前导字符  ra*t    rt、rat、raat和raaat 等
++	可以重复1次或多次的前导字符	ra+t    rat、raat和raaat等（但不能是rt)
+?	可以重复0次或1次的前导字符	ra?t    只有rt和rat匹配
+
+{n} 精确匹配 n 次。比如“a{3}”表示连续出现三个a。
+{n,}	至少匹配 n 次。
+{n,m}	匹配 n 到 m 次。
+
+--------------------------------------------------------------------------------
+
+^	匹配必须出现在字符串或者一行的开头	^B  B,但只能是文本中的第一个字符
+$	输入文本的结尾	X$  X,但只能是文本中的最后一个字符
+
+\b	字边界	ion\b	以ion结尾的任何字，而\ba表示以a开头的任何字
+\B	不是字边界的位置	\BX\B	字中间的任何X
+
+--------------------------------------------------------------------------------
+
+.	除了换行字符（\n)以外的所有单个字符	i.ation	isation 和 ization 等
+\s	任何空白字符（空格或制表符等）	\sa	[space]a、 \ta和\na等（\t和\n与C#的\t和n含义相同）
+\S	任何不是空白的字符	\SF	aF, rF和cF等，但不能是\tf
+
+\w	Matches any word character. A word character. A character in the input string can belong to any of the Unicode categories that are appropriate for characters in words.	\w	"I", "D", "A", "1", "3" in "ID A1.3"
+\W	Matches any non-word character. A non-word character. A character in the input string can belong to any Unicode category that is not a word character.	\W	" ", "." in "ID A1.3"
+
+\d	Matches any decimal digit. A decimal digit. A character in the input string can be any of a number of characters classified as Unicode decimal digits.	\d	"4" in "4 = IV"
+\D	Matches any character other than a decimal digit. A non-decimal digit. A character in the input string can be anything other than a Unicode decimal digit.	\D	" ", "=", " ", "I", "V" in "4 = IV"
+
+--------------------------------------------------------------------------------
+
+|	Matches any one element separated by the vertical bar (|) character.括号中的匹配项还是会放到一个group中。	th(e|is|at)	"the", "this" in "this is the day. "
+(?(expression)yes|no)	Matches yes if the regular expression pattern designated by expression matches; otherwise, matches the optional no part. expression is interpreted as a zero-width assertion.	(?(A)A\d{2}\b|\b\d{3}\b)	"A10", "910" in "A10 C103 910"
+(?(name)yes|no)	Matches yes if name, a named or numbered capturing group, has a match; otherwise, matches the optional no.	(?<quoted>")?(?(quoted).+?"|\S+\s)	Dogs.jpg, "Yiska playing.jpg" in "Dogs.jpg "Yiska playing.jpg""
+
+--------------------------------------------------------------------------------
+
+[character_group]	Matches any single character in character_group. By default, the match is case-sensitive. Positive character groups. A character in the input string must match one of a specified set of characters.	[ae]	"a" in "gray" "a", "e" in "lane"
+[^character_group]	Negation: Matches any single character that is not in character_group. By default, characters in character_group are case-sensitive. Negative character groups. A character in the input string must not match one of a specified set of characters.	[^aei]	"r", "g", "n" in "reign"
+[first-last]	Character range: Matches any single character in the range from first to last.	[A-Z]	"A", "B" in "AB123"

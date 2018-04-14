@@ -122,7 +122,7 @@ namespace eZcad.SubgradeQuantity.Entities
             int baseId;
 
             // 一般数据
-            var rec = Utils.GetDictionaryValue<Xrecord>(extensionDict, DictKey_General);
+            var rec = SymbolTableUtils.GetDictionaryValue<Xrecord>(extensionDict, DictKey_General);
             if (rec == null) return data;
 
             var buffs = rec.Data.AsArray();
@@ -148,12 +148,12 @@ namespace eZcad.SubgradeQuantity.Entities
                 Debug.Print("数据转换出错：" + ex.Message + "\r\n" + ex.StackTrace);
             }
             // 边坡
-            var dbSlopes = Utils.GetDictionaryValue<DBDictionary>(extensionDict, DictKey_Slopes);
+            var dbSlopes = SymbolTableUtils.GetDictionaryValue<DBDictionary>(extensionDict, DictKey_Slopes);
             if (dbSlopes != null)
             {
                 for (int i = 0; i < dbSlopes.Count; i++)
                 {
-                    var v = Utils.GetDictionaryValue<Xrecord>(dbSlopes, i.ToString());
+                    var v = SymbolTableUtils.GetDictionaryValue<Xrecord>(dbSlopes, i.ToString());
                     var slp = Slope.FromResultBuffer(v.Data);
                     if (slp != null)
                     {
@@ -162,12 +162,12 @@ namespace eZcad.SubgradeQuantity.Entities
                 }
             }
             // 平台
-            var dbPlatforms = Utils.GetDictionaryValue<DBDictionary>(extensionDict, DictKey_Platforms);
+            var dbPlatforms = SymbolTableUtils.GetDictionaryValue<DBDictionary>(extensionDict, DictKey_Platforms);
             if (dbPlatforms != null)
             {
                 for (int i = 0; i < dbPlatforms.Count; i++)
                 {
-                    var v = Utils.GetDictionaryValue<Xrecord>(dbPlatforms, i.ToString());
+                    var v = SymbolTableUtils.GetDictionaryValue<Xrecord>(dbPlatforms, i.ToString());
                     var slp = Platform.FromResultBuffer(v.Data);
                     if (slp != null)
                     {
@@ -178,7 +178,7 @@ namespace eZcad.SubgradeQuantity.Entities
             // 水位线
 
             // 一般数据
-            var wl = Utils.GetDictionaryValue<Xrecord>(extensionDict, DictKey_Waterlines);
+            var wl = SymbolTableUtils.GetDictionaryValue<Xrecord>(extensionDict, DictKey_Waterlines);
             if (wl == null || wl.Data == null) return data;
             buffs = wl.Data.AsArray();
             var waterlines = buffs.Select(r => Utils.ConvertToHandle(r.Value.ToString())).ToList();
@@ -216,7 +216,7 @@ namespace eZcad.SubgradeQuantity.Entities
         {
             int id = 0;
             var dbSlopes = new DBDictionary();
-            Utils.OverlayDictValue(trans, container, DictKey_Slopes, dbSlopes);
+            SymbolTableUtils.OverlayDictValue(trans, container, DictKey_Slopes, dbSlopes);
             //
             foreach (var sp in Slopes)
             {
@@ -230,7 +230,7 @@ namespace eZcad.SubgradeQuantity.Entities
             //
             id = 0;
             var dbPlatforms = new DBDictionary();
-            Utils.OverlayDictValue(trans, container, DictKey_Platforms, dbPlatforms);
+            SymbolTableUtils.OverlayDictValue(trans, container, DictKey_Platforms, dbPlatforms);
             foreach (var sp in Platforms)
             {
                 var buff = sp.ToResultBuffer();

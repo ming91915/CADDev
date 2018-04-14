@@ -46,7 +46,7 @@ namespace eZcad.SubgradeQuantity.DataExport
             IList<SubgradeSection> allSections, IList<SlopeLine> slopesToHandle) : base(docMdf, allSections.Select(r => r.XData.Station).ToArray())
         {
             _slopesToHandle = slopesToHandle.ToArray();
-            Array.Sort(_slopesToHandle, ProtectionUtils.CompareStation);
+            Array.Sort(_slopesToHandle, SQUtils.CompareStation);
 
             AllSectionDatas = allSections.Select(r => r.XData).ToArray();
             //
@@ -223,7 +223,7 @@ namespace eZcad.SubgradeQuantity.DataExport
             foreach (var block in blocks)
             {
                 // 桥梁后面的横断面（断面桩号较小）
-                var bs = allSlopeExpands.FirstOrDefault(r => Math.Abs(r.Station - block.ConnectedBackStaion) < ProtectionConstants.RangeMergeTolerance);
+                var bs = allSlopeExpands.FirstOrDefault(r => Math.Abs(r.Station - block.ConnectedBackStaion) < SQConstants.RangeMergeTolerance);
                 if (bs != null)
                 {
                     slopeData = bs.XData;
@@ -246,7 +246,7 @@ namespace eZcad.SubgradeQuantity.DataExport
                 }
 
                 // 桥梁前面的横断面（断面桩号较大）
-                var fs = allSlopeExpands.FirstOrDefault(r => Math.Abs(r.Station - block.ConnectedFrontStaion) < ProtectionConstants.RangeMergeTolerance);
+                var fs = allSlopeExpands.FirstOrDefault(r => Math.Abs(r.Station - block.ConnectedFrontStaion) < SQConstants.RangeMergeTolerance);
                 if (fs != null)
                 {
                     slopeData = fs.XData;

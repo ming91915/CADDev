@@ -30,9 +30,9 @@ namespace eZcad.SubgradeQuantity.Cmds
         private const string CommandDescription = @"将所有的填挖交界信息提取出来并制成相应表格";
 
         /// <summary> 将所有的填挖交界信息提取出来并制成相应表格 </summary>
-        [CommandMethod(ProtectionConstants.eZGroupCommnad, CommandName, ProtectionConstants.ModelState | CommandFlags.UsePickSet)
+        [CommandMethod(SQConstants.eZGroupCommnad, CommandName, SQConstants.ModelState | CommandFlags.UsePickSet)
         , DisplayName(CommandText), Description(CommandDescription)
-        , RibbonItem(CommandText, CommandDescription, ProtectionConstants.ImageDirectory + "ExportFillCutIntersections_32.png")]
+        , RibbonItem(CommandText, CommandDescription, SQConstants.ImageDirectory + "ExportFillCutIntersections_32.png")]
         public void ExportFillCutIntersections()
         {
             DocumentModifier.ExecuteCommand(ExportFillCutIntersections);
@@ -42,7 +42,7 @@ namespace eZcad.SubgradeQuantity.Cmds
             ref IList<ObjectId> elementSet)
         {
             var sp = new InfosGetter_FillCutInters();
-            return AddinManagerDebuger.DebugInAddinManager(sp.ExportFillCutIntersections,
+            return SQAddinManagerDebuger.DebugInAddinManager(sp.ExportFillCutIntersections,
                 impliedSelection, ref errorMessage, ref elementSet);
         }
 

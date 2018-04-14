@@ -19,6 +19,9 @@ namespace eZcad.Addins
         private readonly Color _btnColor;
         private SortColumnCollection _sortColumns = new SortColumnCollection();
 
+        /// <summary> 构造函数 </summary>
+        /// <param name="attriBlocks">所有要进行操作的块参照</param>
+        /// <param name="allAttDefs">要进行读写的块属性定义，以及一些其他字段</param>
         public BlockRefEditorForm(List<AttriBlock> attriBlocks, List<string> allAttDefs)
         {
             InitializeComponent();
@@ -70,6 +73,7 @@ namespace eZcad.Addins
             // 事件绑定 -------------------------------------------------------------
             _eZdgv.DataError += EZdgvOnDataError; // 响应表格中的数据类型不匹配等出错的情况
             _eZdgv.ColumnHeaderMouseClick += EZdgvOnColumnHeaderMouseClick;
+            _eZdgv.SelectionChanged += EZdgvOnSelectionChanged;
         }
 
 
@@ -109,6 +113,10 @@ namespace eZcad.Addins
             }
         }
 
+        private void EZdgvOnSelectionChanged(object sender, EventArgs eventArgs)
+        {
+            label_SelectionCount.Text = $"选择数量：{_eZdgv.SelectedCells.Count}";
+        }
 
         private void EZdgvOnColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
@@ -165,6 +173,12 @@ namespace eZcad.Addins
             column.AutoIncrementStep = 1;
             dt.Columns.Add(column);
             //
+            column = new DataColumn("Space");
+            column.DataType = typeof(string);
+            column.ReadOnly = true;
+            column.Unique = false;
+            dt.Columns.Add(column);
+            //
             column = new DataColumn("Handle");
             column.DataType = typeof(Handle);
             column.ReadOnly = true;
@@ -198,6 +212,7 @@ namespace eZcad.Addins
             foreach (var ab in attriBlocks)
             {
                 row = dt.NewRow();
+                row["Space"] = ab.Space;
                 row["Handle"] = ab.Handle;
                 row["X"] = ab.X;
                 row["Y"] = ab.Y;

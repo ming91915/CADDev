@@ -43,8 +43,8 @@ namespace eZcad.SubgradeQuantity.Entities
         public virtual bool TryMerge(CrossSectionRange<T> frontRange)
         {
             // 桩号的包含
-            if ((frontRange.BackValue.EdgeStation - this.FrontValue.EdgeStation > ProtectionConstants.RangeMergeTolerance)
-                || (this.BackValue.EdgeStation - frontRange.FrontValue.EdgeStation > ProtectionConstants.RangeMergeTolerance))
+            if ((frontRange.BackValue.EdgeStation - this.FrontValue.EdgeStation > SQConstants.RangeMergeTolerance)
+                || (this.BackValue.EdgeStation - frontRange.FrontValue.EdgeStation > SQConstants.RangeMergeTolerance))
             { return false; }
 
             if (FrontValue.IsMergeable(frontRange.BackValue))

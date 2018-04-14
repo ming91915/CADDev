@@ -21,9 +21,9 @@ namespace eZcad.SubgradeQuantity.Options
         [Browsable(true), Category(ctg_Judge), Description("低填浅挖中，判断低填路堤时，从中心线与自然地面交点向上（或向下）进行倾角放射，射线角度为1:n")]
         public double 低填射线坡比 { get; set; }
 
-        /// <summary> 低填浅挖中，路面顶部中点以下要保证1.5m处理深度，当路面中点与自然地面的高度小于1.5m时， 需要在自然地面以下进行超挖回填处理。 </summary>
+        /// <summary> 低填浅挖中，路面顶部中点以下要保证“路面+路床”的处理深度，比如0.5+0.8=1.3m，当路面中点与自然地面的高度小于1.3m时，需要在自然地面以下进行超挖回填处理。 </summary>
         [Browsable(true), Category(ctg_Calculate),
-         Description("低填浅挖中，路面顶部中点以下要保证1.5m处理深度，当路面中点与自然地面的高度小于1.5m时， 需要在自然地面以下进行超挖回填处理。")]
+         Description("低填浅挖中，路面顶部中点以下要保证“路面+路床”的处理深度，比如0.5+0.8=1.3m，当路面中点与自然地面的高度小于1.3m时， 需要在自然地面以下进行超挖回填处理。")]
         public double 低填处理高度 { get; set; }
 
 
@@ -59,9 +59,9 @@ namespace eZcad.SubgradeQuantity.Options
         /// <summary> 私有的构造函数 </summary>
         private Criterion_ThinFillShallowCut() : base()
         {
-            低填最大高度 = 1.5;
+            低填最大高度 = 1.3;
             低填射线坡比 = 5;
-            低填处理高度 = 1.5;
+            低填处理高度 = 1.3;
             //
             浅挖最大深度 = 0.5;
             浅挖射线坡比 = 5;

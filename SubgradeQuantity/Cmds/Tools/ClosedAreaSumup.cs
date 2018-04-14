@@ -29,9 +29,9 @@ namespace eZcad.Addins
 
         /// <summary> 计算选择的所有曲线的面积与长度之和 </summary>
         /// <summary> 沿着道路纵向绘制边坡线 </summary>
-        [CommandMethod(ProtectionConstants.eZGroupCommnad, CommandName, CommandFlags.UsePickSet)
+        [CommandMethod(SQConstants.eZGroupCommnad, CommandName, CommandFlags.UsePickSet)
         , DisplayName(CommandText), Description(CommandDescription)
-            , RibbonItem(CommandText, CommandDescription, ProtectionConstants.ImageDirectory + "ClosedAreaSumup_32.png")]
+            , RibbonItem(CommandText, CommandDescription, SQConstants.ImageDirectory + "ClosedAreaSumup_32.png")]
         public void SumupClosedArea()
         {
             DocumentModifier.ExecuteCommand(SumupClosedArea);
@@ -41,7 +41,7 @@ namespace eZcad.Addins
             ref IList<ObjectId> elementSet)
         {
             var s = new ClosedAreaSumup();
-            return AddinManagerDebuger.DebugInAddinManager(s.SumupClosedArea,
+            return SQAddinManagerDebuger.DebugInAddinManager(s.SumupClosedArea,
                 impliedSelection, ref errorMessage, ref elementSet);
         }
 

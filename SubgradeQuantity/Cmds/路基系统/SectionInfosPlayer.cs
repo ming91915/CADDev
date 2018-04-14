@@ -31,9 +31,9 @@ namespace eZcad.SubgradeQuantity.Cmds
         private const string CommandDescription = @"导出所有横断面的信息";
 
         /// <summary> 提取所有的横断面的相关信息 </summary>
-        [CommandMethod(ProtectionConstants.eZGroupCommnad, CommandName, CommandFlags.UsePickSet),
+        [CommandMethod(SQConstants.eZGroupCommnad, CommandName, CommandFlags.UsePickSet),
          DisplayName(CommandText), Description(CommandDescription)
-        , RibbonItem(CommandText, CommandDescription, ProtectionConstants.ImageDirectory + "SectionInfos_32.png")]
+        , RibbonItem(CommandText, CommandDescription, SQConstants.ImageDirectory + "SectionInfos_32.png")]
         public void AllSectionsInfo()
         {
             DocumentModifier.ExecuteCommand(AllSectionsInfo);
@@ -43,7 +43,7 @@ namespace eZcad.SubgradeQuantity.Cmds
             ref IList<ObjectId> elementSet)
         {
             var s = new SectionInfosPlayer();
-            return AddinManagerDebuger.DebugInAddinManager(s.AllSectionsInfo,
+            return SQAddinManagerDebuger.DebugInAddinManager(s.AllSectionsInfo,
                 impliedSelection, ref errorMessage, ref elementSet);
         }
 
@@ -53,7 +53,7 @@ namespace eZcad.SubgradeQuantity.Cmds
         public ExternalCmdResult AllSectionsInfo(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
             _docMdf = docMdf;
-            var allSections = ProtectionUtils.GetAllSections(docMdf, sort: true);
+            var allSections = SQUtils.GetAllSections(docMdf, sort: true);
             _docMdf.WriteNow($"\n找到{allSections.Length}个横断面对象！\n");
             ExportSectionInfoToText(allSections);
             return ExternalCmdResult.Commit;

@@ -33,9 +33,9 @@ namespace eZcad.SubgradeQuantity.Cmds
 
 
         /// <summary> 根据 AutoCAD 中的几何图形构造出完整的路基横断面信息系统 </summary>
-        [CommandMethod(ProtectionConstants.eZGroupCommnad, CommandName, CommandFlags.UsePickSet)
+        [CommandMethod(SQConstants.eZGroupCommnad, CommandName, CommandFlags.UsePickSet)
         , DisplayName(CommandText), Description(CommandDescription)
-        , RibbonItem(CommandText, CommandDescription, ProtectionConstants.ImageDirectory + "Section_32.png")]
+        , RibbonItem(CommandText, CommandDescription, SQConstants.ImageDirectory + "Section_32.png")]
         public void ConstructSections()
         {
             DocumentModifier.ExecuteCommand(ConstructSections);
@@ -45,7 +45,7 @@ namespace eZcad.SubgradeQuantity.Cmds
             ref IList<ObjectId> elementSet)
         {
             var s = new SectionsConstructor();
-            return AddinManagerDebuger.DebugInAddinManager(s.ConstructSections,
+            return SQAddinManagerDebuger.DebugInAddinManager(s.ConstructSections,
                 impliedSelection, ref errorMessage, ref elementSet);
         }
 
@@ -57,12 +57,12 @@ namespace eZcad.SubgradeQuantity.Cmds
         public ExternalCmdResult ConstructSections(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
             _docMdf = docMdf;
-            ProtectionUtils.SubgradeEnvironmentConfiguration(docMdf);
+            SQUtils.SubgradeEnvironmentConfiguration(docMdf);
 
             // 在界面中选择指定的断面
-            // var axes = ProtectionUtils.SelecteSectionLines(docMdf.acEditor);
+            // var axisLines = ProtectionUtils.SelecteSectionLines(docMdf.acEditor);
             // 直接提取整个文档中所有的断面
-            var axisLines = ProtectionUtils.GetAllSectionLines(docMdf.acEditor);
+            var axisLines = SQUtils.GetAllSectionLines(docMdf.acEditor);
 
             if (axisLines != null && axisLines.Count > 0)
             {

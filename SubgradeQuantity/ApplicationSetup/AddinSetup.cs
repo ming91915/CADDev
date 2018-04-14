@@ -84,7 +84,7 @@ namespace eZcad.SubgradeQuantity
 
         private const string CmdStartRibbon = @"SQRibbon";
         /// <summary> 添加自定义功能区选项卡 </summary>
-        [CommandMethod(ProtectionConstants.eZGroupCommnad, CmdStartRibbon, ProtectionConstants.ModelState)]
+        [CommandMethod(SQConstants.eZGroupCommnad, CmdStartRibbon, SQConstants.ModelState)]
         public void CreateRibbon()
         {
             if (ComponentManager.Ribbon == null)

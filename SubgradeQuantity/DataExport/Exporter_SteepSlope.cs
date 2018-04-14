@@ -82,7 +82,7 @@ namespace eZcad.SubgradeQuantity.DataExport
         public Exporter_SteepSlope(DocumentModifier docMdf, IList<SubgradeSection> allSections,
             List<SubgradeSection> handledSections) : base(docMdf, allSections.Select(r => r.XData.Station).ToArray())
         {
-            handledSections.Sort(ProtectionUtils.CompareStation);
+            handledSections.Sort(SQUtils.CompareStation);
             _handledSections = handledSections;
             //
             _sortedRanges = InitializeGeometricRange<SteepSlope>(AllStations);
@@ -166,15 +166,15 @@ namespace eZcad.SubgradeQuantity.DataExport
                 {
                     rg.BackValue.EdgeStation,
                     rg.FrontValue.EdgeStation,
-                    ProtectionUtils.GetStationString(rg.BackValue.EdgeStation, rg.FrontValue.EdgeStation, maxDigits: 0),
+                    SQUtils.GetStationString(rg.BackValue.EdgeStation, rg.FrontValue.EdgeStation, maxDigits: 0),
                     // 挖台阶位置
-                    (rg.BackValue.Treatment & SectionSide.左)>0 ? ProtectionConstants.CheckMark: null,
-                    (rg.BackValue.Treatment & SectionSide.右)>0 ? ProtectionConstants.CheckMark:null,
+                    (rg.BackValue.Treatment & SectionSide.左)>0 ? SQConstants.CheckMark: null,
+                    (rg.BackValue.Treatment & SectionSide.右)>0 ? SQConstants.CheckMark:null,
                     // Enum.GetName(typeof (SectionSide), rg.BackValue.Treatment),
                     
                     // 土工格栅位置
-                     (rg.BackValue.Reinforcement & SectionSide.左)>0 ? ProtectionConstants.CheckMark: null,
-                     (rg.BackValue.Reinforcement & SectionSide.右)>0 ? ProtectionConstants.CheckMark:null,
+                     (rg.BackValue.Reinforcement & SectionSide.左)>0 ? SQConstants.CheckMark: null,
+                     (rg.BackValue.Reinforcement & SectionSide.右)>0 ? SQConstants.CheckMark:null,
                     // Enum.GetName(typeof (SectionSide), rg.BackValue.Reinforcement),
 
                     rangeLength,

@@ -99,7 +99,7 @@ namespace eZcad.SubgradeQuantity.DataExport
         public Exporter_ThinFillShallowCut(DocumentModifier docMdf, List<SubgradeSection> sectionsToHandle,
             IList<SubgradeSection> allSections) : base(docMdf, allSections.Select(r => r.XData.Station).ToArray())
         {
-            sectionsToHandle.Sort(ProtectionUtils.CompareStation);
+            sectionsToHandle.Sort(SQUtils.CompareStation);
             _sectionsToHandle = sectionsToHandle;
             //
             _sortedRanges = InitializeGeometricRange<ThinFillShallowCut>(AllStations);
@@ -180,7 +180,7 @@ namespace eZcad.SubgradeQuantity.DataExport
                 {
                     thsc.BackValue.EdgeStation,
                     thsc.FrontValue.EdgeStation,
-                    ProtectionUtils.GetStationString(thsc.BackValue.EdgeStation, thsc.FrontValue.EdgeStation,
+                    SQUtils.GetStationString(thsc.BackValue.EdgeStation, thsc.FrontValue.EdgeStation,
                         maxDigits: 0),
                     thsc.FrontValue.EdgeStation - thsc.BackValue.EdgeStation,
                     thsc.BackValue.GetDescription(),

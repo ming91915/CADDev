@@ -146,7 +146,7 @@ namespace eZcad.SubgradeQuantity.Entities
             DocMdf = docMdf;
             CenterLine = line;
             _infoBlock = infoBlock.Handle;
-            _station = ProtectionUtils.GetStationFromString(station).Value;
+            _station = SQUtils.GetStationFromString(station).Value;
             //
             var blr = FindCenterAxisElevation(docMdf.acEditor);
             if (blr != null)
@@ -207,10 +207,10 @@ namespace eZcad.SubgradeQuantity.Entities
             Extents3d extSection; // 整个横断面的搜索范围
             // 道路中轴线的搜索范围
             Extents3d extCenterAxis = new Extents3d(
-                min: new Point3d(_centerX - ProtectionConstants.CoincideTolerance,
-                        _bottomPt.Y - ProtectionConstants.CoincideTolerance, 0),
-                max: new Point3d(_centerX + ProtectionConstants.CoincideTolerance,
-                        _topPt.Y + ProtectionConstants.CoincideTolerance, 0));
+                min: new Point3d(_centerX - SQConstants.CoincideTolerance,
+                        _bottomPt.Y - SQConstants.CoincideTolerance, 0),
+                max: new Point3d(_centerX + SQConstants.CoincideTolerance,
+                        _topPt.Y + SQConstants.CoincideTolerance, 0));
 
             Polyline leftGroundSurf;
             Polyline rightGroundSurf;
@@ -439,8 +439,8 @@ namespace eZcad.SubgradeQuantity.Entities
                 // 黄色  "HDMD.ITEM.ZLJ.ZFG..横断面绘图模板-带标高"
             };
 
-            var pt1 = new Point3d(_bottomPt.X - ProtectionConstants.CoincideTolerance, _bottomPt.Y, _bottomPt.Z);
-            var pt2 = new Point3d(_topPt.X + ProtectionConstants.CoincideTolerance, _topPt.Y, _topPt.Z);
+            var pt1 = new Point3d(_bottomPt.X - SQConstants.CoincideTolerance, _bottomPt.Y, _bottomPt.Z);
+            var pt2 = new Point3d(_topPt.X + SQConstants.CoincideTolerance, _topPt.Y, _topPt.Z);
 
             var res = ed.SelectCrossingWindow(
                 pt1: pt1,
@@ -893,10 +893,16 @@ namespace eZcad.SubgradeQuantity.Entities
                 var rw = new RetainingWall(retainingWall);
                 if (slopeLine != null && rw.WallCurve.IsOn(slopeLine.StartPoint))
                 {
-                    // 说明是路肩墙
+                    // 如果填方边坡线的起点与挡墙多段线相交，则说明是路肩墙
                     return RetainingWallType.路肩墙;
                 }
-                else { return RetainingWallType.路堤墙;}
+                else if (slopeLine != null && rw.GetTopY() >= slopeLine.StartPoint.Y)
+                {
+                    // 在填方区的挡墙，而且挡墙顶的标高大于填方边坡线的起点标高，则说明是路肩墙。
+                    // 这种情况出现在手动进行了路基加宽的情况下（挡墙在路基线外侧）
+                    return RetainingWallType.路肩墙;
+                }
+                else { return RetainingWallType.路堤墙; }
             }
             else
             {
@@ -995,14 +1001,14 @@ namespace eZcad.SubgradeQuantity.Entities
         {
             var x = startP.X;
             var y = startP.Y;
-            if (y <= _topPt.Y && y >= _bottomPt.Y && Math.Abs(x - _centerX) < ProtectionConstants.CoincideTolerance)
+            if (y <= _topPt.Y && y >= _bottomPt.Y && Math.Abs(x - _centerX) < SQConstants.CoincideTolerance)
             {
                 intersectP = startP;
                 return true;
             }
             x = endP.X;
             y = endP.Y;
-            if (y <= _topPt.Y && y >= _bottomPt.Y && Math.Abs(x - _centerX) < ProtectionConstants.CoincideTolerance)
+            if (y <= _topPt.Y && y >= _bottomPt.Y && Math.Abs(x - _centerX) < SQConstants.CoincideTolerance)
             {
                 intersectP = endP;
                 return true;
@@ -1016,13 +1022,17 @@ namespace eZcad.SubgradeQuantity.Entities
         /// </summary>
         /// <param name="curves"></param>
         /// <returns></returns>
-        private static Curve GetClosestPolyLine(IEnumerable<Curve> curves, Point3d axisMiddlePt)
+        private static Curve GetClosestPolyLine(IEnumerable<Polyline> curves, Point3d axisMiddlePt)
         {
             Curve closetSlope = null;
             var minDis = double.MaxValue;
             double dist;
             foreach (var sp in curves)
             {
+                if (sp.Length <= SQConstants.MinSlopeSegLength)
+                {
+                    continue;
+                }
                 dist = sp.StartPoint.DistanceTo(axisMiddlePt);
                 if (dist <= minDis)
                 {

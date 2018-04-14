@@ -28,9 +28,9 @@ namespace eZcad.SubgradeQuantity.Cmds
         private const string CommandDescription = @"道路路基工程量的基础项目信息设置";
 
         /// <summary> 边坡防护的选项设置 </summary>
-        [CommandMethod(ProtectionConstants.eZGroupCommnad, CommandName, ProtectionConstants.ModelState | CommandFlags.UsePickSet)
+        [CommandMethod(SQConstants.eZGroupCommnad, CommandName, SQConstants.ModelState | CommandFlags.UsePickSet)
         , DisplayName(CommandText), Description(CommandDescription)
-        , RibbonItem(CommandText, CommandDescription, ProtectionConstants.ImageDirectory + "ProjectInfos_32.png")]
+        , RibbonItem(CommandText, CommandDescription, SQConstants.ImageDirectory + "ProjectInfos_32.png")]
         public void SetProjectInfos()
         {
             DocumentModifier.ExecuteCommand(SetProjectInfos);
@@ -40,7 +40,7 @@ namespace eZcad.SubgradeQuantity.Cmds
             ref IList<ObjectId> elementSet)
         {
             var s = new ProjectInfos();
-            return AddinManagerDebuger.DebugInAddinManager(s.SetProjectInfos,
+            return SQAddinManagerDebuger.DebugInAddinManager(s.SetProjectInfos,
                 impliedSelection, ref errorMessage, ref elementSet);
         }
 

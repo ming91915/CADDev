@@ -23,7 +23,6 @@ namespace eZcad.Addins.Table
 
         /// <summary> 命令行命令名称，同时亦作为命令语句所对应的C#代码中的函数的名称 </summary>
         public const string CommandName = @"CopyColumnsFromClipboard";
-
         private const string CommandText = @"复制列";
         private const string CommandDescription = @"将剪切板中的一列数据复制到AutoCAD中的一列文本中";
 
@@ -32,7 +31,7 @@ namespace eZcad.Addins.Table
             CommandFlags.Interruptible | CommandFlags.UsePickSet | CommandFlags.NoBlockEditor)
         , DisplayName(CommandText), Description(CommandDescription)
         , RibbonItem(CommandText, CommandDescription, eZConstants.ImageDirectory + "HighFill_32.png")]
-        public void SumupArea()
+        public void CopyColumnsFromClipboard()
         {
             DocumentModifier.ExecuteCommand(CopyColumnsFromClipboard);
         }
@@ -41,7 +40,7 @@ namespace eZcad.Addins.Table
             ref IList<ObjectId> elementSet)
         {
             var s = new CopyColumns();
-            return AddinManagerDebuger.DebugInAddinManager(s.CopyColumnsFromClipboard,
+            return eZcadAddinManagerDebuger.DebugInAddinManager(s.CopyColumnsFromClipboard,
                 impliedSelection, ref errorMessage, ref elementSet);
         }
 
@@ -132,7 +131,7 @@ namespace eZcad.Addins.Table
         private List<DBText> SelectTexts()
         {
             var op = new PromptSelectionOptions();
-            op.MessageForAdding = "\n选择一列文本"; // 当用户在命令行中输入A（或Add）时，命令行出现的提示字符。
+            op.MessageForAdding = "\n选择一列或一行文本"; // 当用户在命令行中输入A（或Add）时，命令行出现的提示字符。
             op.MessageForRemoval = op.MessageForAdding;
 
             var filterType = new[]

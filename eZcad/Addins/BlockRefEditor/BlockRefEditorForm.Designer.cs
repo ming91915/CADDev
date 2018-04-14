@@ -32,6 +32,7 @@
             this.btn_cancel = new System.Windows.Forms.Button();
             this.btn_SortMultiLevel = new System.Windows.Forms.Button();
             this._eZdgv = new eZstd.UserControls.eZDataGridView();
+            this.label_SelectionCount = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this._eZdgv)).BeginInit();
             this.SuspendLayout();
             // 
@@ -85,13 +86,23 @@
             this._eZdgv.SupportPaste = false;
             this._eZdgv.TabIndex = 0;
             // 
+            // label_SelectionCount
+            // 
+            this.label_SelectionCount.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.label_SelectionCount.AutoSize = true;
+            this.label_SelectionCount.Location = new System.Drawing.Point(13, 536);
+            this.label_SelectionCount.Name = "label_SelectionCount";
+            this.label_SelectionCount.Size = new System.Drawing.Size(71, 12);
+            this.label_SelectionCount.TabIndex = 3;
+            this.label_SelectionCount.Text = "选择数量：1";
+            // 
             // BlockRefEditorForm
             // 
             this.AcceptButton = this.btn_Ok;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.CancelButton = this.btn_cancel;
             this.ClientSize = new System.Drawing.Size(860, 560);
+            this.Controls.Add(this.label_SelectionCount);
             this.Controls.Add(this.btn_SortMultiLevel);
             this.Controls.Add(this.btn_cancel);
             this.Controls.Add(this.btn_Ok);
@@ -101,6 +112,7 @@
             this.Text = "块属性编辑器";
             ((System.ComponentModel.ISupportInitialize)(this._eZdgv)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -110,5 +122,6 @@
         private System.Windows.Forms.Button btn_Ok;
         private System.Windows.Forms.Button btn_cancel;
         private System.Windows.Forms.Button btn_SortMultiLevel;
+        private System.Windows.Forms.Label label_SelectionCount;
     }
 }

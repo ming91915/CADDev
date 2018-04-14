@@ -28,10 +28,10 @@ namespace eZcad.SubgradeQuantity.Cmds
         private const string CommandDescription = @"将分割开的多个子边坡进行合并";
 
         /// <summary> 将分割开的多个子边坡进行合并 </summary>
-        [CommandMethod(ProtectionConstants.eZGroupCommnad, CommandName,
-            ProtectionConstants.ModelState | CommandFlags.UsePickSet)
+        [CommandMethod(SQConstants.eZGroupCommnad, CommandName,
+            SQConstants.ModelState | CommandFlags.UsePickSet)
         , DisplayName(CommandText), Description(CommandDescription)
-        , RibbonItem(CommandText, CommandDescription, ProtectionConstants.ImageDirectory + "SegMerge_32.png")]
+        , RibbonItem(CommandText, CommandDescription, SQConstants.ImageDirectory + "SegMerge_32.png")]
         public void MergeSlopeSegs()
         {
             DocumentModifier.ExecuteCommand(MergeSlopeSegs);
@@ -41,7 +41,7 @@ namespace eZcad.SubgradeQuantity.Cmds
             ref IList<ObjectId> elementSet)
         {
             var s = new SlopeSegMerge();
-            return AddinManagerDebuger.DebugInAddinManager(s.MergeSlopeSegs,
+            return SQAddinManagerDebuger.DebugInAddinManager(s.MergeSlopeSegs,
                 impliedSelection, ref errorMessage, ref elementSet);
         }
 
@@ -51,9 +51,9 @@ namespace eZcad.SubgradeQuantity.Cmds
         public ExternalCmdResult MergeSlopeSegs(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
             _docMdf = docMdf;
-            ProtectionUtils.SubgradeEnvironmentConfiguration(docMdf);
+            SQUtils.SubgradeEnvironmentConfiguration(docMdf);
             //
-            var selectedSlopes = ProtectionUtils.SelecteExistingSlopeLines(docMdf, left: null, sort: true);
+            var selectedSlopes = SQUtils.SelecteExistingSlopeLines(docMdf, left: null, sort: true);
             if (selectedSlopes == null || selectedSlopes.Count == 0) return ExternalCmdResult.Cancel;
             //
             MergeProtectionDirection dir;

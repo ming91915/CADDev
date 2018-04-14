@@ -27,10 +27,10 @@ namespace eZcad.SubgradeQuantity.Cmds
         private const string CommandDescription = @"对AutoCAD图形中与边坡防护相关的文字进行修改";
 
         /// <summary> 对AutoCAD图形中与边坡防护相关的文字进行修改 </summary>
-        [CommandMethod(ProtectionConstants.eZGroupCommnad, CommandName,
+        [CommandMethod(SQConstants.eZGroupCommnad, CommandName,
             CommandFlags.Interruptible | CommandFlags.UsePickSet | CommandFlags.NoBlockEditor | CommandFlags.Redraw)
         , DisplayName(CommandText), Description(CommandDescription)
-        , RibbonItem(CommandText, CommandDescription, ProtectionConstants.ImageDirectory + "DeleteProtection_32.png")]
+        , RibbonItem(CommandText, CommandDescription, SQConstants.ImageDirectory + "DeleteProtection_32.png")]
         public void ModifySlopeProtText()
         {
             DocumentModifier.ExecuteCommand(ModifySlopeProtText);
@@ -40,7 +40,7 @@ namespace eZcad.SubgradeQuantity.Cmds
             ref IList<ObjectId> elementSet)
         {
             var s = new SlopeProtTextModifier();
-            return AddinManagerDebuger.DebugInAddinManager(s.ModifySlopeProtText,
+            return SQAddinManagerDebuger.DebugInAddinManager(s.ModifySlopeProtText,
                 impliedSelection, ref errorMessage, ref elementSet);
         }
 
@@ -133,8 +133,8 @@ namespace eZcad.SubgradeQuantity.Cmds
                 {
                     new TypedValue((int) DxfCode.Start, "TEXT"),
                     new TypedValue((int) DxfCode.Operator, "<OR"),
-                    new TypedValue((int) DxfCode.LayerName, ProtectionConstants.LayerName_ProtectionMethod_Slope),
-                    new TypedValue((int) DxfCode.LayerName, ProtectionConstants.LayerName_ProtectionMethod_Platform),
+                    new TypedValue((int) DxfCode.LayerName, SQConstants.LayerName_ProtectionMethod_Slope),
+                    new TypedValue((int) DxfCode.LayerName, SQConstants.LayerName_ProtectionMethod_Platform),
                     new TypedValue((int) DxfCode.Operator, "OR>")
                 };
             }
@@ -143,7 +143,7 @@ namespace eZcad.SubgradeQuantity.Cmds
                 acTypValAr = new TypedValue[]
                 {
                     new TypedValue((int) DxfCode.Start, "TEXT"),
-                    new TypedValue((int) DxfCode.LayerName, ProtectionConstants.LayerName_ProtectionMethod_Slope),
+                    new TypedValue((int) DxfCode.LayerName, SQConstants.LayerName_ProtectionMethod_Slope),
                 };
             }
             else
@@ -151,7 +151,7 @@ namespace eZcad.SubgradeQuantity.Cmds
                 acTypValAr = new TypedValue[]
                 {
                     new TypedValue((int) DxfCode.Start, "TEXT"),
-                    new TypedValue((int) DxfCode.LayerName, ProtectionConstants.LayerName_ProtectionMethod_Platform),
+                    new TypedValue((int) DxfCode.LayerName, SQConstants.LayerName_ProtectionMethod_Platform),
                 };
             }
 

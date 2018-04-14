@@ -59,5 +59,12 @@ namespace eZcad.Properties {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>  正则表达式的Pattern提示 </summary>
+        internal static string RegexTips {
+            get {
+                return ResourceManager.GetString("RegexTips", resourceCulture);
+            }
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Windows.Forms;
 using eZcad.Examples;
 using eZcad.Utility;
@@ -21,7 +22,7 @@ namespace eZcad.Examples
 
         #region --- GetSelection
 
-        public static void GetSelectionWithFilter()
+        private static void GetSelectionWithFilter()
         {
             // 创建一个 TypedValue 数组，用于定义过滤条件
             var filterTypes = new TypedValue[]
@@ -66,7 +67,7 @@ namespace eZcad.Examples
             }
         }
 
-        public static void GetSelectionWithKeywords()
+        private static void GetSelectionWithKeywords()
         {
             Document doc = Application.DocumentManager.MdiActiveDocument;
             Editor ed = doc.Editor;
@@ -103,7 +104,7 @@ namespace eZcad.Examples
 
         /// <summary> 在  GetSelection 方法中指定关键字与对应的快捷键 </summary>
         /// <returns></returns>
-        public static SelectionSet GetSelectionWithKeywordsAndShortcut(DocumentModifier docMdf, ref string filteredDxfName,
+        private static SelectionSet GetSelectionWithKeywordsAndShortcut(DocumentModifier docMdf, ref string filteredDxfName,
             out bool continueSelect)
         {
             var ed = docMdf.acEditor;
@@ -189,9 +190,55 @@ namespace eZcad.Examples
             return null;
         }
 
+
+        /// <summary> 举例，选择多个属性定义对象 </summary>
+        private static List<AttributeDefinition> SelectAttibuteDefinitions()
+        {
+            // 创建一个 TypedValue 数组，用于定义过滤条件
+            var filterTypes = new TypedValue[]
+            {
+                new TypedValue((int) DxfCode.Start, "ATTDEF"),
+            };
+
+            // Create our options object
+            var op = new PromptSelectionOptions();
+
+            // Add our keywords
+            //op.Keywords.Add("First");
+            //op.Keywords.Add("Second");
+
+            // Set our prompts to include our keywords
+            string kws = op.Keywords.GetDisplayString(true);
+            op.MessageForAdding = "\n 请选择一个或多个属性定义 " + kws; // 当用户在命令行中输入A（或Add）时，命令行出现的提示字符。
+            op.MessageForRemoval = "\nPlease remove objects from selection or " + kws;
+
+
+            //获取当前文档编辑器
+            Editor acDocEd = Application.DocumentManager.MdiActiveDocument.Editor;
+
+            // 请求在图形区域选择对象
+            var res = acDocEd.GetSelection(op, new SelectionFilter(filterTypes));
+
+            var output = new List<AttributeDefinition>();
+            // 如果提示状态OK，表示对象已选
+            if (res.Status == PromptStatus.OK)
+            {
+                var acSSet = res.Value.GetObjectIds();
+                foreach (var id in acSSet)
+                {
+                    var obj = id.GetObject(OpenMode.ForRead) as AttributeDefinition;
+                    if (obj != null)
+                    {
+                        output.Add(obj);
+                    }
+                }
+            }
+            return output;
+        }
+
         #endregion
 
-        public static void GetAngleWithKeywords()
+        private static void GetAngleWithKeywords()
         {
             var doc = Application.DocumentManager.MdiActiveDocument;
             var ed = doc.Editor;
@@ -231,7 +278,7 @@ namespace eZcad.Examples
         }
 
         /// <summary> 通过点选的方式选择一条曲线 </summary>
-        public static Curve GetEntity(DocumentModifier docMdf)
+        private static Curve GetEntity(DocumentModifier docMdf)
         {
             // 点选
             var peO = new PromptEntityOptions("\n 选择一条曲线 ");
@@ -249,10 +296,9 @@ namespace eZcad.Examples
             return null;
         }
 
-
         /// <summary> 从两个选项中选择一个 </summary>
         /// <param name="docMdf"></param>
-        /// <returns>true 表示按顶点缩放（默认值），false 表示按长度缩放</returns>
+        /// <returns>true 表示第一个选项（默认值），false 表示第二个选项</returns>
         private static bool GetKeywordsFromTwoOptions(DocumentModifier docMdf)
         {
             var op = new PromptKeywordOptions(
@@ -269,7 +315,7 @@ namespace eZcad.Examples
                     return false;
                 }
             }
-            return true;
+            return true; // true 表示第一个选项
         }
 
         /// <summary> 分段的长度 </summary>
@@ -314,28 +360,7 @@ namespace eZcad.Examples
             return 0;
         }
 
-        /// <summary> 在命令行中获取一个小数值 </summary>
-        /// <param name="value">成功获得的数值</param>
-        /// <returns>操作成功，则返回 true，操作失败或手动取消操作，则返回 false</returns>
-        private static bool GetDouble(Editor ed, out double value)
-        {
-            value = double.MaxValue;
-            var op = new PromptDoubleOptions(message: "\n用来进行剪切的标高：")
-            {
-                AllowNegative = true,
-                AllowNone = false,
-                AllowZero = true,
-                AllowArbitraryInput = false
-            };
-            //
-            var res = ed.GetDouble(op);
-            if (res.Status == PromptStatus.OK)
-            {
-                value = res.Value;
-                return true;
-            }
-            return false;
-        }
+
 
         /// <summary> 在命令行中获取一个字符 </summary>
         /// <param name="value">成功获得的数值</param>
@@ -358,5 +383,54 @@ namespace eZcad.Examples
             }
             return false;
         }
+
+        #region ---   公共静态函数
+
+        /// <summary> 在命令行中获取一个小数值 </summary>
+        /// <param name="value">成功获得的数值</param>
+        /// <param name="allowArbitraryInput"></param>
+        /// <returns>操作成功，则返回 true，操作失败或手动取消操作，则返回 false</returns>
+        public static bool GetDouble(Editor ed, string message, out double value, double defaultValue = 1,
+            bool allowNegative = true, bool allowNone = false, bool allowZero = true, bool allowArbitraryInput = false)
+        {
+            value = double.MaxValue;
+            var op = new PromptDoubleOptions(message: $"\n {message}")
+            {
+                AllowNegative = allowNegative,
+                AllowNone = allowNone,
+                AllowZero = allowZero,
+                AllowArbitraryInput = allowArbitraryInput,
+                DefaultValue = defaultValue
+            };
+            //
+            var res = ed.GetDouble(op);
+            if (res.Status == PromptStatus.OK)
+            {
+                value = res.Value;
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary> 在界面中选择一个点 </summary>
+        /// <param name="point">成功获得的三维点</param>
+        /// <returns>操作成功，则返回 true，操作失败或手动取消操作，则返回 false</returns>
+        public static bool GetPoint(Editor ed, string message, out Point3d point)
+        {
+            point = default(Point3d);
+            var op = new PromptPointOptions(message: $"\n {message}")
+            {
+            };
+            //
+            var res = ed.GetPoint(op);
+            if (res.Status == PromptStatus.OK)
+            {
+                point = res.Value;
+                return true;
+            }
+            return false;
+        }
+
+        #endregion
     }
 }

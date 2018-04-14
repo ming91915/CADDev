@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Windows;
 using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
@@ -14,6 +15,7 @@ using eZcad.SubgradeQuantity.Entities;
 using eZcad.SubgradeQuantity.Utility;
 using eZcad.Utility;
 using eZstd.Enumerable;
+using Exception = System.Exception;
 
 [assembly: CommandClass(typeof(LongitudinalSectionDrawer))]
 
@@ -33,9 +35,9 @@ namespace eZcad.SubgradeQuantity.Cmds
         private const string CommandDescription = @"沿着道路纵向绘制边坡线与挡墙";
 
         /// <summary> 沿着道路纵向绘制边坡线 </summary>
-        [CommandMethod(ProtectionConstants.eZGroupCommnad, CommandName, CommandFlags.UsePickSet)
+        [CommandMethod(SQConstants.eZGroupCommnad, CommandName, CommandFlags.UsePickSet)
         , DisplayName(CommandText), Description(CommandDescription)
-            , RibbonItem(CommandText, CommandDescription, ProtectionConstants.ImageDirectory + "LongitudinalSection_32.png")]
+            , RibbonItem(CommandText, CommandDescription, SQConstants.ImageDirectory + "LongitudinalSection_32.png")]
         public void LongitudinalSection()
         {
             DocumentModifier.ExecuteCommand(LongitudinalSection);
@@ -45,7 +47,7 @@ namespace eZcad.SubgradeQuantity.Cmds
             ref IList<ObjectId> elementSet)
         {
             var s = new LongitudinalSectionDrawer();
-            return AddinManagerDebuger.DebugInAddinManager(s.LongitudinalSection,
+            return SQAddinManagerDebuger.DebugInAddinManager(s.LongitudinalSection,
                 impliedSelection, ref errorMessage, ref elementSet);
         }
 
@@ -56,8 +58,8 @@ namespace eZcad.SubgradeQuantity.Cmds
         public ExternalCmdResult LongitudinalSection(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
             _docMdf = docMdf;
-            ProtectionUtils.SubgradeEnvironmentConfiguration(docMdf);
-            var allSections = ProtectionUtils.GetAllSections(docMdf, sort: true);
+            SQUtils.SubgradeEnvironmentConfiguration(docMdf);
+            var allSections = SQUtils.GetAllSections(docMdf, sort: true);
             if (allSections == null || allSections.Length <= 2) return ExternalCmdResult.Cancel;
             if (allSections.Length > 1)
             {
@@ -84,7 +86,7 @@ namespace eZcad.SubgradeQuantity.Cmds
                 //
                 var ss = EditStateIdentifier.GetCurrentEditState(_docMdf);
                 ss.CurrentBTR.UpgradeOpen();
-                var layer_Slope = Utils.GetOrCreateLayer(_docMdf, ProtectionConstants.LayerName_LongitudinalSlopes);
+                var layer_Slope = SymbolTableUtils.GetOrCreateLayer(_docMdf.acTransaction, _docMdf.acDataBase, SQConstants.LayerName_LongitudinalSlopes);
                 var originalLayer = docMdf.acDataBase.Clayer;
                 docMdf.acDataBase.Clayer = layer_Slope.Id;
 
@@ -159,89 +161,105 @@ namespace eZcad.SubgradeQuantity.Cmds
         {
             var slps = new Dictionary<double, double>();
             retainingWalls = new Dictionary<double, double[]>();
-            foreach (var sec in allSections)
+            SubgradeSection errorSection = null;
+            try
             {
-                var xdata_Section = sec.XData;
-                if (left)
+                foreach (var sec in allSections)
                 {
-                    // 边坡
-                    if (xdata_Section.LeftSlopeExists)
+                    errorSection = sec;
+                    var xdata_Section = sec.XData;
+                    if (left)
                     {
-                        var spline = sec.GetSlopeLine(true);
-                        var xdata = spline.XData;
-                        var height = 0.0;
-                        if (xdata.Slopes.Any())
+                        // 边坡
+                        if (xdata_Section.LeftSlopeExists)
                         {
-                            height = xdata.Slopes.Last().OuterPoint.Y - xdata_Section.CenterY;
+                            var spline = sec.GetSlopeLine(true);
+                            var xdata = spline.XData;
+                            var height = 0.0;
+                            if (xdata.Slopes.Any())
+                            {
+                                height = xdata.Slopes.Last().OuterPoint.Y - xdata_Section.CenterY;
+                            }
+                            else
+                            {
+                                var edgeElevation = xdata.FillCut ? xdata.BottomElevation : xdata.TopElevation;
+                                height = edgeElevation - xdata_Section.CenterElevation_Road;
+                            }
+                            slps.Add(xdata_Section.Station, height);
+
                         }
                         else
                         {
-                            var edgeElevation = xdata.FillCut ? xdata.BottomElevation : xdata.TopElevation;
-                            height = edgeElevation - xdata_Section.CenterElevation_Road;
+                            slps.Add(xdata_Section.Station, 0);
                         }
-                        slps.Add(xdata_Section.Station, height);
+                        // 挡墙
+                        var retainingWall = xdata_Section.LeftRetainingWallType != RetainingWallType.无
+                            ? xdata_Section.LeftRetainingWallHandle.GetDBObject<Polyline>(sec.DocMdf.acDataBase)
+                            : null;
+                        if (retainingWall != null)
+                        {
+                            var rtw = new RetainingWall(retainingWall);
+                            var topY = rtw.GetTopY();
+                            var bottomY = rtw.GetBottomY();
+                            retainingWalls.Add(xdata_Section.Station,
+                                new double[] { topY - xdata_Section.CenterY, bottomY - xdata_Section.CenterY });
+                        }
+                        else
+                        {
+                            retainingWalls.Add(xdata_Section.Station, null);
+                        }
+                    }
+                    else
+                    {
+                        if (xdata_Section.RightSlopeExists)
+                        {
+                            var spline = sec.GetSlopeLine(false);
+                            var xdata = spline.XData;
 
-                    }
-                    else
-                    {
-                        slps.Add(xdata_Section.Station, 0);
-                    }
-                    // 挡墙
-                    var retainingWall = xdata_Section.LeftRetainingWallType != RetainingWallType.无
-                        ? xdata_Section.LeftRetainingWallHandle.GetDBObject<Polyline>(sec.DocMdf.acDataBase)
-                        : null;
-                    if (retainingWall != null)
-                    {
-                        var rtw = new RetainingWall(retainingWall);
-                        var topY = rtw.GetTopY();
-                        var bottomY = rtw.GetBottomY();
-                        retainingWalls.Add(xdata_Section.Station,
-                            new double[] { topY - xdata_Section.CenterY, bottomY - xdata_Section.CenterY });
-                    }
-                    else
-                    {
-                        retainingWalls.Add(xdata_Section.Station, null);
+                            var height = 0.0;
+                            if (spline.XData.Slopes.Any())
+                            {
+                                height = spline.XData.Slopes.Last().OuterPoint.Y - xdata_Section.CenterY;
+                            }
+                            else
+                            {
+                                var edgeElevation = xdata.FillCut ? xdata.BottomElevation : xdata.TopElevation;
+                                height = edgeElevation - xdata_Section.CenterElevation_Road;
+                            }
+                            slps.Add(xdata_Section.Station, height);
+                        }
+                        else
+                        {
+                            slps.Add(xdata_Section.Station, 0);
+                        }
+                        // 挡墙
+                        var retainingWall = xdata_Section.RightRetainingWallType != RetainingWallType.无
+                            ? xdata_Section.RightRetainingWallHandle.GetDBObject<Polyline>(sec.DocMdf.acDataBase)
+                            : null;
+                        if (retainingWall != null)
+                        {
+                            var rtw = new RetainingWall(retainingWall);
+                            var topY = rtw.GetTopY();
+                            var bottomY = rtw.GetBottomY();
+                            retainingWalls.Add(xdata_Section.Station,
+                                new double[] { topY - xdata_Section.CenterY, bottomY - xdata_Section.CenterY });
+                        }
+                        else
+                        {
+                            retainingWalls.Add(xdata_Section.Station, null);
+                        }
                     }
                 }
-                else
+            }
+            catch (Exception ex)
+            {
+                if (errorSection != null)
                 {
-                    if (xdata_Section.RightSlopeExists)
-                    {
-                        var spline = sec.GetSlopeLine(false);
-                        var xdata = spline.XData;
-
-                        var height = 0.0;
-                        if (spline.XData.Slopes.Any())
-                        {
-                            height = spline.XData.Slopes.Last().OuterPoint.Y - xdata_Section.CenterY;
-                        }
-                        else
-                        {
-                            var edgeElevation = xdata.FillCut ? xdata.BottomElevation : xdata.TopElevation;
-                            height = edgeElevation - xdata_Section.CenterElevation_Road;
-                        }
-                        slps.Add(xdata_Section.Station, height);
-                    }
-                    else
-                    {
-                        slps.Add(xdata_Section.Station, 0);
-                    }
-                    // 挡墙
-                    var retainingWall = xdata_Section.RightRetainingWallType != RetainingWallType.无
-                        ? xdata_Section.RightRetainingWallHandle.GetDBObject<Polyline>(sec.DocMdf.acDataBase)
-                        : null;
-                    if (retainingWall != null)
-                    {
-                        var rtw = new RetainingWall(retainingWall);
-                        var topY = rtw.GetTopY();
-                        var bottomY = rtw.GetBottomY();
-                        retainingWalls.Add(xdata_Section.Station,
-                            new double[] { topY - xdata_Section.CenterY, bottomY - xdata_Section.CenterY });
-                    }
-                    else
-                    {
-                        retainingWalls.Add(xdata_Section.Station, null);
-                    }
+                    var leftSide = left ? "左" : "右";
+                    var errMsg = $"构造{leftSide}边的边坡线数据时出错，出错桩号为{errorSection.XData.Station}。\r\n {ex.StackTrace}";
+                    MessageBox.Show(errMsg, "出错", MessageBoxButton.OK, MessageBoxImage.Error);
+                    // throw new InvalidOperationException(errMsg, ex);
+                    return slps;
                 }
             }
             return slps;

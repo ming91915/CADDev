@@ -45,11 +45,12 @@ namespace eZcad.Addins
             DocumentModifier.ExecuteCommand(InstanceMethod1);
         }
 
-        public void InstanceMethod1(DocumentModifier docMdf, SelectionSet impliedSelection)
+        public ExternalCmdResult InstanceMethod1(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
             if (impliedSelection != null && impliedSelection.Count > 0)
             {
             }
+            return ExternalCmdResult.Commit;
         }
 
         #endregion
@@ -64,11 +65,12 @@ namespace eZcad.Addins
             DocumentModifier.ExecuteCommand(InstanceMethod2);
         }
 
-        public void InstanceMethod2(DocumentModifier docMdf, SelectionSet impliedSelection)
+        public ExternalCmdResult InstanceMethod2(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
             if (impliedSelection != null && impliedSelection.Count > 0)
             {
             }
+            return ExternalCmdResult.Commit;
         }
 
         #endregion
@@ -82,12 +84,13 @@ namespace eZcad.Addins
             DocumentModifier.ExecuteCommand(StaticeMethod1);
         }
 
-        public static void StaticeMethod1(DocumentModifier docMdf, SelectionSet impliedSelection)
+        public static ExternalCmdResult StaticeMethod1(DocumentModifier docMdf, SelectionSet impliedSelection)
         {
             MessageBox.Show("进入静态的外部命令");
             if (impliedSelection != null && impliedSelection.Count > 0)
             {
             }
+            return ExternalCmdResult.Cancel;
         }
 
         #endregion
